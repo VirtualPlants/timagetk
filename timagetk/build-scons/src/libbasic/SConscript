@@ -1,0 +1,85 @@
+# -*- coding: utf-8 -*-
+# -*- python -*-
+#
+#
+#       Copyright 2016 INRIA
+#
+#       File author(s):
+#           Guillaume Baty <guillaume.baty@inria.fr>
+#           Sophie Ribes <sophie.ribes@inria.fr>
+#
+#       See accompanying file LICENSE.txt
+#------------------------------------------------------------------------------
+
+import os
+import os.path
+import glob
+import shutil
+separator = os.sep
+Import( "env" )
+
+env_basic = env.Clone()
+
+folder = env_basic['libbasic']
+src = env['src'] + separator + 'libbasic'
+sources_files = []
+files = ['chamfercoefficients.c',
+	'chamferdistance.c',
+	'chamferdistance-mask.c',
+	'chunks.c',
+	'connexe.c',
+	'convert.c',
+	'convolution.c',
+	'convolution1D.c',
+	'cspline.c',
+	'drawShapes.c',
+	'eigens.c',
+	'extract.c',
+	'file-tools.c',
+	'histogram.c',
+	'iopnm.c',
+	'issimple3D.c',
+	'levenberg.c',
+	'linearFiltering-common.c',
+	'linearFiltering-contours.c',
+	'linearFiltering.c',
+	'local-operation.c',
+	'morphotools.c',
+	'parcelling.c',
+	'pixel-operation.c',
+	'recbuffer.c',
+	'recline.c',
+	'regionalext.c',
+	'sour-filter.c',
+	'string-tools.c',
+	'systlin.c',
+	't04t08.c',
+	't06t26.c',
+	'transfo.c',
+	'watershed.c',
+	'zcross.c',
+	'morpho.c',
+	'reech-def.c',
+	'reech4x4-coeff.c',
+	'reech4x4.c']
+	#'regionalmax.c',
+	#'thickening.c',
+	#'thinning.c',
+for file in files:
+    tmp = folder + file
+    sources_files.append(tmp)
+inc = env['include'] + separator + 'libbasic'
+includes_files = glob.glob(folder + '*.h')
+
+libname =  env_basic['build'] + separator + 'lib' + separator + 'libbasic'
+
+tmp_cpppath = []
+vars = ['libbasic']
+for var in vars:
+   tmp_inc = env['include'] + separator + var
+   tmp_cpppath.append(tmp_inc)
+env_basic.Replace(CPPPATH = tmp_cpppath)
+libpath_folder = env_basic['build'] + separator + 'lib'
+
+env_basic.SharedLibrary(libname, sources_files, LIBS = ['z', 'm', 'pthread'], LIBPATH = [libpath_folder])
+
