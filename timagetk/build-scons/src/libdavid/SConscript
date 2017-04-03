@@ -1,0 +1,43 @@
+# -*- coding: utf-8 -*-
+# -*- python -*-
+#
+#
+#       Copyright 2016 INRIA
+#
+#       File author(s):
+#           Guillaume Baty <guillaume.baty@inria.fr>
+#           Sophie Ribes <sophie.ribes@inria.fr>
+#
+#       See accompanying file LICENSE.txt
+#------------------------------------------------------------------------------
+
+import os
+import os.path
+import glob
+import shutil
+separator = os.sep
+Import( "env" )
+
+env_david = env.Clone()
+
+folder = env_david['libdavid']
+
+src = env_david['src'] + separator + 'libdavid'
+sources_files = folder + 'ccparameters.c'
+
+inc = env_david['include'] + separator + 'libdavid'
+includes_files = glob.glob(folder + '*.h')
+
+libname =  env_david['build'] + separator + 'lib' + separator + 'libdavid'
+
+tmp_cpppath = []
+vars = ['libbasic', 'libio', 'libvt', 'libdavid']
+for var in vars:
+   tmp_inc = env['include'] + separator + var
+   tmp_cpppath.append(tmp_inc)
+#print tmp_cpppath
+env_david.Replace(CPPPATH = tmp_cpppath)
+
+libpath_folder = env_david['build'] + separator + 'lib'
+env_david.SharedLibrary(libname, sources_files, LIBS = ['z', 'm', 'pthread', 'basic', 'io', 'vt'],
+LIBPATH = [libpath_folder])

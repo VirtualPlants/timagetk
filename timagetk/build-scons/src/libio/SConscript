@@ -1,0 +1,40 @@
+# -*- coding: utf-8 -*-
+# -*- python -*-
+#
+#
+#       Copyright 2016 INRIA
+#
+#       File author(s):
+#           Guillaume Baty <guillaume.baty@inria.fr>
+#           Sophie Ribes <sophie.ribes@inria.fr>
+#
+#       See accompanying file LICENSE.txt
+#------------------------------------------------------------------------------
+
+import os
+import os.path
+import glob
+import shutil
+separator = os.sep
+Import( "env" )
+
+env_io = env.Clone()
+
+folder = env_io['libio']
+src = env['src'] + separator + 'libio'
+sources_files = glob.glob(folder + '*.c')
+
+inc = env['include'] + separator + 'libio'
+includes_files = glob.glob(folder + '*.h')
+
+libname =  env_io['build'] + separator + 'lib' + separator + 'libio'
+
+tmp_cpppath = []
+vars = ['libio']
+for var in vars:
+   tmp_inc = env['include'] + separator + var
+   tmp_cpppath.append(tmp_inc)
+env_io.Replace(CPPPATH = tmp_cpppath)
+libpath_folder = env_io['build'] + separator + 'lib'
+
+env_io.SharedLibrary(libname, sources_files, LIBS = ['z', 'm', 'pthread'], LIBPATH = [libpath_folder])
