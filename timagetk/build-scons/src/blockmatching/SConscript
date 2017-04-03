@@ -1,0 +1,74 @@
+# -*- coding: utf-8 -*-
+# -*- python -*-
+#
+#
+#       Copyright 2016 INRIA
+#
+#       File author(s):
+#           Guillaume Baty <guillaume.baty@inria.fr>
+#           Sophie Ribes <sophie.ribes@inria.fr>
+#
+#       See accompanying file LICENSE.txt
+#------------------------------------------------------------------------------
+
+import os
+import os.path
+import glob
+import shutil
+separator = os.sep
+Import( "env" )
+
+env_bm = env.Clone()
+
+folder = env_bm['blockmatching']
+
+src = env_bm['src'] + separator + 'blockmatching'
+sources_files = glob.glob(folder + 'api-*.c') + glob.glob(folder + 'bal-*.c')
+excs = ['api-execTemplate.c', 'api-interpolateTrsfs.c']
+for exc in excs:
+    tmp = folder + exc
+    if tmp in sources_files:
+        sources_files.remove(tmp)
+
+inc = env_bm['include'] + separator + 'blockmatching'
+includes_files = glob.glob(folder + '*.h')
+
+libname =  env_bm['build'] + separator + 'lib' + separator + 'blockmatching'
+
+tmp_cpppath = []
+vars = ['libbasic', 'libio', 'blockmatching']
+for var in vars:
+   tmp_inc = env['include'] + separator + var
+   tmp_cpppath.append(tmp_inc)
+#print tmp_cpppath
+env_bm.Replace(CPPPATH = tmp_cpppath)
+
+libpath_folder = env_bm['build'] + separator + 'lib'
+env_bm.SharedLibrary(libname, sources_files, LIBS = ['z', 'm', 'pthread', 'basic', 'io'],
+LIBPATH = [libpath_folder])
+
+exepath_folder = env_bm['build'] + separator + 'bin'
+exe_list = ['applyTrsf.c',
+		'applyTrsfToPoints.c',
+		'blockmatching.c',
+		'composeTrsf.c',
+    		'copyTrsf.c',
+    		'createGrid.c',
+    		'createTrsf.c',
+		'cropImage.c',
+    		'invTrsf.c',
+    		'pointTrsf.c',
+    		'printTrsf.c']
+
+for source in exe_list:
+    if isinstance(source, (list, tuple)):
+        src, name = source
+    else:
+        src = source
+        name = src.rstrip('.c')
+        out = exepath_folder + separator + name
+    # env_bm.Program(out, src, LIBS = ['z', 'm', 'pthread', 'basic', 'io', 'blockmatching'], LIBPATH = [libpath_folder])
+
+
+
+
