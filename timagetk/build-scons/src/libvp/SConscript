@@ -1,0 +1,57 @@
+# -*- coding: utf-8 -*-
+# -*- python -*-
+#
+#
+#       Copyright 2016 INRIA
+#
+#       File author(s):
+#           Guillaume Baty <guillaume.baty@inria.fr>
+#           Sophie Ribes <sophie.ribes@inria.fr>
+#
+#       See accompanying file LICENSE.txt
+#------------------------------------------------------------------------------
+
+import os
+import os.path
+import glob
+import shutil
+separator = os.sep
+Import( "env" )
+
+env_vp = env.Clone()
+
+folder = env_vp['libvp']
+
+src = env_vp['src'] + separator + 'libvp'
+sources_files = []
+tmp_files = ['api-cellfilter.c', 'vt_cellfilter.c', 'vt_removeLine.c']
+for file in tmp_files:
+    var = folder + file
+    sources_files.append(var)
+
+inc = env_vp['include'] + separator + 'libvp'
+includes_files = glob.glob(folder + '*.h')
+
+libname =  env_vp['build'] + separator + 'lib' + separator + 'libvp'
+
+tmp_cpppath = []
+vars = ['libbasic', 'libio', 'libvt', 'libdavid', 'libvp']
+for var in vars:
+   tmp_inc = env['include'] + separator + var
+   tmp_cpppath.append(tmp_inc)
+env_vp.Replace(CPPPATH = tmp_cpppath)
+
+libpath_folder = env_vp['build'] + separator + 'lib'
+env_vp.SharedLibrary(libname, sources_files, LIBS = ['z', 'm', 'pthread', 'basic', 'io', 'vt', 'david'], LIBPATH = [libpath_folder])
+
+exepath_folder = env_vp['build'] + separator + 'bin'
+exe_list = ['cellfilter.c']
+
+for source in exe_list:
+    if isinstance(source, (list, tuple)):
+        src, name = source
+    else:
+        src = source
+        name = src.rstrip('.c')
+        out = exepath_folder + separator + name
+    # env_vp.Program(out, src, LIBS = ['z', 'm', 'pthread', 'basic', 'io', 'vt', 'david', 'vp'], LIBPATH = [libpath_folder])

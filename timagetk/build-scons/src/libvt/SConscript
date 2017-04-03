@@ -1,0 +1,108 @@
+# -*- coding: utf-8 -*-
+# -*- python -*-
+#
+#
+#       Copyright 2016 INRIA
+#
+#       File author(s):
+#           Guillaume Baty <guillaume.baty@inria.fr>
+#           Sophie Ribes <sophie.ribes@inria.fr>
+#
+#       See accompanying file LICENSE.txt
+#------------------------------------------------------------------------------
+
+import os
+import os.path
+import glob
+import shutil
+separator = os.sep
+Import( "env" )
+
+env_vt = env.Clone()
+
+folder = env_vt['libvt']
+src = env_vt['src'] + separator + 'libvt'
+sources_files = []
+files = ['vt_3m.c',
+	'vt_ambdd.c',
+	'vt_amincir.c',
+	'vt_amliste.c',
+	'vt_amseuil.c',
+	'vt_average.c',
+	'vt_bbox.c',
+	'vt_bdd.c',
+	'vt_bdd2.c',
+	'vt_bdd3.c',
+	'vt_bdd_amincir.c',
+	'vt_boolean.c',
+	'vt_bytes.c',
+	'vt_caracterisation.c',
+	'vt_cc.c',
+	'vt_connexe.c',
+	'vt_contours.c',
+	'vt_copy.c',
+	'vt_daneucmapsc.c',
+	'vt_daneucmapss.c',
+	'vt_distance.c',
+	'vt_distfield.c',
+	'vt_dst_amincir.c',
+	'vt_error.c',
+	'vt_etoilebarre.c',
+	'vt_eucmap.c',
+	'vt_eucmapsc.c',
+	'vt_eucmapss.c',
+	'vt_extract.c',
+	'vt_filters.c',
+	'vt_gausssmooth.c',
+	'vt_gb.c',
+	'vt_getval.c',
+	'vt_greynumbers.c',
+	'vt_histo-tools.c',
+	'vt_histo.c',
+	'vt_image.c',
+	'vt_inrimage.c',
+	'vt_localsmooth.c',
+	'vt_maxgrad.c',
+	'vt_median.c',
+	'vt_mescorr.c',
+	'vt_mip.c',
+	'vt_names.c',
+	'vt_old_amincir.c',
+	'vt_old_t26.c',
+	'vt_old_t26noopt.c',
+	'vt_recfilters.c',
+	'vt_recline.c',
+	'vt_seuil.c',
+	'vt_skiz.c',
+	'vt_slconnexe.c',
+	'vt_t04t08.c',
+	'vt_t06.c',
+	'vt_t06noopt.c',
+	'vt_t06t26.c',
+	'vt_t06t26_simple.c',
+	'vt_t26.c',
+	'vt_t26noopt.c',
+	'vt_unix.c',
+	'vt_zerocross.c',
+	'vt_morpho.c',
+	'vt_reech.c']
+for file in files:
+    tmp = folder + file
+    sources_files.append(tmp)
+
+inc = env_vt['include'] + separator + 'libvt'
+includes_files = glob.glob(folder + '*.h')
+
+libname =  env_vt['build'] + separator + 'lib' + separator + 'libvt'
+
+tmp_cpppath = []
+vars = ['libvt', 'libbasic', 'libio']
+for var in vars:
+   tmp_inc = env['include'] + separator + var
+   tmp_cpppath.append(tmp_inc)
+env_vt.Replace(CPPPATH = tmp_cpppath)
+
+libpath_folder = env_vt['build'] + separator + 'lib'
+env_vt.SharedLibrary(libname, sources_files, LIBS = ['z', 'm', 'pthread', 'basic', 'io'],
+LIBPATH = [libpath_folder])
+
