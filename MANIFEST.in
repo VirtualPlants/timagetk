@@ -1,0 +1,50 @@
+include LICENSE.txt
+recursive-include *.txt, *.rst, *.py, *.h, *.c
+
+include SConstruct
+
+include timagetk/components/*.txt
+include timagetk/components/*.c
+
+include timagetk/test/*.py
+
+include timagetk/share/data/*
+
+include timagetk/examples/*.py
+include timagetk/examples/results/*
+
+include timagetk/doc/*.bat
+include timagetk/doc/Makefile
+include timagetk/doc/source/*
+include timagetk/doc/source/_templates/*
+include timagetk/doc/source/_static/*
+include timagetk/doc/source/examples/*.py
+include timagetk/doc/build/*
+
+include timagetk/build-scons/*.txt
+include timagetk/build-scons/*.py
+
+include timagetk/build-scons/src/blockmatching/*.c
+include timagetk/build-scons/src/blockmatching/SConscript
+include timagetk/build-scons/src/libbasic/*.c
+include timagetk/build-scons/src/libbasic/SConscript
+include timagetk/build-scons/src/libdavid/*.c
+include timagetk/build-scons/src/libdavid/SConscript
+include timagetk/build-scons/src/libio/*.c
+include timagetk/build-scons/src/libio/SConscript
+include timagetk/build-scons/src/libvp/*.c
+include timagetk/build-scons/src/libvp/SConscript
+include timagetk/build-scons/src/libvt/*.c
+include timagetk/build-scons/src/libvt/SConscript
+include timagetk/build-scons/src/vtexec/*.c
+include timagetk/build-scons/src/vtexec/SConscript
+
+include timagetk/build-scons/include/blockmatching/*.h
+include timagetk/build-scons/include/libbasic/*.h
+include timagetk/build-scons/include/libdavid/*.h
+include timagetk/build-scons/include/libio/*.h
+include timagetk/build-scons/include/libvp/*.h
+include timagetk/build-scons/include/libvt/*.h
+include timagetk/build-scons/include/vtexec/*.h
+
+include timagetk/algorithms/*.py
