@@ -1,0 +1,7 @@
+libVT:
+Gregoire Malandain <gregoire.malandain@inria.fr>
+Gael Michelin <gael.michelin@inria.fr>
+
+Compilation:
+Guillaume Baty <guillaume.baty@inria.fr>
+Sophie Ribes <sophie.ribes@inria.fr>
