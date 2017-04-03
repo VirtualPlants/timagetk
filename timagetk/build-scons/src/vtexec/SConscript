@@ -1,0 +1,66 @@
+# -*- coding: utf-8 -*-
+# -*- python -*-
+#
+#
+#       Copyright 2016 INRIA
+#
+#       File author(s):
+#           Guillaume Baty <guillaume.baty@inria.fr>
+#           Sophie Ribes <sophie.ribes@inria.fr>
+#
+#       See accompanying file LICENSE.txt
+#------------------------------------------------------------------------------
+
+import os
+import os.path
+import glob
+import shutil
+separator = os.sep
+Import( "env" )
+
+env_vtexec = env.Clone()
+
+folder = env_vtexec['vtexec']
+src = env_vtexec['src'] + separator + 'vtexec'
+sources_files = glob.glob(folder + 'api-*.c')
+excs = ['api-tree.c']
+for exc in excs:
+    tmp = folder + exc
+    if tmp in sources_files:
+        sources_files.remove(tmp)
+
+inc = env_vtexec['include'] + separator + 'vtexec'
+includes_files = glob.glob(folder + '*.h')
+
+libname =  env_vtexec['build'] + separator + 'lib' + separator + 'vtexec'
+
+tmp_cpppath = []
+vars = ['libvt', 'libbasic', 'libio', 'vtexec']
+for var in vars:
+   tmp_inc = env['include'] + separator + var
+   tmp_cpppath.append(tmp_inc)
+env_vtexec.Replace(CPPPATH = tmp_cpppath)
+
+libpath_folder = env_vtexec['build'] + separator + 'lib'
+env_vtexec.SharedLibrary(libname, sources_files, LIBS = ['z', 'm', 'pthread', 'vt', 'basic', 'io'],
+LIBPATH = [libpath_folder])
+
+exepath_folder = env_vtexec['build'] + separator + 'bin'
+exe_list = ['linearFilter.c',
+		'connexe.c',
+		'regionalext.c',
+		'morpho.c',
+    		'recfilters.c',
+    		'filters.c',
+    		'reech3d.c',
+    		'meanImages.c',
+    		'watershed.c']
+
+for source in exe_list:
+    if isinstance(source, (list, tuple)):
+        src, name = source
+    else:
+        src = source
+        name = src.rstrip('.c')
+        out = exepath_folder + separator + name
+    # env_vtexec.Program(out, src, LIBS = ['z', 'm', 'pthread', 'vt', 'basic', 'io', 'vtexec'], LIBPATH = [libpath_folder])
