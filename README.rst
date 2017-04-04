@@ -1,4 +1,4 @@
-**Tissue Image Toolkit** (*timagetk*) is a Python language package dedicated
+**Tissue Image Toolkit** (*timagetk*) is a Python library dedicated
 to image processing of multicellular architectures such as plants or animals,
 and is intended for biologists, modelers and computer scientists.
 The package provides the following main functionalities (both in 2D and 3D):
@@ -21,7 +21,10 @@ Installation
 Follow the installation procedure provided with the dynamic documentation.
 
 
-Stable release: 1.0.0
-Licence: Inria licence, non commercial use
-Operaring system: Linux, Mac OS
-Teams: Inria-Cirad-Inra Virtual Plants, Inria Morpheme and Inria Project Lab Morphogenetics
+**Stable release**: 1.0.0
+
+**Licence**: Inria licence, non commercial use
+
+**Operaring system**: Linux, Mac OS
+
+**Teams**: `Inria-Cirad-Inra Virtual Plants <https://team.inria.fr/virtualplants>`_, `Inria Morpheme <http://www-sop.inria.fr/morpheme/>`_ and `Inria Project Lab Morphogenetics <https://team.inria.fr/morphogenetics/>`_.
