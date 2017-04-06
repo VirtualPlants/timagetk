@@ -6,10 +6,10 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>plugins.region_labeling &#8212; timagetk 1. documentation</title>
+    <title>plugins.h_transform &#8212; timagetk 1. documentation</title>
     
-    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
-    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../static/pygments.css" type="text/css" />
     
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
@@ -21,16 +21,16 @@
         SOURCELINK_SUFFIX: '.txt'
       };
     </script>
-    <script type="text/javascript" src="../../_static/jquery.js"></script>
-    <script type="text/javascript" src="../../_static/underscore.js"></script>
-    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <script type="text/javascript" src="../../static/jquery.js"></script>
+    <script type="text/javascript" src="../../static/underscore.js"></script>
+    <script type="text/javascript" src="../../static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
   </head>
   <body role="document">
 
 <div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
-<a href="../../index.html"><img src="../../_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+<a href="../../index.html"><img src="../../static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
 </div>
 
     <div class="related" role="navigation" aria-label="related navigation">
@@ -72,7 +72,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <h1>Source code for plugins.region_labeling</h1><div class="highlight"><pre>
+  <h1>Source code for plugins.h_transform</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="c1"># -*- python -*-</span>
 <span class="c1">#</span>
@@ -88,32 +88,33 @@
 <span class="c1">#------------------------------------------------------------------------------</span>
 
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">This module contain implementation of region labeling algorithms</span>
+<span class="sd">This module contains a generic implementation of several h_transform algorithms.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="k">try</span><span class="p">:</span>
-    <span class="kn">from</span> <span class="nn">timagetk.algorithms</span> <span class="k">import</span> <span class="n">connexe</span>
+    <span class="kn">from</span> <span class="nn">timagetk.algorithms</span> <span class="k">import</span> <span class="n">regionalext</span>
     <span class="kn">from</span> <span class="nn">timagetk.components.spatial_image</span> <span class="k">import</span> <span class="n">SpatialImage</span>
-
 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
     <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
 
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;region_labeling&#39;</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;h_transform&#39;</span><span class="p">]</span>
 
 
-<div class="viewcode-block" id="region_labeling"><a class="viewcode-back" href="../../autodoc.html#plugins.region_labeling.region_labeling">[docs]</a><span class="k">def</span> <span class="nf">region_labeling</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<div class="viewcode-block" id="h_transform"><a class="viewcode-back" href="../../autodoc.html#plugins.h_transform.h_transform">[docs]</a><span class="k">def</span> <span class="nf">h_transform</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Region labeling plugin. Available methods are :</span>
+<span class="sd">    h_transform plugin. Available methods are :</span>
 
-<span class="sd">    * connected_components</span>
+<span class="sd">    * h_transform_min</span>
+<span class="sd">    * h_transform_max</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    :param *SpatialImage* input_image: input *SpatialImage*</span>
 
-<span class="sd">    :param str method: used method (example: &#39;connected_components&#39;)</span>
+<span class="sd">    :param str method: used method (example: &#39;min&#39;)</span>
+
+<span class="sd">    :param int h: optional, h value. Default: h=1</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    ----------</span>
@@ -122,18 +123,18 @@
 <span class="sd">    Example</span>
 <span class="sd">    ----------</span>
 <span class="sd">    &gt;&gt;&gt; from timagetk.util import data, data_path</span>
-<span class="sd">    &gt;&gt;&gt; from timagetk.plugins import h_transform, region_labeling</span>
-<span class="sd">    &gt;&gt;&gt; image_path = data_path(&#39;time_0_cut.inr&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; input_image = data(image_path)</span>
+<span class="sd">    &gt;&gt;&gt; from timagetk.plugins import h_transform</span>
+<span class="sd">    &gt;&gt;&gt; img_path = data_path(&#39;filtering_src.inr&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; input_image = data(img_path)</span>
+<span class="sd">    &gt;&gt;&gt; reg_max_image = h_transform(input_image)</span>
+<span class="sd">    &gt;&gt;&gt; reg_max_image = h_transform(input_image, h=3, method=&#39;h_transform_max&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; reg_min_image = h_transform(input_image, h=3, method=&#39;h_transform_min&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; reg_lab_image = region_labeling(reg_min_image, low_threshold=1,</span>
-<span class="sd">                                        high_threshold=3, method=&#39;connected_components&#39;)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">poss_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;connected_components&#39;</span><span class="p">]</span>
+    <span class="n">poss_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;h_transform_min&#39;</span><span class="p">,</span> <span class="s1">&#39;h_transform_max&#39;</span><span class="p">]</span>
     <span class="n">conds</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">connected_components</span><span class="p">(</span><span class="n">input_image</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">h_transform_min</span><span class="p">(</span><span class="n">input_image</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">poss_methods</span><span class="p">:</span>
                 <span class="k">try</span><span class="p">:</span>
@@ -142,11 +143,11 @@
                     <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                         <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
                 <span class="k">except</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;connected_components&#39;</span><span class="p">:</span>
-                        <span class="n">low_threshold_val</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;low_threshold&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                        <span class="n">high_threshold_val</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;high_threshold&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
-                        <span class="k">return</span> <span class="n">connected_components</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">low_threshold</span><span class="o">=</span><span class="n">low_threshold_val</span><span class="p">,</span>
-                                                    <span class="n">high_threshold</span><span class="o">=</span><span class="n">high_threshold_val</span><span class="p">)</span>
+                    <span class="n">h_val</span> <span class="o">=</span> <span class="n">kwds</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;h&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;h_transform_min&#39;</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">h_transform_min</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h_val</span><span class="p">)</span>
+                    <span class="k">elif</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;h_transform_max&#39;</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">h_transform_max</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="n">h_val</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Available methods :&#39;</span><span class="p">),</span> <span class="n">poss_methods</span>
                 <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
@@ -155,34 +156,55 @@
         <span class="k">return</span></div>
 
 
-<span class="k">def</span> <span class="nf">connected_components</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">low_threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">high_threshold</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">h_transform_min</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Connected components</span>
+<span class="sd">    Min h transform.</span>
 
-<span class="sd">    Parameters</span>
+<span class="sd">     Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    :param SpatialImage input_image: input *SpatialImage*</span>
+<span class="sd">    :param *SpatialImage* input_image: input *SpatialImage*</span>
 
-<span class="sd">    :param int low_threshold: low threshold</span>
-
-<span class="sd">    :param int high_threshold: high threshold</span>
+<span class="sd">    :param int h: optional, h value. Default: h=1</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    ----------</span>
-<span class="sd">    :return: *SpatialImage* instance -- image and associated informations</span>
+<span class="sd">    :return: ``SpatialImage`` instance -- image and metadata</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">conds</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">low_threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">low_threshold</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">h</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">low_threshold</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">low_threshold</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">high_threshold</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">high_threshold</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="s1">&#39;-minima -h </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">h</span>
+        <span class="k">return</span> <span class="n">regionalext</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">param_str_2</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Input image must be a SpatialImage&#39;</span><span class="p">)</span>
+        <span class="k">return</span>
+
+
+<span class="k">def</span> <span class="nf">h_transform_max</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Max h transform</span>
+
+<span class="sd">     Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :param *SpatialImage* input_image: input *SpatialImage*</span>
+
+<span class="sd">    :param int h: optional, h value. Default: h=1</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :return: ``SpatialImage`` instance -- image and metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conds</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">h</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">high_threshold</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">high_threshold</span><span class="p">))</span>
-        <span class="n">params</span> <span class="o">=</span> <span class="s1">&#39;-low-threshold </span><span class="si">%d</span><span class="s1"> -high-threshold </span><span class="si">%d</span><span class="s1"> -label-output&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">low_threshold</span><span class="p">,</span> <span class="n">high_threshold</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">connexe</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">param_str_2</span><span class="o">=</span><span class="n">params</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">)</span>
+            <span class="n">h</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="s1">&#39;-maxima -h </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">h</span>
+        <span class="k">return</span> <span class="n">regionalext</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">param_str_2</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Input image must be a SpatialImage&#39;</span><span class="p">)</span>
         <span class="k">return</span>
