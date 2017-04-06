@@ -20,6 +20,10 @@ Installation
 
 Follow the installation procedure provided with the dynamic documentation.
 
+The documentation file ``timagetk/doc/build/html/index.html`` can be opened using a web browser.
+
+An online version is also available `here <http://timagetk.readthedocs.io/en/latest/>`_.
+
 
 **Stable release**: 1.0.0
 
