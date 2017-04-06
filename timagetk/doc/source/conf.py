@@ -34,9 +34,10 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
-    'rst2pdf.pdfbuilder',
+    
     
 ]
+#'rst2pdf.pdfbuilder',
 #'sphinx.ext.pngmath',
 #'sphinx.ext.imgmath',
 
