@@ -1,0 +1,217 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>plugins.registration &#8212; timagetk 1. documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+  </head>
+  <body role="document">
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="../../index.html"><img src="../../_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+</div>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Home</a>|&nbsp;</li>
+        <li><a href="../../install.html">Installation</a>|&nbsp;</li>
+        <li><a href="../../autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="../../examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="../../search.html">search </a> &raquo;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" accesskey="U">Module code</a> &#187;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <h1>Source code for plugins.registration</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="c1"># -*- python -*-</span>
+<span class="c1">#</span>
+<span class="c1">#</span>
+<span class="c1">#       Copyright 2016 INRIA</span>
+<span class="c1">#</span>
+<span class="c1">#       File author(s):</span>
+<span class="c1">#           Guillaume Baty &lt;guillaume.baty@inria.fr&gt;</span>
+<span class="c1">#           Sophie Ribes &lt;sophie.ribes@inria.fr&gt;</span>
+<span class="c1">#           Gregoire Malandain &lt;gregoire.malandain@inria.fr&gt;</span>
+<span class="c1">#</span>
+<span class="c1">#       See accompanying file LICENSE.txt</span>
+<span class="c1">#------------------------------------------------------------------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module contains a generic implementation of several registration algorithms.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.algorithms</span> <span class="k">import</span> <span class="n">blockmatching</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;registration&#39;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="registration"><a class="viewcode-back" href="../../autodoc.html#plugins.registration.registration">[docs]</a><span class="k">def</span> <span class="nf">registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Registration plugin. Available methods are :</span>
+
+<span class="sd">    * rigid_registration</span>
+<span class="sd">    * affine_registration</span>
+<span class="sd">    * deformable_registration</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :param *SpatialImage* floating_img: floating *SpatialImage*</span>
+
+<span class="sd">    :param *SpatialImage* reference_img: reference *SpatialImage*</span>
+
+<span class="sd">    :param str method: used method (example: &#39;rigid_registration&#39;)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :return: ``BalTransformation`` instance -- trsf_out, *BalTransformation* transformation</span>
+
+<span class="sd">    :return: ``SpatialImage`` instance -- res_image, *SpatialImage* image and metadata</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    ----------</span>
+<span class="sd">    &gt;&gt;&gt; from timagetk.util import data, data_path</span>
+<span class="sd">    &gt;&gt;&gt; from timagetk.plugins import registration</span>
+<span class="sd">    &gt;&gt;&gt; image_path = data_path(&#39;time_0_cut.inr&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; floating_image = data(image_path)</span>
+<span class="sd">    &gt;&gt;&gt; image_path = data_path(&#39;time_1_cut.inr&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; reference_image = data(image_path)</span>
+<span class="sd">    &gt;&gt;&gt; trsf_rig, res_rig = registration(floating_image, reference_image, method=&#39;rigid_registration&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; trsf_aff, res_aff = registration(floating_image, reference_image, method=&#39;affine_registration&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; trsf_def, res_def = registration(floating_image, reference_image, method=&#39;deformable_registration&#39;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">poss_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;rigid_registration&#39;</span><span class="p">,</span> <span class="s1">&#39;affine_registration&#39;</span><span class="p">,</span> <span class="s1">&#39;deformable_registration&#39;</span><span class="p">]</span>
+
+    <span class="n">conds</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">reference_img</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">rigid_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">method</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">method</span> <span class="ow">in</span> <span class="n">poss_methods</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">openalea.core.service.plugin</span> <span class="k">import</span> <span class="n">plugin_function</span>
+                    <span class="n">func</span> <span class="o">=</span> <span class="n">plugin_function</span><span class="p">(</span><span class="s1">&#39;openalea.image&#39;</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">return</span> <span class="n">func</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">,</span> <span class="o">**</span><span class="n">kwds</span><span class="p">)</span>
+                <span class="k">except</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;rigid_registration&#39;</span><span class="p">:</span>
+                        <span class="n">trsf_out</span><span class="p">,</span> <span class="n">res_image</span> <span class="o">=</span> <span class="n">rigid_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">trsf_out</span><span class="p">,</span> <span class="n">res_image</span>
+                    <span class="k">elif</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;affine_registration&#39;</span><span class="p">:</span>
+                        <span class="n">trsf_out</span><span class="p">,</span> <span class="n">res_image</span> <span class="o">=</span> <span class="n">affine_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">trsf_out</span><span class="p">,</span> <span class="n">res_image</span>
+                    <span class="k">elif</span> <span class="n">method</span><span class="o">==</span><span class="s1">&#39;deformable_registration&#39;</span><span class="p">:</span>
+                        <span class="n">trsf_out</span><span class="p">,</span> <span class="n">res_image</span> <span class="o">=</span> <span class="n">deformable_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+                        <span class="k">return</span> <span class="n">trsf_out</span><span class="p">,</span> <span class="n">res_image</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Available methods :&#39;</span><span class="p">),</span> <span class="n">poss_methods</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Floating image and Refernece image must be a SpatialImage&#39;</span><span class="p">)</span>
+        <span class="k">return</span></div>
+
+
+<span class="k">def</span> <span class="nf">rigid_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">):</span>
+    <span class="n">trsf_rig</span><span class="p">,</span> <span class="n">res_rig</span> <span class="o">=</span> <span class="n">blockmatching</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trsf_rig</span><span class="p">,</span> <span class="n">res_rig</span>
+
+
+<span class="k">def</span> <span class="nf">affine_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">):</span>
+    <span class="n">trsf_rig</span><span class="p">,</span> <span class="n">res_rig</span> <span class="o">=</span> <span class="n">rigid_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+    <span class="n">param_str_2</span> <span class="o">=</span> <span class="s1">&#39;-trsf-type affine&#39;</span>
+    <span class="n">trsf_aff</span><span class="p">,</span> <span class="n">res_aff</span> <span class="o">=</span> <span class="n">blockmatching</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">,</span> <span class="n">left_transformation</span><span class="o">=</span><span class="n">trsf_rig</span><span class="p">,</span> <span class="n">param_str_2</span><span class="o">=</span><span class="n">param_str_2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trsf_aff</span><span class="p">,</span> <span class="n">res_aff</span>
+
+
+<span class="k">def</span> <span class="nf">deformable_registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">):</span>
+    <span class="n">trsf_rig</span><span class="p">,</span> <span class="n">res_rig</span> <span class="o">=</span> <span class="n">blockmatching</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+    <span class="n">param_str_2</span> <span class="o">=</span> <span class="s1">&#39;-trsf-type vectorfield&#39;</span>
+    <span class="n">trsf_def</span><span class="p">,</span> <span class="n">res_def</span> <span class="o">=</span> <span class="n">blockmatching</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">,</span>
+                                      <span class="n">init_result_transformation</span><span class="o">=</span><span class="n">trsf_rig</span><span class="p">,</span>
+                                      <span class="n">param_str_2</span><span class="o">=</span><span class="n">param_str_2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">trsf_def</span><span class="p">,</span> <span class="n">res_def</span>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Home</a>|&nbsp;</li>
+        <li><a href="../../install.html">Installation</a>|&nbsp;</li>
+        <li><a href="../../autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="../../examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="../../search.html">search </a> &raquo;</li>
+
+          <li class="nav-item nav-item-1"><a href="../index.html" >Module code</a> &#187;</li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Sophie Ribes.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.4.
+    </div>
+  </body>
+</html>

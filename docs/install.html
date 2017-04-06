@@ -1,0 +1,191 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Installation &#8212; timagetk 1. documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+</div>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Home</a>|&nbsp;</li>
+        <li><a href="#">Installation</a>|&nbsp;</li>
+        <li><a href="autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Installation</a><ul>
+<li><a class="reference internal" href="#requirements">Requirements</a></li>
+<li><a class="reference internal" href="#installing-from-source">Installing from source</a><ul>
+<li><a class="reference internal" href="#github">Github</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/install.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="installation">
+<span id="ref-installation"></span><h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="requirements">
+<h2>Requirements<a class="headerlink" href="#requirements" title="Permalink to this headline">¶</a></h2>
+<ul class="simple">
+<li>python 2.7 (to check the version, open a shell prompt and type: <code class="docutils literal"><span class="pre">python</span> <span class="pre">--version</span></code>)</li>
+<li><a class="reference external" href="https://pypi.python.org/pypi/pip">pip</a> and setuptools (extensions for python package installation)</li>
+<li><a class="reference external" href="http://scons.org/">scons</a> (build tool)</li>
+<li><a class="reference external" href="http://www.zlib.net/">zlib</a> (compression/decompression)</li>
+<li><a class="reference external" href="http://www.numpy.org/">numpy</a> (array support for python)</li>
+<li><a class="reference external" href="https://networkx.github.io/">networkx</a> (data structures for graphs)</li>
+</ul>
+<p>To install pip, setuptools, scons, zlib and numpy:</p>
+<ul class="simple">
+<li><strong>Ubuntu and Debian:</strong>
+<code class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">python-pip</span> <span class="pre">python-setuptools</span> <span class="pre">scons</span> <span class="pre">libz-dev</span> <span class="pre">python-numpy</span></code></li>
+<li><strong>Fedora and Redhat:</strong>
+<code class="docutils literal"><span class="pre">sudo</span> <span class="pre">yum</span> <span class="pre">install</span> <span class="pre">python-pip</span> <span class="pre">python-setuptools</span> <span class="pre">scons</span> <span class="pre">zlib-devel</span> <span class="pre">numpy</span></code></li>
+<li><strong>Mac</strong> (using <a class="reference external" href="https://www.macports.org/">Macports</a>):
+<code class="docutils literal"><span class="pre">sudo</span> <span class="pre">port</span> <span class="pre">install</span> <span class="pre">py27-pip</span> <span class="pre">py27-setuptools</span> <span class="pre">scons</span> <span class="pre">zlib-devel</span> <span class="pre">py27-numpy</span></code></li>
+</ul>
+<p>To install networks (all platforms): <code class="docutils literal"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">networkx</span></code></p>
+</div>
+<div class="section" id="installing-from-source">
+<h2>Installing from source<a class="headerlink" href="#installing-from-source" title="Permalink to this headline">¶</a></h2>
+<div class="section" id="github">
+<h3>Github<a class="headerlink" href="#github" title="Permalink to this headline">¶</a></h3>
+<p>If you are interested in contributing to development or running the latest source code,
+grab the git version. First, install the requirements and the development tools:</p>
+<ul class="simple">
+<li><strong>Ubuntu &amp; Debian:</strong> <code class="docutils literal"><span class="pre">sudo</span> <span class="pre">apt-get</span> <span class="pre">install</span> <span class="pre">git</span> <span class="pre">gitk</span></code></li>
+<li><strong>Fedora &amp; Redhat:</strong> <code class="docutils literal"><span class="pre">sudo</span> <span class="pre">yum</span> <span class="pre">install</span> <span class="pre">git</span> <span class="pre">gitk</span></code></li>
+<li><strong>Mac</strong>: <code class="docutils literal"><span class="pre">sudo</span> <span class="pre">port</span> <span class="pre">install</span> <span class="pre">git-core</span> <span class="pre">+doc</span> <span class="pre">+bash_completion</span> <span class="pre">+gitweb</span></code></li>
+</ul>
+<p>To install <a class="reference external" href="http://nose.readthedocs.io/en/latest/">nose</a> (testing, all platforms): <code class="docutils literal"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">nose</span></code></p>
+<p>Then:</p>
+<ol class="arabic simple">
+<li>Clone the timagetk repository <code class="docutils literal"><span class="pre">git</span> <span class="pre">clone</span> <span class="pre">https://github.com/VirtualPlants/timagetk.git</span></code></li>
+<li>Change directory to timagetk</li>
+<li>Run <code class="docutils literal"><span class="pre">python</span> <span class="pre">setup.py</span> <span class="pre">develop</span> <span class="pre">--user</span></code></li>
+<li>Check that timagetk has been added to your .bashrc file</li>
+<li><dl class="first docutils">
+<dt>If it is not the case, add the following lines to the bottom of your .bashrc file:</dt>
+<dd><ul class="first last">
+<li>timagetk_path=/path/to/timagetk/folder</li>
+<li>export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:${timagetk_path}/timagetk/build-scons/lib</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li>Open a new shell prompt</li>
+<li>Type <code class="docutils literal"><span class="pre">nosetests</span> <span class="pre">-v</span></code> to execute the tests</li>
+</ol>
+</div>
+</div>
+</div>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>To build <strong>timagetk</strong>&#8216;s dynamic documentation (<a class="reference external" href="http://www.sphinx-doc.org/en/stable/">sphinx</a>), open a shell prompt and type:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-U</span> <span class="pre">Sphinx</span></code></li>
+</ul>
+<p>Go to the <strong>timagetk/timagetk/doc/</strong> folder and type:</p>
+<ul class="simple">
+<li><code class="docutils literal"><span class="pre">make</span> <span class="pre">html</span></code></li>
+</ul>
+<p>Open the file: <strong>timagetk/timagetk/build/html/index.html</strong></p>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Home</a>|&nbsp;</li>
+        <li><a href="#">Installation</a>|&nbsp;</li>
+        <li><a href="autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Sophie Ribes.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.4.
+    </div>
+  </body>
+</html>
