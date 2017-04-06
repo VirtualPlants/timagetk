@@ -1,0 +1,1281 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Documentation &#8212; timagetk 1. documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+</div>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Home</a>|&nbsp;</li>
+        <li><a href="install.html">Installation</a>|&nbsp;</li>
+        <li><a href="#">Documentation</a>|&nbsp;</li>
+        <li><a href="examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Documentation</a><ul>
+<li><a class="reference internal" href="#package-components">Package Components</a><ul>
+<li><a class="reference internal" href="#module-components.spatial_image">Module Spatial Image</a></li>
+<li><a class="reference internal" href="#module-components.io">Module Input/Output</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#package-plugins">Package Plugins</a><ul>
+<li><a class="reference internal" href="#module-plugins.linear_filtering">Module Linear Filtering</a></li>
+<li><a class="reference internal" href="#module-plugins.morphology">Module Grayscale Morphology</a></li>
+<li><a class="reference internal" href="#module-plugins.averaging">Module Averaging</a></li>
+<li><a class="reference internal" href="#module-plugins.h_transform">Module H-transform</a></li>
+<li><a class="reference internal" href="#module-plugins.region_labeling">Module Region Labeling</a></li>
+<li><a class="reference internal" href="#module-plugins.segmentation">Module Segmentation</a></li>
+<li><a class="reference internal" href="#module-plugins.labels_post_processing">Module Labels Post Processing</a></li>
+<li><a class="reference internal" href="#module-plugins.registration">Module Registration</a></li>
+<li><a class="reference internal" href="#module-plugins.sequence_registration">Module Sequence registration</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/autodoc.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="documentation">
+<span id="ref-documentation"></span><h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="package-components">
+<span id="ref-package-components"></span><h2>Package Components<a class="headerlink" href="#package-components" title="Permalink to this headline">¶</a></h2>
+<p>The package Components contains both a data structure (<code class="docutils literal"><span class="pre">SpatialImage</span></code>) and functionalities
+dedicated to input/output operations (<code class="docutils literal"><span class="pre">imread</span></code>, <code class="docutils literal"><span class="pre">imsave</span></code>).</p>
+<p>It consists in two modules : SpatialImage (see <a class="reference internal" href="#ref-spatial-image"><span class="std std-ref">Module Spatial Image</span></a>) and Input/Ouput (see <a class="reference internal" href="#ref-input-output"><span class="std std-ref">Module Input/Output</span></a>).</p>
+<div class="section" id="module-components.spatial_image">
+<span id="module-spatial-image"></span><span id="ref-spatial-image"></span><h3>Module Spatial Image<a class="headerlink" href="#module-components.spatial_image" title="Permalink to this headline">¶</a></h3>
+<p>This class allows a management of <code class="docutils literal"><span class="pre">SpatialImage</span></code> objects (2D and 3D images).
+A <code class="docutils literal"><span class="pre">SpatialImage</span></code> gathers a numpy array and some metadata (such as voxelsize,
+physical extent, origin, type, etc.). Through a <code class="docutils literal"><span class="pre">numpy.ndarray</span></code> inheritance, all
+usual operations on <a class="reference external" href="http://docs.scipy.org/doc/numpy-1.10.1/reference/generated/numpy.ndarray.html">numpy.ndarray</a>
+objects (sum, product, transposition, etc.) are available. All image processing
+operations are performed on this data structure, that is also used to solve inputs (read)
+and outputs (write).</p>
+<dl class="class">
+<dt id="components.spatial_image.SpatialImage">
+<em class="property">class </em><code class="descclassname">components.spatial_image.</code><code class="descname">SpatialImage</code><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="staticmethod">
+<dt id="components.spatial_image.SpatialImage.__new__">
+<em class="property">static </em><code class="descname">__new__</code><span class="sig-paren">(</span><em>input_array</em>, <em>origin=None</em>, <em>voxelsize=None</em>, <em>dtype=None</em>, <em>metadata_dict=None</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.__new__"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.__new__" title="Permalink to this definition">¶</a></dt>
+<dd><p><code class="docutils literal"><span class="pre">SpatialImage</span></code> constructor (2D and 3D images)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_array</strong> (<em>numpy.ndarray</em>) &#8211; image</li>
+<li><strong>origin</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; image origin, optional. Default: [0,0] or [0,0,0]</li>
+<li><strong>voxelsize</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; image voxelsize, optional. Default: [1.0,1.0] or [1.0,1.0,1.0]</li>
+<li><strong>dtype</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; image type, optional. Default: dtype=input_array.dtype</li>
+<li><strong>metadata_dict</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; image metadata, optional. Default: metadata_dict={}</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_1</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_2</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">image_1</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">image_2</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.equal">
+<code class="descname">equal</code><span class="sig-paren">(</span><em>sp_img</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.equal"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.equal" title="Permalink to this definition">¶</a></dt>
+<dd><p>Equality test between two <code class="docutils literal"><span class="pre">SpatialImage</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>sp_img</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> instance</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">True/False (<em>bool</em>) &#8211; if (array and metadata) are equal/or not</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_1</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_1</span><span class="o">==</span><span class="n">image_1</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_2</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span><span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_1</span><span class="o">==</span><span class="n">image_2</span>
+<span class="go">False</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_array">
+<code class="descname">get_array</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_array"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_array" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get a <code class="docutils literal"><span class="pre">numpy.ndarray</span></code> from a <code class="docutils literal"><span class="pre">SpatialImage</span></code></p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_array (<em>numpy.ndarray</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> array</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_array</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_array</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">image_array</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
+<span class="go">False</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">image_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_dim">
+<code class="descname">get_dim</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_dim"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_dim" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> dimension (2D or 3D image)</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_dim (<em>int</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> dimension</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_dim</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_dim</span>
+<span class="go">2</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_extent">
+<code class="descname">get_extent</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_extent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> physical extent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_extent (<em>list</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> physical extent</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_extent</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_extent</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_extent</span>
+<span class="go">[5.0, 5.0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_max">
+<code class="descname">get_max</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_max"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_max" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> max</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_max (<em>val</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> max</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_max</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_max</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_max</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_mean">
+<code class="descname">get_mean</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_mean"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> mean</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_mean (<em>val</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> mean</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_mean</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_mean</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_mean</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_metadata">
+<code class="descname">get_metadata</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> metadata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_metadata (<em>dict</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_metadata</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_metadata</span>
+<span class="go">{&#39;dim&#39;: 2,</span>
+<span class="go"> &#39;extent&#39;: [5.0, 5.0],</span>
+<span class="go"> &#39;origin&#39;: [0, 0],</span>
+<span class="go"> &#39;shape&#39;: (5, 5),</span>
+<span class="go"> &#39;type&#39;: &#39;uint8&#39;,</span>
+<span class="go"> &#39;voxelsize&#39;: [1.0, 1.0]</span>
+<span class="go"> }</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_min">
+<code class="descname">get_min</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_min"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_min" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> min</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_min (<em>val</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> min</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_min</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_min</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_min</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_origin">
+<code class="descname">get_origin</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> origin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_origin (<em>list</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> origin</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_origin</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_origin</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_origin</span>
+<span class="go">[0, 0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_pixel">
+<code class="descname">get_pixel</code><span class="sig-paren">(</span><em>indices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_pixel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> pixel value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; indices as list of integers</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">pixel_value (<em>self.get_type()</em>) &#8211; pixel value</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">pixel_value</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_pixel</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">pixel_value</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_region">
+<code class="descname">get_region</code><span class="sig-paren">(</span><em>indices</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_region"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Extract a region</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; indices as list of integers</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">out_sp_image (<code class="docutils literal"><span class="pre">SpatialImage</span></code>) &#8211; output <code class="docutils literal"><span class="pre">SpatialImage</span></code></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_sp_image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_region</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">out_sp_image</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_shape">
+<code class="descname">get_shape</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_shape"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> shape</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_shape (<em>tuple</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> shape</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_shape</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_shape</span>
+<span class="go">(5, 5)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_type">
+<code class="descname">get_type</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_type (<em>str</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> type</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_type</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_type</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_type</span>
+<span class="go">uint8</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.get_voxelsize">
+<code class="descname">get_voxelsize</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.get_voxelsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.get_voxelsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get <code class="docutils literal"><span class="pre">SpatialImage</span></code> voxelsize</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">image_voxelsize (<em>list</em>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> voxelsize</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_voxelsize</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span> <span class="n">image_voxelsize</span>
+<span class="go">[1.0, 1.0]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.revert_axis">
+<code class="descname">revert_axis</code><span class="sig-paren">(</span><em>axis='z'</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.revert_axis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.revert_axis" title="Permalink to this definition">¶</a></dt>
+<dd><p>Revert x, y, or z axis</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>axis</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; can be either &#8216;x&#8217;, &#8216;y&#8217; or &#8216;z&#8217;</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">out_sp_image (<code class="docutils literal"><span class="pre">SpatialImage</span></code>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> instance</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span><span class="o">.</span><span class="n">revert_axis</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.set_extent">
+<code class="descname">set_extent</code><span class="sig-paren">(</span><em>img_extent</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.set_extent"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.set_extent" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <code class="docutils literal"><span class="pre">SpatialImage</span></code> physical extent</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_extent</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> physical extent.
+Metadata are updated according to the new physical extent.</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_extent</span> <span class="o">=</span> <span class="p">[</span><span class="mf">10.0</span><span class="p">,</span> <span class="mf">10.0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span><span class="o">.</span><span class="n">set_extent</span><span class="p">(</span><span class="n">image_extent</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.set_metadata">
+<code class="descname">set_metadata</code><span class="sig-paren">(</span><em>img_metadata</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.set_metadata"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.set_metadata" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <code class="docutils literal"><span class="pre">SpatialImage</span></code> metadata</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_metadata</strong> (<a class="reference external" href="https://docs.python.org/2/library/stdtypes.html#dict" title="(in Python v2.7)"><em>dict</em></a>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_metadata</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span><span class="s1">&#39;img_test&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">(</span><span class="n">image_metadata</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.set_origin">
+<code class="descname">set_origin</code><span class="sig-paren">(</span><em>img_origin</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.set_origin"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.set_origin" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <code class="docutils literal"><span class="pre">SpatialImage</span></code> origin</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_origin</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> origin</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_origin</span> <span class="o">=</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span><span class="o">.</span><span class="n">set_origin</span><span class="p">(</span><span class="n">image_origin</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.set_pixel">
+<code class="descname">set_pixel</code><span class="sig-paren">(</span><em>indices</em>, <em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.set_pixel"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.set_pixel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <code class="docutils literal"><span class="pre">SpatialImage</span></code> pixel value</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; indices as list of integers</li>
+<li><strong>value</strong> &#8211; new value, type of <code class="docutils literal"><span class="pre">SpatialImage</span></code> array</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">1</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">value</span> <span class="o">=</span> <span class="mi">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span><span class="o">.</span><span class="n">set_pixel</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.set_region">
+<code class="descname">set_region</code><span class="sig-paren">(</span><em>indices</em>, <em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.set_region"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.set_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace a region</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>indices</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; indices as list of integers</li>
+<li><strong>val</strong> &#8211; new values (<em>np.ndarray</em> or value)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">out_sp_image (<code class="docutils literal"><span class="pre">SpatialImage</span></code>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> instance</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_sp_image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">set_region</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.set_type">
+<code class="descname">set_type</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.set_type"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.set_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <code class="docutils literal"><span class="pre">SpatialImage</span></code> type</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_type</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; image type (see numpy types).</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">out_sp_image (<code class="docutils literal"><span class="pre">SpatialImage</span></code>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> instance</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_type</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">out_sp_image</span> <span class="o">=</span> <span class="n">image</span><span class="o">.</span><span class="n">set_type</span><span class="p">(</span><span class="n">image_type</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.set_voxelsize">
+<code class="descname">set_voxelsize</code><span class="sig-paren">(</span><em>val</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.set_voxelsize"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.set_voxelsize" title="Permalink to this definition">¶</a></dt>
+<dd><p>Set <code class="docutils literal"><span class="pre">SpatialImage</span></code> voxelsize</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_voxelsize</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; <code class="docutils literal"><span class="pre">SpatialImage</span></code> voxelsize</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_voxelsize</span> <span class="o">=</span> <span class="p">[</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">0.5</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image</span><span class="o">.</span><span class="n">set_voxelsize</span><span class="p">(</span><span class="n">image_voxelsize</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.to_2D">
+<code class="descname">to_2D</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.to_2D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.to_2D" title="Permalink to this definition">¶</a></dt>
+<dd><p>3D to 2D</p>
+</dd></dl>
+
+<dl class="method">
+<dt id="components.spatial_image.SpatialImage.to_3D">
+<code class="descname">to_3D</code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/spatial_image.html#SpatialImage.to_3D"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.spatial_image.SpatialImage.to_3D" title="Permalink to this definition">¶</a></dt>
+<dd><p>2D to 3D</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-components.io">
+<span id="module-input-output"></span><span id="ref-input-output"></span><h3>Module Input/Output<a class="headerlink" href="#module-components.io" title="Permalink to this headline">¶</a></h3>
+<p>This module allows a management of inputs and outputs (2D/3D images and metadata)
+through the functions <code class="docutils literal"><span class="pre">imread</span></code> and <code class="docutils literal"><span class="pre">imsave</span></code>. Supported formats are : [&#8216;.tif&#8217;, &#8216;.tiff&#8217;, &#8216;.inr&#8217;, &#8216;.inr.gz&#8217;, &#8216;.inr.zip&#8217;].</p>
+<dl class="function">
+<dt id="components.io.imread">
+<code class="descclassname">components.io.</code><code class="descname">imread</code><span class="sig-paren">(</span><em>img_file</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/io.html#imread"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.io.imread" title="Permalink to this definition">¶</a></dt>
+<dd><p>Read an image (2D/3D).
+The supported formats are : [&#8216;.tif&#8217;, &#8216;.tiff&#8217;, &#8216;.inr&#8217;, &#8216;.inr.gz&#8217;, &#8216;.inr.zip&#8217;]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>image_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; path to the image</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">sp_image (<em>SpatialImage</em>) &#8211; image and metadata (such as voxelsize, extent, type, etc.)</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span><span class="p">,</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;filtering_src.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp_image</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">sp_image</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="function">
+<dt id="components.io.imsave">
+<code class="descclassname">components.io.</code><code class="descname">imsave</code><span class="sig-paren">(</span><em>img_file</em>, <em>sp_img</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/components/io.html#imsave"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#components.io.imsave" title="Permalink to this definition">¶</a></dt>
+<dd><p>Save an image (2D/3D).
+The supported formats are : [&#8216;.tif&#8217;, &#8216;.tiff&#8217;, &#8216;.inr&#8217;, &#8216;.inr.gz&#8217;, &#8216;.inr.zip&#8217;]</p>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>save_path</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; save path</li>
+<li><strong>sp_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; <em>SpatialImage</em> instance</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imsave</span><span class="p">,</span> <span class="n">SpatialImage</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">test_array</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">5</span><span class="p">,</span><span class="mi">5</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sp_image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">test_array</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">save_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;test_output.tif&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">imsave</span><span class="p">(</span><span class="n">save_path</span><span class="p">,</span> <span class="n">sp_image</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+<div class="section" id="package-plugins">
+<span id="ref-package-plugins"></span><h2>Package Plugins<a class="headerlink" href="#package-plugins" title="Permalink to this headline">¶</a></h2>
+<p><strong>Tissue Image Toolkit</strong> (timagetk) can be used with or without the plug-in architecture provided
+by <strong>OpenAleaLab</strong> and implemented within the platform <strong>TissueLab</strong>. <strong>TissueLab</strong> will automatically
+detect the presence of <strong>Tissue Image Toolkit</strong> as plugins. Note that these plugins can be used independently
+of the <strong>TissueLab</strong> environment.</p>
+<p><strong>Tissue Image Toolkit</strong> is based on a set of X groups of plugins whose API
+(<em>Application Programming Interface</em>) are standardized, and these groups provide an
+access to a total of X methods. The groups of plugins are:</p>
+<ul class="simple">
+<li>Linear Filtering (9 methods, see <a class="reference internal" href="#ref-package-linear-filtering"><span class="std std-ref">Module Linear Filtering</span></a>)</li>
+<li>Grayscale Morphology (12 methods, see <a class="reference internal" href="#ref-package-morphology"><span class="std std-ref">Module Grayscale Morphology</span></a>)</li>
+<li>Averaging (5 methods, see <a class="reference internal" href="#ref-package-averaging"><span class="std std-ref">Module Averaging</span></a>)</li>
+<li>H-transform (2 methods, see <a class="reference internal" href="#ref-package-h-transform"><span class="std std-ref">Module H-transform</span></a>)</li>
+<li>Region Labeling (1 method, see <a class="reference internal" href="#ref-package-region-labeling"><span class="std std-ref">Module Region Labeling</span></a>)</li>
+<li>Segmentation (1 method, see <a class="reference internal" href="#ref-package-segmentation"><span class="std std-ref">Module Segmentation</span></a>)</li>
+<li>Labels Post Processing (X methods, see <a class="reference internal" href="#ref-package-labels-post-processing"><span class="std std-ref">Module Labels Post Processing</span></a>)</li>
+<li>Registration (3 methods, see <a class="reference internal" href="#ref-package-registration"><span class="std std-ref">Module Registration</span></a>)</li>
+<li>Sequence Registration (3 methods, see <a class="reference internal" href="#ref-package-sequence-registration"><span class="std std-ref">Module Sequence registration</span></a>)</li>
+</ul>
+<div class="section" id="module-plugins.linear_filtering">
+<span id="module-linear-filtering"></span><span id="ref-package-linear-filtering"></span><h3>Module Linear Filtering<a class="headerlink" href="#module-plugins.linear_filtering" title="Permalink to this headline">¶</a></h3>
+<p>This module contains a generic implementation of several linear filtering algorithms.</p>
+<dl class="function">
+<dt id="plugins.linear_filtering.linear_filtering">
+<code class="descclassname">plugins.linear_filtering.</code><code class="descname">linear_filtering</code><span class="sig-paren">(</span><em>input_image</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/linear_filtering.html#linear_filtering"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.linear_filtering.linear_filtering" title="Permalink to this definition">¶</a></dt>
+<dd><p>Linear filtering plugin. Available methods are :</p>
+<ul class="simple">
+<li>gaussian_smoothing</li>
+<li>gradient</li>
+<li>gradient_modulus</li>
+<li>hessian</li>
+<li>laplacian</li>
+<li>gradient_hessian</li>
+<li>gradient_laplacian</li>
+<li>zero_crossings_hessian</li>
+<li>zero_crossings_laplacian</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; input <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;gaussian_smoothing&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">linear_filtering</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_0_cut.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gauss_image</span> <span class="o">=</span> <span class="n">linear_filtering</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">std_dev</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;gaussian_smoothing&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grad_mod_image</span> <span class="o">=</span> <span class="n">linear_filtering</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;gradient_modulus&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">lap_image</span> <span class="o">=</span> <span class="n">linear_filtering</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;laplacian&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.morphology">
+<span id="module-grayscale-morphology"></span><span id="ref-package-morphology"></span><h3>Module Grayscale Morphology<a class="headerlink" href="#module-plugins.morphology" title="Permalink to this headline">¶</a></h3>
+<p>This module contain a generic implementation of several grayscale morphology algorithms.</p>
+<dl class="function">
+<dt id="plugins.morphology.morphology">
+<code class="descclassname">plugins.morphology.</code><code class="descname">morphology</code><span class="sig-paren">(</span><em>input_image</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/morphology.html#morphology"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.morphology.morphology" title="Permalink to this definition">¶</a></dt>
+<dd><p>Grayscale morphology plugin. Available methods are :</p>
+<ul class="simple">
+<li>erosion</li>
+<li>dilation</li>
+<li>opening</li>
+<li>closing</li>
+<li>morpho_gradient</li>
+<li>contrast</li>
+<li>hat_transform</li>
+<li>inverse_hat_transform</li>
+<li>oc_alternate_sequential_filter</li>
+<li>co_alternate_sequential_filter</li>
+<li>coc_alternate_sequential_filter</li>
+<li>oco_alternate_sequential_filter</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; input <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;erosion&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">morphology</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_0_cut.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">dilation_image</span> <span class="o">=</span> <span class="n">morphology</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;dilation&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">oc_asf_image</span> <span class="o">=</span> <span class="n">morphology</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">max_radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;oc_alternate_sequential_filter&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.averaging">
+<span id="module-averaging"></span><span id="ref-package-averaging"></span><h3>Module Averaging<a class="headerlink" href="#module-plugins.averaging" title="Permalink to this headline">¶</a></h3>
+<p>This module contains a generic implementation of several averaging algorithms.</p>
+<dl class="function">
+<dt id="plugins.averaging.averaging">
+<code class="descclassname">plugins.averaging.</code><code class="descname">averaging</code><span class="sig-paren">(</span><em>list_images</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/averaging.html#averaging"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.averaging.averaging" title="Permalink to this definition">¶</a></dt>
+<dd><p>Averaging plugin. Available methods are :</p>
+<ul class="simple">
+<li>mean_averaging</li>
+<li>robust_mean_averaging</li>
+<li>median_averaging</li>
+<li>minimum_averaging</li>
+<li>maximum_averaging</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>list_images</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; list of <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;mean_averaging&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">averaging</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_0_cut.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_image</span><span class="p">,</span> <span class="n">input_image</span><span class="p">,</span> <span class="n">input_image</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">rob_mean_image</span> <span class="o">=</span> <span class="n">averaging</span><span class="p">(</span><span class="n">list_images</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;robust_mean_averaging&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mean_image</span> <span class="o">=</span> <span class="n">averaging</span><span class="p">(</span><span class="n">list_images</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;mean_averaging&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.h_transform">
+<span id="module-h-transform"></span><span id="ref-package-h-transform"></span><h3>Module H-transform<a class="headerlink" href="#module-plugins.h_transform" title="Permalink to this headline">¶</a></h3>
+<p>This module contains a generic implementation of several h_transform algorithms.</p>
+<dl class="function">
+<dt id="plugins.h_transform.h_transform">
+<code class="descclassname">plugins.h_transform.</code><code class="descname">h_transform</code><span class="sig-paren">(</span><em>input_image</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/h_transform.html#h_transform"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.h_transform.h_transform" title="Permalink to this definition">¶</a></dt>
+<dd><p>h_transform plugin. Available methods are :</p>
+<ul class="simple">
+<li>h_transform_min</li>
+<li>h_transform_max</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; input <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;min&#8217;)</li>
+<li><strong>h</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#int" title="(in Python v2.7)"><em>int</em></a>) &#8211; optional, h value. Default: h=1</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">h_transform</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">img_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;filtering_src.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg_max_image</span> <span class="o">=</span> <span class="n">h_transform</span><span class="p">(</span><span class="n">input_image</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg_max_image</span> <span class="o">=</span> <span class="n">h_transform</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;h_transform_max&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg_min_image</span> <span class="o">=</span> <span class="n">h_transform</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;h_transform_min&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.region_labeling">
+<span id="module-region-labeling"></span><span id="ref-package-region-labeling"></span><h3>Module Region Labeling<a class="headerlink" href="#module-plugins.region_labeling" title="Permalink to this headline">¶</a></h3>
+<p>This module contain implementation of region labeling algorithms</p>
+<dl class="function">
+<dt id="plugins.region_labeling.region_labeling">
+<code class="descclassname">plugins.region_labeling.</code><code class="descname">region_labeling</code><span class="sig-paren">(</span><em>input_image</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/region_labeling.html#region_labeling"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.region_labeling.region_labeling" title="Permalink to this definition">¶</a></dt>
+<dd><p>Region labeling plugin. Available methods are :</p>
+<ul class="simple">
+<li>connected_components</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; input <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;connected_components&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">h_transform</span><span class="p">,</span> <span class="n">region_labeling</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_0_cut.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg_min_image</span> <span class="o">=</span> <span class="n">h_transform</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;h_transform_min&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reg_lab_image</span> <span class="o">=</span> <span class="n">region_labeling</span><span class="p">(</span><span class="n">reg_min_image</span><span class="p">,</span> <span class="n">low_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="go">                                    high_threshold=3, method=&#39;connected_components&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.segmentation">
+<span id="module-segmentation"></span><span id="ref-package-segmentation"></span><h3>Module Segmentation<a class="headerlink" href="#module-plugins.segmentation" title="Permalink to this headline">¶</a></h3>
+<p>This module contains a generic implementation of several segmentation algorithms.</p>
+<dl class="function">
+<dt id="plugins.segmentation.segmentation">
+<code class="descclassname">plugins.segmentation.</code><code class="descname">segmentation</code><span class="sig-paren">(</span><em>input_image</em>, <em>seeds_image</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/segmentation.html#segmentation"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.segmentation.segmentation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Segmentation plugin. Available methods are :</p>
+<ul class="simple">
+<li>seeded_watershed</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; input <em>SpatialImage</em></li>
+<li><strong>seeds_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; seeds <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;seeded_watershed&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">linear_filtering</span><span class="p">,</span> <span class="n">h_transform</span><span class="p">,</span> <span class="n">region_labeling</span><span class="p">,</span> <span class="n">segmentation</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;segmentation_src.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">input_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">smooth_image</span> <span class="o">=</span> <span class="n">linear_filtering</span><span class="p">(</span><span class="n">input_image</span><span class="p">,</span> <span class="n">std_dev</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;gaussian_smoothing&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">regext_image</span> <span class="o">=</span> <span class="n">h_transform</span><span class="p">(</span><span class="n">smooth_image</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;h_transform_min&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seeds_image</span> <span class="o">=</span> <span class="n">region_labeling</span><span class="p">(</span><span class="n">regext_image</span><span class="p">,</span> <span class="n">low_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">high_threshold</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+<span class="go">                                  method=&#39;connected_components&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">segmented_image</span> <span class="o">=</span> <span class="n">segmentation</span><span class="p">(</span><span class="n">smooth_image</span><span class="p">,</span> <span class="n">seeds_image</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span>
+<span class="go">                                   method=&#39;seeded_watershed&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.labels_post_processing">
+<span id="module-labels-post-processing"></span><span id="ref-package-labels-post-processing"></span><h3>Module Labels Post Processing<a class="headerlink" href="#module-plugins.labels_post_processing" title="Permalink to this headline">¶</a></h3>
+<p>This module contain a generic implementation of labels post processing algorithms.</p>
+<dl class="function">
+<dt id="plugins.labels_post_processing.labels_post_processing">
+<code class="descclassname">plugins.labels_post_processing.</code><code class="descname">labels_post_processing</code><span class="sig-paren">(</span><em>input_image</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/labels_post_processing.html#labels_post_processing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.labels_post_processing.labels_post_processing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Labels post-processing algorithms. Available methods are :</p>
+<ul class="simple">
+<li>labels_erosion</li>
+<li>labels_dilation</li>
+<li>labels_opening</li>
+<li>labels_closing</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>input_image</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; input <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;labels_erosion&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">labels_post_processing</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;segmentation_seeded_watershed.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">segmented_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ero_image</span> <span class="o">=</span> <span class="n">labels_post_processing</span><span class="p">(</span><span class="n">segmented_image</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+<span class="go">                                       method=&#39;labels_erosion&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">open_image</span> <span class="o">=</span> <span class="n">labels_post_processing</span><span class="p">(</span><span class="n">segmented_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;labels_opening&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.registration">
+<span id="module-registration"></span><span id="ref-package-registration"></span><h3>Module Registration<a class="headerlink" href="#module-plugins.registration" title="Permalink to this headline">¶</a></h3>
+<p>This module contains a generic implementation of several registration algorithms.</p>
+<dl class="function">
+<dt id="plugins.registration.registration">
+<code class="descclassname">plugins.registration.</code><code class="descname">registration</code><span class="sig-paren">(</span><em>floating_img</em>, <em>reference_img</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/registration.html#registration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.registration.registration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Registration plugin. Available methods are :</p>
+<ul class="simple">
+<li>rigid_registration</li>
+<li>affine_registration</li>
+<li>deformable_registration</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>floating_img</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; floating <em>SpatialImage</em></li>
+<li><strong>reference_img</strong> (<a class="reference internal" href="#components.spatial_image.SpatialImage" title="components.spatial_image.SpatialImage"><em>SpatialImage</em></a>) &#8211; reference <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;rigid_registration&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">BalTransformation</span></code> instance &#8211; trsf_out, <em>BalTransformation</em> transformation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><code class="docutils literal"><span class="pre">SpatialImage</span></code> instance &#8211; res_image, <em>SpatialImage</em> image and metadata</td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data</span><span class="p">,</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">registration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_0_cut.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">floating_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">image_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_1_cut.inr&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_image</span> <span class="o">=</span> <span class="n">data</span><span class="p">(</span><span class="n">image_path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trsf_rig</span><span class="p">,</span> <span class="n">res_rig</span> <span class="o">=</span> <span class="n">registration</span><span class="p">(</span><span class="n">floating_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;rigid_registration&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trsf_aff</span><span class="p">,</span> <span class="n">res_aff</span> <span class="o">=</span> <span class="n">registration</span><span class="p">(</span><span class="n">floating_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;affine_registration&#39;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">trsf_def</span><span class="p">,</span> <span class="n">res_def</span> <span class="o">=</span> <span class="n">registration</span><span class="p">(</span><span class="n">floating_image</span><span class="p">,</span> <span class="n">reference_image</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;deformable_registration&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+<div class="section" id="module-plugins.sequence_registration">
+<span id="module-sequence-registration"></span><span id="ref-package-sequence-registration"></span><h3>Module Sequence registration<a class="headerlink" href="#module-plugins.sequence_registration" title="Permalink to this headline">¶</a></h3>
+<p>This module contains a generic implementation of several sequence registration algorithms.</p>
+<dl class="function">
+<dt id="plugins.sequence_registration.sequence_registration">
+<code class="descclassname">plugins.sequence_registration.</code><code class="descname">sequence_registration</code><span class="sig-paren">(</span><em>list_images</em>, <em>method=None</em>, <em>**kwds</em><span class="sig-paren">)</span><a class="reference internal" href="_modules/plugins/sequence_registration.html#sequence_registration"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#plugins.sequence_registration.sequence_registration" title="Permalink to this definition">¶</a></dt>
+<dd><p>Sequence registration plugin. Available methods are :</p>
+<ul class="simple">
+<li>sequence_rigid_registration</li>
+<li>sequence_affine_registration</li>
+</ul>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>list_images</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#list" title="(in Python v2.7)"><em>list</em></a>) &#8211; list of <em>SpatialImage</em></li>
+<li><strong>method</strong> (<a class="reference external" href="https://docs.python.org/2/library/functions.html#str" title="(in Python v2.7)"><em>str</em></a>) &#8211; used method (example: &#8216;sequence_registration_rigid&#8217;)</li>
+</ul>
+</td>
+</tr>
+</tbody>
+</table>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body">list_compo_trsf &#8211; list of <em>BalTransformation</em> transformation</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body">list_res_img &#8211; list of <em>SpatialImage</em></td>
+</tr>
+</tbody>
+</table>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">sequence_registration</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">imread</span><span class="p">(</span><span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.inr&#39;</span><span class="p">))</span>
+<span class="go">                    for time in times]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_compo_trsf</span><span class="p">,</span> <span class="n">list_res_img</span> <span class="o">=</span> <span class="n">sequence_registration</span><span class="p">(</span><span class="n">list_images</span><span class="p">,</span>
+<span class="go">                                                          method=&#39;sequence_rigid_registration&#39;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">list_compo_trsf</span><span class="p">,</span> <span class="n">list_res_img</span> <span class="o">=</span> <span class="n">sequence_registration</span><span class="p">(</span><span class="n">list_images</span><span class="p">,</span>
+<span class="go">                                                          method=&#39;sequence_affine_registration&#39;)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Home</a>|&nbsp;</li>
+        <li><a href="install.html">Installation</a>|&nbsp;</li>
+        <li><a href="#">Documentation</a>|&nbsp;</li>
+        <li><a href="examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Sophie Ribes.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.4.
+    </div>
+  </body>
+</html>

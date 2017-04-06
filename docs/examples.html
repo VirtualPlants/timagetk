@@ -1,0 +1,522 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Examples &#8212; timagetk 1. documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true,
+        SOURCELINK_SUFFIX: '.txt'
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head>
+  <body role="document">
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="index.html"><img src="_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+</div>
+
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Home</a>|&nbsp;</li>
+        <li><a href="install.html">Installation</a>|&nbsp;</li>
+        <li><a href="autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="#">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Examples</a><ul>
+<li><a class="reference internal" href="#input-output">Input/Output</a></li>
+<li><a class="reference internal" href="#rigid-affine-and-deformable-registration">Rigid, affine and deformable registration</a></li>
+<li><a class="reference internal" href="#sequence-registration">Sequence Registration</a></li>
+<li><a class="reference internal" href="#seeded-watershed-segmentation">Seeded-watershed segmentation</a></li>
+<li><a class="reference internal" href="#computation-of-features">Computation of features</a></li>
+<li><a class="reference internal" href="#temporal-tracking">Temporal tracking</a></li>
+</ul>
+</li>
+</ul>
+
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/examples.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <div><input type="text" name="q" /></div>
+      <div><input type="submit" value="Go" /></div>
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="examples">
+<span id="ref-examples"></span><h1>Examples<a class="headerlink" href="#examples" title="Permalink to this headline">¶</a></h1>
+<p>All sample scripts can be found in the folder <strong>timagetk/timagetk/examples/</strong> and can be launched.</p>
+<p>For example, to run the script <code class="docutils literal"><span class="pre">input_output.py</span></code>, open a shell prompt, go the
+the folder examples and type: <code class="docutils literal"><span class="pre">python</span> <span class="pre">input_output.py</span></code></p>
+<div class="section" id="input-output">
+<span id="ref-examples-input-output"></span><h2>Input/Output<a class="headerlink" href="#input-output" title="Permalink to this headline">¶</a></h2>
+<p>This example illustrates input and output operations (see <a class="reference internal" href="autodoc.html#ref-package-components"><span class="std std-ref">Package Components</span></a>).</p>
+<p>The resulting images (see folder <strong>timagetk/timagetk/examples/results/</strong>) can be checked against the
+reference image by using any image visualization tool (such as <strong>TissueLab</strong> or <strong>fiji</strong>).</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">SpatialImage</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span><span class="p">,</span> <span class="n">imsave</span>
+    <span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
+
+<span class="n">out_path</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="c1"># to save results</span>
+<span class="c1"># input image path</span>
+<span class="n">img_path</span> <span class="o">=</span> <span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_0_cut.inr&#39;</span><span class="p">)</span>
+<span class="c1"># .inr format to SpatialImage</span>
+<span class="n">sp_img</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">img_path</span><span class="p">)</span>
+<span class="c1"># sp_img is now a SpatialImage instance</span>
+<span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sp_img</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">):</span>
+    
+    <span class="c1"># get the SpatialImage metadata, accessor</span>
+    <span class="n">metadata</span> <span class="o">=</span> <span class="n">sp_img</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span> <span class="c1"># dictionary</span>
+    <span class="c1"># print the SpatialImage metadata</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Metadata :&#39;</span><span class="p">),</span> <span class="n">metadata</span>
+    <span class="c1"># metadata modification</span>
+    <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;filename&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_path</span>
+    <span class="c1"># set the SpatialImage metadata, mutator</span>
+    <span class="n">sp_img</span><span class="o">.</span><span class="n">set_metadata</span><span class="p">(</span><span class="n">metadata</span><span class="p">)</span>
+    <span class="c1"># print the SpatialImage metadata</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;New metadata :&#39;</span><span class="p">),</span> <span class="n">sp_img</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+    
+    <span class="c1"># get the SpatialImage voxelsize (list of floating numbers)</span>
+    <span class="n">vox</span> <span class="o">=</span> <span class="n">sp_img</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">()</span>
+    <span class="c1"># print the SpatialImage voxelsize</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Voxelsize :&#39;</span><span class="p">),</span> <span class="n">vox</span>
+    <span class="c1"># voxelsize modification</span>
+    <span class="n">new_vox</span> <span class="o">=</span> <span class="p">[]</span> <span class="c1"># empty list</span>
+    <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">vox</span><span class="p">):</span>
+        <span class="n">new_vox</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">2.0</span><span class="o">*</span><span class="n">val</span><span class="p">)</span>
+    <span class="c1"># set the SpatialImage voxelsize, mutator</span>
+    <span class="n">sp_img</span><span class="o">.</span><span class="n">set_voxelsize</span><span class="p">(</span><span class="n">new_vox</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;New voxelsize :&#39;</span><span class="p">),</span> <span class="n">sp_img</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">()</span>
+
+    <span class="c1"># output</span>
+    <span class="c1"># filename</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_input_output.tif&#39;</span>
+    <span class="c1"># SpatialImage to .tif format</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">)</span>
+    <span class="c1"># filename</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_input_output.inr&#39;</span>
+    <span class="c1"># SpatialImage to .inr format</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>You can find a detailed description of:</p>
+<ul class="simple">
+<li>data structure <code class="docutils literal"><span class="pre">SpatialImage</span></code>, see <a class="reference internal" href="autodoc.html#ref-spatial-image"><span class="std std-ref">Module Spatial Image</span></a></li>
+<li>functions <code class="docutils literal"><span class="pre">imread</span></code> and <code class="docutils literal"><span class="pre">imsave</span></code>, see <a class="reference internal" href="autodoc.html#ref-input-output"><span class="std std-ref">Module Input/Output</span></a></li>
+</ul>
+</div>
+<div class="section" id="rigid-affine-and-deformable-registration">
+<h2>Rigid, affine and deformable registration<a class="headerlink" href="#rigid-affine-and-deformable-registration" title="Permalink to this headline">¶</a></h2>
+<p>This example illustrates rigid, affine and deformable registration (see <a class="reference internal" href="autodoc.html#ref-package-registration"><span class="std std-ref">Module Registration</span></a>).</p>
+<p>A registration process requires two input images (<code class="docutils literal"><span class="pre">floating_img</span></code> and <code class="docutils literal"><span class="pre">reference_img</span></code>) and computes:</p>
+<ul class="simple">
+<li>a spatial transformation <code class="docutils literal"><span class="pre">trsf_out</span></code> between the two input images,</li>
+<li>a result image <code class="docutils literal"><span class="pre">img_res</span></code> corresponding to the floating image resampled into the reference frame.</li>
+</ul>
+<p>The resulting images (see folder <strong>timagetk/timagetk/examples/results/</strong>) can be checked against the
+reference image by using any image visualization tool (such as <strong>TissueLab</strong> or <strong>fiji</strong>).</p>
+<a class="reference internal image-reference" href="_images/registration.jpg"><img alt="_images/registration.jpg" class="align-center" src="_images/registration.jpg" style="width: 500px; height: 420px;" /></a>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span><span class="p">,</span> <span class="n">imsave</span>
+    <span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">registration</span>
+    <span class="c1">#from timagetk.wrapping.bal_trsf import BalTransformation</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
+
+<span class="n">out_path</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="c1"># to save results</span>
+<span class="c1"># we consider two different times</span>
+<span class="c1"># time_1 is the floating image</span>
+<span class="c1"># time_2 is the reference image</span>
+<span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="c1"># list of SpatialImage instances</span>
+<span class="n">list_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">imread</span><span class="p">(</span><span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.inr&#39;</span><span class="p">))</span>
+               <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">times</span><span class="p">]</span>
+<span class="n">floating_img</span><span class="p">,</span> <span class="n">reference_img</span> <span class="o">=</span> <span class="n">list_images</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">list_images</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+<span class="c1"># Rigid registration:</span>
+<span class="n">trsf_rig</span><span class="p">,</span> <span class="n">res_rig</span> <span class="o">=</span> <span class="n">registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span>
+                                 <span class="n">reference_img</span><span class="p">,</span>
+                                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;rigid_registration&#39;</span><span class="p">)</span>
+<span class="c1"># display the spatial transformation (4x4 matrix):</span>
+<span class="n">trsf_rig</span><span class="o">.</span><span class="n">c_display</span><span class="p">()</span>
+<span class="c1"># save the spatial transformation:</span>
+<span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_trsf_rigid.trsf&#39;</span> <span class="c1"># filename</span>
+<span class="n">trsf_rig</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">)</span>
+<span class="c1"># save the result image:</span>
+<span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_reg_rigid_1_2.tif&#39;</span> <span class="c1"># filename</span>
+<span class="c1"># SpatialImage to .tif format</span>
+<span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">res_rig</span><span class="p">)</span>
+
+<span class="c1"># Affine registration:</span>
+<span class="n">trsf_aff</span><span class="p">,</span> <span class="n">res_aff</span> <span class="o">=</span> <span class="n">registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span>
+                                 <span class="n">reference_img</span><span class="p">,</span>
+                                 <span class="n">method</span><span class="o">=</span><span class="s1">&#39;affine_registration&#39;</span><span class="p">)</span>
+<span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_reg_affine_1_2.tif&#39;</span> <span class="c1"># filename</span>
+<span class="c1"># SpatialImage to .tif format</span>
+<span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">res_aff</span><span class="p">)</span>
+
+<span class="c1"># Deformable registration:</span>
+<span class="n">trsf_def</span><span class="p">,</span> <span class="n">res_def</span> <span class="o">=</span> <span class="n">registration</span><span class="p">(</span><span class="n">floating_img</span><span class="p">,</span>
+                                 <span class="n">reference_img</span><span class="p">,</span>
+                                 <span class="n">method</span><span class="o">=</span>
+                                 <span class="s1">&#39;deformable_registration&#39;</span><span class="p">)</span>
+<span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_reg_deformable_1_2.tif&#39;</span> <span class="c1"># filename</span>
+<span class="c1"># SpatialImage to .tif format</span>
+<span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">res_def</span><span class="p">)</span>
+
+<span class="c1"># Save the reference image:</span>
+<span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_reg_reference.tif&#39;</span> <span class="c1"># filename</span>
+<span class="c1"># SpatialImage to .tif format</span>
+<span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">reference_img</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="sequence-registration">
+<h2>Sequence Registration<a class="headerlink" href="#sequence-registration" title="Permalink to this headline">¶</a></h2>
+<p>This example illustrates rigid and affine registration along a whole sequence (see <a class="reference internal" href="autodoc.html#ref-package-sequence-registration"><span class="std std-ref">Module Sequence registration</span></a>).</p>
+<p>This process requires a list of images (a sequence) and computes:</p>
+<ul class="simple">
+<li>a list of spatial transformations <code class="docutils literal"><span class="pre">list_compo_trsf</span></code> between successive images and the reference image,</li>
+<li>a list of result images <code class="docutils literal"><span class="pre">list_res_img</span></code> corresponding to the successive images resampled into the reference frame.</li>
+</ul>
+<p>By default, the reference image is the last image of the sequence and all images are resampled into this frame.
+The resulting images (see folder <strong>timagetk/timagetk/examples/results/</strong>) can be checked against the
+reference image by using any image visualization tool (such as <strong>TissueLab</strong> or <strong>fiji</strong>).</p>
+<a class="reference internal image-reference" href="_images/seq_rigid_registration.jpg"><img alt="_images/seq_rigid_registration.jpg" class="align-center" src="_images/seq_rigid_registration.jpg" style="width: 550px; height: 400px;" /></a>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span><span class="p">,</span> <span class="n">imsave</span>
+    <span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">sequence_registration</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
+
+<span class="n">out_path</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="c1"># to save results</span>
+<span class="c1"># we consider three different times</span>
+<span class="c1"># time_0 is the floating image</span>
+<span class="c1"># time_1 is first the local reference image,</span>
+<span class="c1"># and becames the floating image</span>
+<span class="c1"># time_2 is the global reference image</span>
+<span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">]</span>
+<span class="c1"># list of SpatialImage instances</span>
+<span class="n">list_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">imread</span><span class="p">(</span><span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;.inr&#39;</span><span class="p">))</span>
+               <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">times</span><span class="p">]</span>
+
+<span class="c1"># Rigid registration along the whole sequence:</span>
+<span class="c1"># list_compo_trsf : list of transformations</span>
+<span class="c1"># list_res_img : list of resulting images</span>
+<span class="c1"># the primitive embeds an iterative registration</span>
+<span class="n">list_compo_trsf</span><span class="p">,</span> <span class="n">list_res_img</span> <span class="o">=</span> <span class="n">sequence_registration</span><span class="p">(</span><span class="n">list_images</span><span class="p">,</span>
+                          <span class="n">method</span><span class="o">=</span><span class="s1">&#39;sequence_rigid_registration&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_res_img</span><span class="p">):</span>
+    <span class="c1"># filenames</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;example_seq_reg_rigid_&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="s1">&#39;.inr&#39;</span><span class="p">])</span>
+    <span class="c1"># SpatialImage to .inr format</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+
+<span class="c1"># Affine registration alog the whole sequence:</span>
+<span class="n">list_compo_trsf</span><span class="p">,</span> <span class="n">list_res_img</span> <span class="o">=</span> <span class="n">sequence_registration</span><span class="p">(</span><span class="n">list_images</span><span class="p">,</span>
+                          <span class="n">method</span><span class="o">=</span><span class="s1">&#39;sequence_affine_registration&#39;</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">img</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">list_res_img</span><span class="p">):</span>
+    <span class="c1"># filenames</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="s1">&#39;example_seq_reg_affine_&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">ind</span><span class="p">),</span> <span class="s1">&#39;_&#39;</span><span class="p">,</span>
+                        <span class="nb">str</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]),</span> <span class="s1">&#39;.inr&#39;</span><span class="p">])</span>
+    <span class="c1"># SpatialImage to .inr format</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="seeded-watershed-segmentation">
+<h2>Seeded-watershed segmentation<a class="headerlink" href="#seeded-watershed-segmentation" title="Permalink to this headline">¶</a></h2>
+<p>This example illustrates seeded-watershed segmentation.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span><span class="p">,</span> <span class="n">imsave</span>
+    <span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">linear_filtering</span><span class="p">,</span> <span class="n">morphology</span>
+    <span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">h_transform</span>
+    <span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">region_labeling</span><span class="p">,</span> <span class="n">segmentation</span>
+    <span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">labels_post_processing</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
+
+<span class="n">out_path</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="c1"># to save results</span>
+<span class="c1"># we consider an input image</span>
+<span class="c1"># SpatialImage instance</span>
+<span class="n">input_img</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;input.tif&#39;</span><span class="p">))</span>
+
+<span class="c1"># optional denoising block</span>
+<span class="n">smooth_img</span> <span class="o">=</span> <span class="n">linear_filtering</span><span class="p">(</span><span class="n">input_img</span><span class="p">,</span> <span class="n">std_dev</span><span class="o">=</span><span class="mf">2.0</span><span class="p">,</span>
+                              <span class="n">method</span><span class="o">=</span><span class="s1">&#39;gaussian_smoothing&#39;</span><span class="p">)</span>
+<span class="n">asf_img</span> <span class="o">=</span> <span class="n">morphology</span><span class="p">(</span><span class="n">smooth_img</span><span class="p">,</span> <span class="n">max_radius</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+                     <span class="n">method</span><span class="o">=</span><span class="s1">&#39;co_alternate_sequential_filter&#39;</span><span class="p">)</span>
+
+<span class="n">ext_img</span> <span class="o">=</span> <span class="n">h_transform</span><span class="p">(</span><span class="n">asf_img</span><span class="p">,</span> <span class="n">h</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+                      <span class="n">method</span><span class="o">=</span><span class="s1">&#39;h_transform_min&#39;</span><span class="p">)</span>
+<span class="n">con_img</span> <span class="o">=</span> <span class="n">region_labeling</span><span class="p">(</span><span class="n">ext_img</span><span class="p">,</span> <span class="n">low_threshold</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                          <span class="n">high_threshold</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span>
+                          <span class="n">method</span><span class="o">=</span><span class="s1">&#39;connected_components&#39;</span><span class="p">)</span>
+<span class="n">seg_img</span> <span class="o">=</span> <span class="n">segmentation</span><span class="p">(</span><span class="n">smooth_img</span><span class="p">,</span> <span class="n">con_img</span><span class="p">,</span> <span class="n">control</span><span class="o">=</span><span class="s1">&#39;first&#39;</span><span class="p">,</span>
+                       <span class="n">method</span><span class="o">=</span><span class="s1">&#39;seeded_watershed&#39;</span><span class="p">)</span>
+
+<span class="c1"># optional post processig block</span>
+<span class="n">pp_img</span> <span class="o">=</span> <span class="n">labels_post_processing</span><span class="p">(</span><span class="n">seg_img</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                <span class="n">iterations</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                <span class="n">method</span><span class="o">=</span><span class="s1">&#39;labels_erosion&#39;</span><span class="p">)</span>
+
+<span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_segmentation.tif&#39;</span>
+<span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">pp_img</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="computation-of-features">
+<h2>Computation of features<a class="headerlink" href="#computation-of-features" title="Permalink to this headline">¶</a></h2>
+<p>This example illustrates computation of geometrical features on labeled images.
+This process requires a labeled image and computes several features such as moments,
+spatial relationships, etc. This algorithm returns a dictionary that can be pickled
+(see pickle module).</p>
+<a class="reference internal image-reference" href="_images/geometrical_features.jpg"><img alt="_images/geometrical_features.jpg" class="align-center" src="_images/geometrical_features.jpg" style="width: 330px; height: 280px;" /></a>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span>
+    <span class="kn">from</span> <span class="nn">timagetk.algorithms</span> <span class="k">import</span> <span class="n">GeometricalFeatures</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="k">as</span> <span class="nn">pickle</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="n">out_path</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span> <span class="c1"># to save results</span>
+<span class="c1"># We consider two different times</span>
+<span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">list_images</span> <span class="o">=</span> <span class="p">[</span><span class="n">imread</span><span class="p">(</span><span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_seg.inr&#39;</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">time</span> <span class="ow">in</span> <span class="n">times</span><span class="p">]</span> <span class="c1"># list of SpatialImage</span>
+<span class="n">feature_space_list</span> <span class="o">=</span> <span class="p">[]</span>
+<span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+    <span class="n">segmentation</span> <span class="o">=</span> <span class="n">list_images</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="c1"># segmentations</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">segmentation</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1"># labels</span>
+    <span class="n">background_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">labels</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">background_id</span><span class="p">)</span> <span class="c1"># remove background</span>
+    <span class="n">int_seg</span> <span class="o">=</span> <span class="n">GeometricalFeatures</span><span class="p">(</span><span class="n">segmentation</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span> <span class="c1"># GeometricalFeatures object</span>
+    <span class="n">feature_space_dict</span> <span class="o">=</span> <span class="n">int_seg</span><span class="o">.</span><span class="n">compute_feature_space</span><span class="p">(</span><span class="n">background_id</span><span class="o">=</span><span class="n">background_id</span><span class="p">)</span> <span class="c1"># compute feature space</span>
+    <span class="n">feature_space_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_space_dict</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">time</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+    <span class="n">pkl_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">out_path</span><span class="p">,</span> <span class="s1">&#39;example_geom_feat_time_&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">times</span><span class="p">[</span><span class="n">ind</span><span class="p">]),</span> <span class="s1">&#39;.pkl&#39;</span><span class="p">])</span>
+    <span class="n">out</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pkl_path</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="c1"># save as pickle object (serialization)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">feature_space_list</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">out</span><span class="p">)</span>
+    <span class="n">out</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="n">sp_label</span> <span class="o">=</span> <span class="mi">137</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Retrieve information for the label :&#39;</span><span class="p">),</span> <span class="n">sp_label</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Label : &#39;</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sp_label</span><span class="p">),</span> <span class="n">feature_space_list</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">sp_label</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Label : &#39;</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">sp_label</span><span class="p">),</span> <span class="n">feature_space_list</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="n">sp_label</span><span class="p">]</span>
+</pre></div>
+</div>
+<div class="highlight-python"><div class="highlight"><pre><span></span><span class="n">Label</span> <span class="p">:</span>  <span class="mi">137</span> <span class="p">{</span><span class="s1">&#39;Neighbors&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">32</span><span class="p">,</span> <span class="mi">124</span><span class="p">,</span> <span class="mi">149</span><span class="p">,</span> <span class="mi">195</span><span class="p">,</span> <span class="mi">282</span><span class="p">,</span> <span class="mi">297</span><span class="p">,</span> <span class="mi">298</span><span class="p">,</span> <span class="mi">312</span><span class="p">],</span>
+              <span class="s1">&#39;Distances&#39;</span><span class="p">:</span> <span class="p">{</span><span class="mi">32</span><span class="p">:</span> <span class="mf">5.28</span><span class="p">,</span> <span class="mi">195</span><span class="p">:</span> <span class="mf">6.963</span><span class="p">,</span> <span class="mi">297</span><span class="p">:</span> <span class="mf">4.348</span><span class="p">,</span> <span class="mi">298</span><span class="p">:</span> <span class="mf">5.989</span><span class="p">,</span>
+                           <span class="mi">149</span><span class="p">:</span> <span class="mf">5.8</span><span class="p">,</span> <span class="mi">312</span><span class="p">:</span> <span class="mf">4.783</span><span class="p">,</span> <span class="mi">282</span><span class="p">:</span> <span class="mf">5.665</span><span class="p">,</span> <span class="mi">124</span><span class="p">:</span> <span class="mf">7.703</span><span class="p">},</span>
+              <span class="s1">&#39;Bounding box volume&#39;</span><span class="p">:</span> <span class="mi">12180</span><span class="p">,</span>
+              <span class="s1">&#39;Physical centroid&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mf">55.428</span><span class="p">,</span> <span class="mf">62.878</span><span class="p">,</span> <span class="mf">1.191</span><span class="p">),</span>
+              <span class="s1">&#39;Label&#39;</span><span class="p">:</span> <span class="mi">137</span><span class="p">,</span> <span class="s1">&#39;Bounding box size&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">29</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="mi">14</span><span class="p">),</span>
+              <span class="s1">&#39;Physical volume&#39;</span><span class="p">:</span> <span class="mf">117.329</span><span class="p">,</span> <span class="s1">&#39;Index centroid&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">186</span><span class="p">,</span> <span class="mi">211</span><span class="p">,</span> <span class="mi">3</span><span class="p">),</span>
+              <span class="s1">&#39;Bounding box&#39;</span><span class="p">:</span> <span class="p">(</span><span class="mi">172</span><span class="p">,</span> <span class="mi">200</span><span class="p">,</span> <span class="mi">197</span><span class="p">,</span> <span class="mi">226</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">13</span><span class="p">)}</span>
+</pre></div>
+</div>
+</div>
+<div class="section" id="temporal-tracking">
+<h2>Temporal tracking<a class="headerlink" href="#temporal-tracking" title="Permalink to this headline">¶</a></h2>
+<p>This example illustrates tracking of objects on labeled images.</p>
+<div class="highlight-default"><div class="highlight"><pre><span></span><span class="c1"># imports</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.util</span> <span class="k">import</span> <span class="n">data_path</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="k">import</span> <span class="n">imread</span><span class="p">,</span> <span class="n">imsave</span><span class="p">,</span> <span class="n">SpatialImage</span>
+    <span class="kn">from</span> <span class="nn">timagetk.plugins</span> <span class="k">import</span> <span class="n">labels_post_processing</span>
+    <span class="kn">from</span> <span class="nn">timagetk.algorithms</span> <span class="k">import</span> <span class="n">GeometricalFeatures</span>
+    <span class="kn">from</span> <span class="nn">timagetk.algorithms</span> <span class="k">import</span> <span class="n">TemporalMatching</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Import Error&#39;</span><span class="p">)</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">cPickle</span> <span class="k">as</span> <span class="nn">pickle</span>
+<span class="k">except</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">pickle</span>
+
+<span class="n">out_path</span> <span class="o">=</span> <span class="s1">&#39;./results/&#39;</span>
+<span class="c1"># We consider two different times</span>
+<span class="n">times</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">]</span>
+<span class="n">segmentation_list</span><span class="p">,</span> <span class="n">feature_space_list</span><span class="p">,</span> <span class="n">back_id_list</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+<span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">times</span><span class="p">):</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">imread</span><span class="p">(</span><span class="n">data_path</span><span class="p">(</span><span class="s1">&#39;time_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_seg.inr&#39;</span><span class="p">))</span>
+
+    <span class="c1"># subimage extraction</span>
+    <span class="n">shape</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+    <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">5</span><span class="p">]</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">img</span><span class="o">.</span><span class="n">get_region</span><span class="p">(</span><span class="n">indices</span><span class="o">=</span><span class="n">indices</span><span class="p">)</span>
+
+    <span class="c1"># remove small cells</span>
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">labels_post_processing</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;labels_erosion&#39;</span><span class="p">,</span> <span class="n">radius</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">img</span><span class="p">[</span><span class="n">img</span><span class="o">==</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">img</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="n">img</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">())</span>
+
+    <span class="c1"># save input labeled images</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_track_time_&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;_seg.inr&#39;</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">img</span><span class="p">)</span>
+
+    <span class="n">labels</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">img</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span> <span class="c1"># list of labels</span>
+    <span class="n">back_id</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">min</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span> <span class="c1"># background identifier</span>
+    <span class="n">back_id_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">back_id</span><span class="p">)</span>
+    <span class="n">labels</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">back_id</span><span class="p">)</span>
+
+    <span class="c1"># feature space computation</span>
+    <span class="n">obj_gf</span> <span class="o">=</span> <span class="n">GeometricalFeatures</span><span class="p">(</span><span class="n">img</span><span class="p">,</span> <span class="n">label</span><span class="o">=</span><span class="n">labels</span><span class="p">)</span>
+    <span class="n">feature_space</span> <span class="o">=</span> <span class="n">obj_gf</span><span class="o">.</span><span class="n">compute_feature_space</span><span class="p">()</span>
+    <span class="n">segmentation_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">img</span><span class="p">),</span> <span class="n">feature_space_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">feature_space</span><span class="p">)</span>
+
+<span class="c1"># temporal matching</span>
+<span class="n">obj_tm</span> <span class="o">=</span> <span class="n">TemporalMatching</span><span class="p">(</span><span class="n">segmentation_list</span><span class="o">=</span><span class="n">segmentation_list</span><span class="p">,</span>
+                          <span class="n">feature_space_list</span><span class="o">=</span><span class="n">feature_space_list</span><span class="p">,</span>
+                          <span class="n">background_id_list</span><span class="o">=</span><span class="n">back_id_list</span><span class="p">)</span>
+
+<span class="c1"># computation of admissible matching</span>
+<span class="n">adm_match_list</span> <span class="o">=</span> <span class="n">obj_tm</span><span class="o">.</span><span class="n">get_admissible_matching_list</span><span class="p">()</span>
+
+<span class="c1"># matching criterion (default is None)</span>
+<span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;Jaccard coefficient&#39;</span>
+<span class="c1"># computation of normalized matching costs</span>
+<span class="n">norm_cost_list</span> <span class="o">=</span> <span class="n">obj_tm</span><span class="o">.</span><span class="n">compute_normalized_cost</span><span class="p">(</span><span class="n">adm_match_list</span><span class="p">,</span>
+                                                <span class="n">criterion</span><span class="o">=</span><span class="n">criterion</span><span class="p">)</span>
+
+<span class="n">poss_opt</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;matching&#39;</span><span class="p">,</span><span class="s1">&#39;iterative_matching&#39;</span><span class="p">]</span>
+<span class="n">opt</span> <span class="o">=</span> <span class="s1">&#39;matching&#39;</span>
+
+<span class="k">if</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">poss_opt</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">opt</span><span class="o">==</span><span class="s1">&#39;matching&#39;</span><span class="p">:</span>
+        <span class="c1"># appear/disappear cost</span>
+        <span class="n">alpha_cost</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="mi">80</span><span class="o">/</span><span class="mf">100.0</span><span class="p">)</span><span class="o">*</span><span class="n">obj_tm</span><span class="o">.</span><span class="n">max_cost</span><span class="p">)</span>
+        <span class="c1"># matching</span>
+        <span class="n">matching_dict</span> <span class="o">=</span> <span class="n">obj_tm</span><span class="o">.</span><span class="n">matching</span><span class="p">(</span><span class="n">norm_cost_list</span><span class="p">,</span> <span class="n">alpha_cost</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">opt</span><span class="o">==</span><span class="s1">&#39;iterative_matching&#39;</span><span class="p">:</span>
+        <span class="c1"># initial graph</span>
+        <span class="n">init_graph</span> <span class="o">=</span> <span class="n">obj_tm</span><span class="o">.</span><span class="n">build_init_graph</span><span class="p">(</span><span class="n">norm_cost_list</span><span class="p">)</span>
+        <span class="c1"># iterative matching</span>
+        <span class="n">matching_dict</span> <span class="o">=</span> <span class="n">obj_tm</span><span class="o">.</span><span class="n">iterative_matching</span><span class="p">(</span><span class="n">norm_cost_list</span><span class="p">,</span> <span class="n">init_graph</span><span class="p">)</span>
+
+    <span class="c1"># write a dictionary of matching</span>
+    <span class="n">pkl_path</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">out_path</span><span class="p">,</span> <span class="s1">&#39;example_track_matching_dict.pkl&#39;</span><span class="p">])</span>
+    <span class="n">pkl_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">pkl_path</span><span class="p">),</span> <span class="s1">&#39;wb&#39;</span><span class="p">)</span>
+    <span class="c1"># save as pickle object (serialization)</span>
+    <span class="n">pickle</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">matching_dict</span><span class="p">,</span> <span class="n">pkl_file</span><span class="p">)</span>
+    <span class="n">pkl_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+
+    <span class="c1"># resulting images</span>
+    <span class="n">img_list</span> <span class="o">=</span> <span class="n">obj_tm</span><span class="o">.</span><span class="n">res_images</span><span class="p">(</span><span class="n">matching_dict</span><span class="p">)</span>
+    <span class="c1"># save results</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_track_initial_cells.inr&#39;</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">img_list</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_track_final_cells.inr&#39;</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">img_list</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_track_disapp_cells.inr&#39;</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">img_list</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">res_name</span> <span class="o">=</span> <span class="s1">&#39;example_track_app_cells.inr&#39;</span>
+    <span class="n">imsave</span><span class="p">(</span><span class="n">out_path</span><span class="o">+</span><span class="n">res_name</span><span class="p">,</span> <span class="n">img_list</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+<span class="k">else</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;Poss. opt :&#39;</span><span class="p">),</span> <span class="n">poss_opt</span>
+</pre></div>
+</div>
+</div>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="index.html">Home</a>|&nbsp;</li>
+        <li><a href="install.html">Installation</a>|&nbsp;</li>
+        <li><a href="autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="#">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2016, Sophie Ribes.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.5.4.
+    </div>
+  </body>
+</html>
