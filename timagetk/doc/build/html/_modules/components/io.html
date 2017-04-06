@@ -1,0 +1,227 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>components.io &mdash; timagetk 1. documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="timagetk 1. documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="../../index.html"><img src="../../_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Home</a>|&nbsp;</li>
+        <li><a href="../../install.html">Installation</a>|&nbsp;</li>
+        <li><a href="../../autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="../../examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="../../search.html">search </a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for components.io</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2016 INRIA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s):</span>
+<span class="c">#           Sophie Ribes &lt;sophie.ribes@inria.fr&gt;</span>
+<span class="c">#           Jerome Chopard &lt;jerome.chopard@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       See accompanying file LICENSE.txt</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This module allows a management of inputs and outputs (2D/3D images and metadata)</span>
+<span class="sd">through the functions ``imread`` and ``imsave``. Supported formats are : [&#39;.tif&#39;, &#39;.tiff&#39;, &#39;.inr&#39;, &#39;.inr.gz&#39;, &#39;.inr.zip&#39;].</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="k">try</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">timagetk.components</span> <span class="kn">import</span> <span class="n">SpatialImage</span>
+<span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;Unable to import SpatialImage&#39;</span><span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&quot;imread&quot;</span><span class="p">,</span> <span class="s">&quot;imsave&quot;</span><span class="p">]</span>
+
+
+<div class="viewcode-block" id="imread"><a class="viewcode-back" href="../../autodoc.html#components.io.imread">[docs]</a><span class="k">def</span> <span class="nf">imread</span><span class="p">(</span><span class="n">img_file</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read an image (2D/3D).</span>
+<span class="sd">    The supported formats are : [&#39;.tif&#39;, &#39;.tiff&#39;, &#39;.inr&#39;, &#39;.inr.gz&#39;, &#39;.inr.zip&#39;]</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :param str image_path: path to the image</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :returns: sp_image (*SpatialImage*) -- image and metadata (such as voxelsize, extent, type, etc.)</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    ---------</span>
+<span class="sd">    &gt;&gt;&gt; from timagetk.util import data_path</span>
+<span class="sd">    &gt;&gt;&gt; from timagetk.components import imread, SpatialImage</span>
+<span class="sd">    &gt;&gt;&gt; image_path = data_path(&#39;filtering_src.inr&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; sp_image = imread(image_path)</span>
+<span class="sd">    &gt;&gt;&gt; isinstance(sp_image, SpatialImage)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conds</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
+    <span class="n">poss_ext</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.inr&#39;</span><span class="p">,</span> <span class="s">&#39;.inr.gz&#39;</span><span class="p">,</span> <span class="s">&#39;.inr.zip&#39;</span><span class="p">,</span> <span class="s">&#39;.tiff&#39;</span><span class="p">,</span> <span class="s">&#39;.tif&#39;</span><span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">shortname</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">poss_ext</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">extension</span><span class="o">==</span><span class="s">&#39;.inr&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s">&#39;.inr.gz&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s">&#39;.inr.zip&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">timagetk.components.inr_image</span> <span class="kn">import</span> <span class="n">read_inr_image</span>
+                <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;Unable to import .inr fonctionalities&#39;</span><span class="p">)</span>
+                <span class="n">sp_img</span> <span class="o">=</span> <span class="n">read_inr_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">sp_img</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">extension</span><span class="o">==</span><span class="s">&#39;.tiff&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s">&#39;.tif&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">timagetk.components.tiff_image</span> <span class="kn">import</span> <span class="n">read_tiff_image</span>
+                <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;Unable to import .tiff fonctionalities&#39;</span><span class="p">)</span>
+                <span class="n">sp_img</span> <span class="o">=</span> <span class="n">read_tiff_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">sp_img</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Unknown extension&#39;</span><span class="p">)</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Extensions can be either :&#39;</span><span class="p">),</span> <span class="n">poss_ext</span>
+            <span class="k">return</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;This file does not exist : &#39;</span><span class="p">),</span> <span class="n">img_file</span>
+        <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="imsave"><a class="viewcode-back" href="../../autodoc.html#components.io.imsave">[docs]</a><span class="k">def</span> <span class="nf">imsave</span><span class="p">(</span><span class="n">img_file</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Save an image (2D/3D).</span>
+<span class="sd">    The supported formats are : [&#39;.tif&#39;, &#39;.tiff&#39;, &#39;.inr&#39;, &#39;.inr.gz&#39;, &#39;.inr.zip&#39;]</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    :param str save_path: save path</span>
+<span class="sd">    :param SpatialImage sp_image: *SpatialImage* instance</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    ---------</span>
+<span class="sd">    &gt;&gt;&gt; from timagetk.util import data_path</span>
+<span class="sd">    &gt;&gt;&gt; from timagetk.components import imsave, SpatialImage</span>
+<span class="sd">    &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">    &gt;&gt;&gt; sp_image = SpatialImage(input_array=test_array)</span>
+<span class="sd">    &gt;&gt;&gt; save_path = data_path(&#39;test_output.tif&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; imsave(save_path, sp_image)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">conds</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sp_img</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">)</span> <span class="ow">and</span> <span class="n">sp_img</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">poss_ext</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;.inr&#39;</span><span class="p">,</span> <span class="s">&#39;.inr.gz&#39;</span><span class="p">,</span> <span class="s">&#39;.inr.zip&#39;</span><span class="p">,</span> <span class="s">&#39;.tiff&#39;</span><span class="p">,</span> <span class="s">&#39;.tif&#39;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">filename</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
+        <span class="p">(</span><span class="n">shortname</span><span class="p">,</span> <span class="n">extension</span><span class="p">)</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">splitext</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">poss_ext</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">extension</span><span class="o">==</span><span class="s">&#39;.inr&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s">&#39;.inr.gz&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s">&#39;.inr.zip&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">timagetk.components.inr_image</span> <span class="kn">import</span> <span class="n">write_inr_image</span>
+                <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;Unable to import .inr fonctionalities&#39;</span><span class="p">)</span>
+                <span class="n">write_inr_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="n">extension</span><span class="o">==</span><span class="s">&#39;.tiff&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s">&#39;.tif&#39;</span><span class="p">):</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="kn">from</span> <span class="nn">timagetk.components.tiff_image</span> <span class="kn">import</span> <span class="n">write_tiff_image</span>
+                <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s">&#39;Unable to import .tiff fonctionalities&#39;</span><span class="p">)</span>
+                <span class="n">write_tiff_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">print</span><span class="p">(</span><span class="s">&#39;sp_img is not a SpatialImage&#39;</span><span class="p">)</span>
+    <span class="k">return</span></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Home</a>|&nbsp;</li>
+        <li><a href="../../install.html">Installation</a>|&nbsp;</li>
+        <li><a href="../../autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="../../examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="../../search.html">search </a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Sophie Ribes, Guillaume Baty, Grégoire Malandain.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

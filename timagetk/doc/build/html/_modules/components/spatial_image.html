@@ -1,0 +1,1044 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>components.spatial_image &mdash; timagetk 1. documentation</title>
+    
+    <link rel="stylesheet" href="../../_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="timagetk 1. documentation" href="../../index.html" />
+    <link rel="up" title="Module code" href="../index.html" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="../../index.html"><img src="../../_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Home</a>|&nbsp;</li>
+        <li><a href="../../install.html">Installation</a>|&nbsp;</li>
+        <li><a href="../../autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="../../examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="../../search.html">search </a> &raquo;</li>
+
+          <li><a href="../index.html" accesskey="U">Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for components.spatial_image</h1><div class="highlight"><pre>
+<span class="c"># -*- coding: utf-8 -*-</span>
+<span class="c"># -*- python -*-</span>
+<span class="c">#</span>
+<span class="c">#       Copyright 2016 INRIA</span>
+<span class="c">#</span>
+<span class="c">#       File author(s):</span>
+<span class="c">#           Sophie Ribes &lt;sophie.ribes@inria.fr&gt;</span>
+<span class="c">#           Jerome Chopard &lt;jerome.chopard@inria.fr&gt;</span>
+<span class="c">#</span>
+<span class="c">#       See accompanying file LICENSE.txt</span>
+<span class="c"># -----------------------------------------------------------------------------</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">This class allows a management of ``SpatialImage`` objects (2D and 3D images).</span>
+<span class="sd">A ``SpatialImage`` gathers a numpy array and some metadata (such as voxelsize,</span>
+<span class="sd">physical extent, origin, type, etc.). Through a ``numpy.ndarray`` inheritance, all</span>
+<span class="sd">usual operations on `numpy.ndarray &lt;http://docs.scipy.org/doc/numpy-1.10.1/reference/generated/numpy.ndarray.html&gt;`_</span>
+<span class="sd">objects (sum, product, transposition, etc.) are available. All image processing</span>
+<span class="sd">operations are performed on this data structure, that is also used to solve inputs (read)</span>
+<span class="sd">and outputs (write).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="c"># ----</span>
+<span class="c"># SR : update - 08/2016</span>
+<span class="c"># numpy types, tests and conds, 2D and 3D management</span>
+<span class="c"># origin, voxelsize, extent, mean, min, max and metadata</span>
+<span class="c"># set and get methods</span>
+<span class="c"># to_2D(), to_3D() methods</span>
+<span class="c"># documentation and unit tests (see test_spatial_image.py)</span>
+
+<span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">division</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;SpatialImage&#39;</span><span class="p">]</span>
+<span class="n">EPS</span><span class="p">,</span> <span class="n">DEC_VAL</span> <span class="o">=</span> <span class="mf">1e-9</span><span class="p">,</span> <span class="mi">6</span>
+
+
+<span class="n">poss_types_dict</span> <span class="o">=</span> <span class="p">{</span> <span class="mi">0</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">,</span> <span class="mi">2</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">,</span> <span class="mi">3</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span> <span class="mi">4</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">,</span>
+                    <span class="mi">5</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="mi">6</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">,</span> <span class="mi">7</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="mi">8</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="mi">9</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+                    <span class="mi">10</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float128</span><span class="p">,</span> <span class="mi">11</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="mi">12</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">,</span> <span class="mi">13</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex256</span><span class="p">,</span>
+                    <span class="s">&#39;uint8&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint8</span><span class="p">,</span> <span class="s">&#39;uint16&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">,</span> <span class="s">&#39;ushort&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint16</span><span class="p">,</span> <span class="s">&#39;uint32&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span><span class="p">,</span>
+                    <span class="s">&#39;uint64&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">,</span> <span class="s">&#39;uint&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">,</span> <span class="s">&#39;ulonglong&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">uint64</span><span class="p">,</span> <span class="s">&#39;int8&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int8</span><span class="p">,</span>
+                    <span class="s">&#39;int16&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span> <span class="s">&#39;short&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int16</span><span class="p">,</span> <span class="s">&#39;int32&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="s">&#39;int64&#39;</span><span class="p">:</span><span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+                    <span class="s">&#39;int&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="s">&#39;longlong&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span> <span class="s">&#39;float16&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float16</span><span class="p">,</span> <span class="s">&#39;float32&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
+                    <span class="s">&#39;single&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span> <span class="s">&#39;float64&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="s">&#39;double&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span> <span class="s">&#39;float&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">,</span>
+                    <span class="s">&#39;float128&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float128</span><span class="p">,</span> <span class="s">&#39;longdouble&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float128</span><span class="p">,</span> <span class="s">&#39;longfloat&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float128</span><span class="p">,</span>
+                    <span class="s">&#39;complex64&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="s">&#39;singlecomplex&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex64</span><span class="p">,</span> <span class="s">&#39;complex128&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">,</span>
+                    <span class="s">&#39;cdouble&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">,</span> <span class="s">&#39;cfloat&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">,</span> <span class="s">&#39;complex&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex128</span><span class="p">,</span>
+                    <span class="s">&#39;complex256&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex256</span><span class="p">,</span> <span class="s">&#39;clongdouble&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex256</span><span class="p">,</span> <span class="s">&#39;clongfloat&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex256</span><span class="p">,</span>
+                    <span class="s">&#39;longcomplex&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">complex256</span> <span class="p">}</span>
+
+
+<span class="k">def</span> <span class="nf">around_list</span><span class="p">(</span><span class="n">input_list</span><span class="p">,</span> <span class="n">dec_val</span><span class="o">=</span><span class="n">DEC_VAL</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_list</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+        <span class="n">output_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">around</span><span class="p">(</span><span class="n">input_list</span><span class="p">[</span><span class="n">ind</span><span class="p">],</span> <span class="n">decimals</span><span class="o">=</span><span class="n">dec_val</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+                       <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_list</span><span class="p">)]</span>
+        <span class="k">return</span> <span class="n">output_list</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+
+<span class="k">def</span> <span class="nf">tuple_to_list</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">output_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">input_tuple</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_tuple</span><span class="p">)]</span>
+        <span class="n">output_list</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">output_list</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">output_list</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+
+
+<div class="viewcode-block" id="SpatialImage"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage">[docs]</a><span class="k">class</span> <span class="nc">SpatialImage</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="SpatialImage.__new__"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.__new__">[docs]</a>    <span class="k">def</span> <span class="nf">__new__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">input_array</span><span class="p">,</span> <span class="n">origin</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span>
+                 <span class="n">dtype</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">metadata_dict</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        ``SpatialImage`` constructor (2D and 3D images)</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param *numpy.ndarray* input_array: image</span>
+
+<span class="sd">        :param list origin: image origin, optional. Default: [0,0] or [0,0,0]</span>
+
+<span class="sd">        :param list voxelsize: image voxelsize, optional. Default: [1.0,1.0] or [1.0,1.0,1.0]</span>
+
+<span class="sd">        :param str dtype: image type, optional. Default: dtype=input_array.dtype</span>
+
+<span class="sd">        :param dict metadata_dict: image metadata, optional. Default: metadata_dict={}</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :return: ``SpatialImage`` instance -- image and metadata</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image_1 = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_2 = SpatialImage(input_array=test_array, voxelsize=[0.5,0.5])</span>
+<span class="sd">        &gt;&gt;&gt; isinstance(image_1, SpatialImage) and isinstance(image_2, SpatialImage)</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">input_array</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">]:</span>
+
+            <span class="n">def_type</span> <span class="o">=</span> <span class="n">poss_types_dict</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">def_vox_2D</span><span class="p">,</span> <span class="n">def_vox_3D</span> <span class="o">=</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">],</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
+            <span class="n">def_orig_2D</span><span class="p">,</span> <span class="n">def_orig_3D</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="k">if</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">dtype</span><span class="o">==</span><span class="p">[]:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">):</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="n">input_array</span><span class="o">.</span><span class="n">dtype</span>
+            <span class="k">elif</span> <span class="n">dtype</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span> <span class="ow">in</span> <span class="n">poss_types_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">or</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">poss_types_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+                    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">poss_types_dict</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">dtype</span><span class="p">)</span><span class="o">==</span><span class="n">key</span> <span class="ow">or</span> <span class="n">dtype</span><span class="o">==</span><span class="n">poss_types_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+                            <span class="n">dtype</span> <span class="o">=</span> <span class="n">poss_types_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Available types :&#39;</span><span class="p">),</span> <span class="n">poss_types_dict</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Setting type to unsigned integer&#39;</span><span class="p">)</span>
+                    <span class="n">dtype</span> <span class="o">=</span> <span class="n">def_type</span>
+
+            <span class="k">if</span> <span class="n">input_array</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">f_contiguous</span><span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">input_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+            <span class="k">else</span> <span class="p">:</span>
+                <span class="n">obj</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">input_array</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtype</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="s">&#39;F&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">view</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">origin</span><span class="o">==</span><span class="p">[]:</span>
+                <span class="n">orig</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+            <span class="k">elif</span> <span class="n">origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">origin</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span><span class="o">==</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)):</span>
+                    <span class="n">orig</span> <span class="o">=</span> <span class="n">origin</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, incorrect specification&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                        <span class="n">orig</span> <span class="o">=</span> <span class="n">def_orig_2D</span>
+                    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                        <span class="n">orig</span> <span class="o">=</span> <span class="n">def_orig_3D</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Setting origin to :&#39;</span><span class="p">),</span> <span class="n">orig</span>
+
+            <span class="n">obj</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">orig</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">voxelsize</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>    <span class="c"># SR --- BACK COMPAT</span>
+                <span class="n">voxelsize</span> <span class="o">=</span> <span class="n">tuple_to_list</span><span class="p">(</span><span class="n">voxelsize</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">voxelsize</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">voxelsize</span><span class="o">==</span><span class="p">[]:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, voxelsize is not defined&#39;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="n">def_vox_2D</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="n">def_vox_3D</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Setting voxelsize to : &#39;</span><span class="p">),</span> <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span>
+            <span class="k">elif</span> <span class="n">voxelsize</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">voxelsize</span><span class="p">)</span><span class="o">&gt;</span><span class="mi">0</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">!=</span><span class="nb">len</span><span class="p">(</span><span class="n">voxelsize</span><span class="p">)):</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, incorrect specification&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+                        <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="n">def_vox_2D</span>
+                    <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="mi">3</span><span class="p">):</span>
+                        <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="n">def_vox_3D</span>
+                    <span class="k">print</span><span class="p">(</span><span class="s">&#39;Setting voxelsize to : &#39;</span><span class="p">),</span> <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span>
+                <span class="k">elif</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span><span class="o">==</span><span class="nb">len</span><span class="p">(</span><span class="n">voxelsize</span><span class="p">)):</span>
+                    <span class="n">vox</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">voxelsize</span><span class="p">)</span>
+                    <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="n">vox</span>
+
+            <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">*</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">xrange</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">input_array</span><span class="o">.</span><span class="n">shape</span><span class="p">))]</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span>
+            <span class="n">obj</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">ext</span>
+
+            <span class="k">if</span> <span class="n">metadata_dict</span> <span class="ow">is</span> <span class="bp">None</span> <span class="ow">or</span> <span class="n">metadata_dict</span><span class="o">==</span><span class="p">[]:</span>
+                <span class="n">metadata_dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">metadata_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">voxelsize</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;shape&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">shape</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;dim&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">ndim</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">origin</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">extent</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+                <span class="n">metadata_dict</span><span class="p">[</span><span class="s">&#39;mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+            <span class="n">obj</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">metadata_dict</span>
+            <span class="k">return</span> <span class="n">obj</span>
+
+</div>
+    <span class="k">def</span> <span class="nf">__array_finalize__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+
+        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;voxelsize&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span>  <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;origin&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;extent&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;min&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;max&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;mean&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="s">&#39;metadata&#39;</span><span class="p">,</span> <span class="p">{})</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span>
+
+
+<span class="c">#    def __str__(self):</span>
+<span class="c">#        return &quot;SpatialImage instance, metadata: {}&quot;.format(self.get_metadata())</span>
+
+
+<div class="viewcode-block" id="SpatialImage.equal"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.equal">[docs]</a>    <span class="k">def</span> <span class="nf">equal</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Equality test between two ``SpatialImage``</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param ``SpatialImage`` sp_img: ``SpatialImage`` instance</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: True/False (*bool*) -- if (array and metadata) are equal/or not</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image_1 = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_1==image_1</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; image_2 = SpatialImage(input_array=test_array, voxelsize=[0.5,0.5])</span>
+<span class="sd">        &gt;&gt;&gt; image_1==image_2</span>
+<span class="sd">        False</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">val</span> <span class="o">=</span> <span class="bp">False</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sp_img</span><span class="p">,</span> <span class="n">SpatialImage</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span> <span class="o">==</span> <span class="n">sp_img</span><span class="o">.</span><span class="n">get_shape</span><span class="p">():</span>
+                <span class="n">out_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float</span><span class="p">)</span>
+                <span class="n">out_img</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">abs</span><span class="p">(</span><span class="bp">self</span> <span class="o">-</span> <span class="n">sp_img</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">out_img</span><span class="o">&lt;</span><span class="n">EPS</span><span class="p">):</span>
+                    <span class="n">conds_arr</span> <span class="o">=</span> <span class="bp">True</span>
+                <span class="n">conds_met</span> <span class="o">=</span> <span class="p">[</span><span class="bp">True</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()[</span><span class="n">key</span><span class="p">]</span><span class="o">==</span><span class="n">sp_img</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()[</span><span class="n">key</span><span class="p">]</span>
+                             <span class="k">else</span> <span class="bp">False</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()]</span>
+                <span class="k">if</span> <span class="n">conds_arr</span> <span class="ow">and</span> <span class="p">(</span><span class="bp">False</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">conds_met</span><span class="p">):</span>
+                    <span class="n">val</span> <span class="o">=</span> <span class="bp">True</span>
+        <span class="k">return</span> <span class="n">val</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_array"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_array">[docs]</a>    <span class="k">def</span> <span class="nf">get_array</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get a ``numpy.ndarray`` from a ``SpatialImage``</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_array (*numpy.ndarray*) -- ``SpatialImage`` array</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_array = image.get_array()</span>
+<span class="sd">        &gt;&gt;&gt; isinstance(image_array, SpatialImage)</span>
+<span class="sd">        False</span>
+<span class="sd">        &gt;&gt;&gt; isinstance(image_array, np.ndarray)</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_dim"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_dim">[docs]</a>    <span class="k">def</span> <span class="nf">get_dim</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` dimension (2D or 3D image)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_dim (*int*) -- ``SpatialImage`` dimension</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_dim = image.get_dim()</span>
+<span class="sd">        &gt;&gt;&gt; print image_dim</span>
+<span class="sd">        2</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_extent"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_extent">[docs]</a>    <span class="k">def</span> <span class="nf">get_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` physical extent</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_extent (*list*) -- ``SpatialImage`` physical extent</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_extent = image.get_extent()</span>
+<span class="sd">        &gt;&gt;&gt; print image_extent</span>
+<span class="sd">        [5.0, 5.0]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_metadata"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">get_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` metadata</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_metadata (*dict*) -- ``SpatialImage`` metadata</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_metadata = image.get_metadata()</span>
+<span class="sd">        &gt;&gt;&gt; print image_metadata</span>
+<span class="sd">        {&#39;dim&#39;: 2,</span>
+<span class="sd">         &#39;extent&#39;: [5.0, 5.0],</span>
+<span class="sd">         &#39;origin&#39;: [0, 0],</span>
+<span class="sd">         &#39;shape&#39;: (5, 5),</span>
+<span class="sd">         &#39;type&#39;: &#39;uint8&#39;,</span>
+<span class="sd">         &#39;voxelsize&#39;: [1.0, 1.0]</span>
+<span class="sd">         }</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">met_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
+        <span class="k">if</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;shape&#39;</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="n">old_shape</span> <span class="o">=</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;shape&#39;</span><span class="p">]</span>
+            <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;shape&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;dim&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">2</span> <span class="ow">and</span> <span class="n">old_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">and</span> <span class="n">old_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="c">#--- transposition</span>
+                <span class="n">vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">orig</span> <span class="o">=</span> <span class="p">[</span><span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">][</span><span class="mi">1</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]]</span>
+                <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span>
+            <span class="k">elif</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="o">==</span><span class="mi">3</span> <span class="ow">and</span> <span class="n">old_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="ow">and</span> <span class="n">old_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span> <span class="ow">and</span> <span class="n">old_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">):</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning : possibly incorrect voxelsize, extent and origin&#39;</span><span class="p">)</span>
+                <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
+                    <span class="n">tmp</span> <span class="o">=</span> <span class="n">old_shape</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+                    <span class="n">vox</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">][</span><span class="n">tmp</span><span class="p">])</span>
+                    <span class="n">ext</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">][</span><span class="n">tmp</span><span class="p">])</span>
+                    <span class="n">orig</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">][</span><span class="n">tmp</span><span class="p">])</span>
+                <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning : incorrect voxelsize, extent and origin&#39;</span><span class="p">)</span>
+                <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+                <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">],</span> <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">vox</span><span class="p">,</span> <span class="n">ext</span><span class="p">,</span> <span class="n">orig</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">met_dict</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_min"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_min">[docs]</a>    <span class="k">def</span> <span class="nf">get_min</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` min</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_min (*val*) -- ``SpatialImage`` min</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_min = image.get_min()</span>
+<span class="sd">        &gt;&gt;&gt; print image_min</span>
+<span class="sd">        1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_max"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_max">[docs]</a>    <span class="k">def</span> <span class="nf">get_max</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` max</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_max (*val*) -- ``SpatialImage`` max</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_max = image.get_max()</span>
+<span class="sd">        &gt;&gt;&gt; print image_max</span>
+<span class="sd">        1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_mean"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_mean">[docs]</a>    <span class="k">def</span> <span class="nf">get_mean</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` mean</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_mean (*val*) -- ``SpatialImage`` mean</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_mean = image.get_mean()</span>
+<span class="sd">        &gt;&gt;&gt; print image_mean</span>
+<span class="sd">        1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_origin"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_origin">[docs]</a>    <span class="k">def</span> <span class="nf">get_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` origin</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_origin (*list*) -- ``SpatialImage`` origin</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_origin = image.get_origin()</span>
+<span class="sd">        &gt;&gt;&gt; print image_origin</span>
+<span class="sd">        [0, 0]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_pixel"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_pixel">[docs]</a>    <span class="k">def</span> <span class="nf">get_pixel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` pixel value</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param list indices: indices as list of integers</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: pixel_value (*self.get_type()*) -- pixel value</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; indices = [1,1]</span>
+<span class="sd">        &gt;&gt;&gt; pixel_value = image.get_pixel(indices)</span>
+<span class="sd">        &gt;&gt;&gt; print pixel_value</span>
+<span class="sd">        1</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">==</span><span class="n">img_dim</span><span class="p">:</span>
+            <span class="n">img_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">range_x</span><span class="p">,</span> <span class="n">range_y</span> <span class="o">=</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">conds_ind</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span>
+            <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                <span class="n">range_x</span><span class="p">,</span> <span class="n">range_y</span><span class="p">,</span> <span class="n">range_z</span> <span class="o">=</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">conds_ind</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_z</span>
+            <span class="k">if</span> <span class="n">conds_ind</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">pix_val</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+                <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                    <span class="n">pix_val</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="k">return</span> <span class="n">pix_val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, incorrect specification&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_region"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_region">[docs]</a>    <span class="k">def</span> <span class="nf">get_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract a region</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param list indices: indices as list of integers</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: out_sp_image (``SpatialImage``) -- output ``SpatialImage``</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; indices = [1,3,1,3]</span>
+<span class="sd">        &gt;&gt;&gt; out_sp_image = image.get_region(indices)</span>
+<span class="sd">        &gt;&gt;&gt; isinstance(out_sp_image, SpatialImage)</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span>
+        <span class="n">conds</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="o">*</span><span class="n">img_dim</span>
+        <span class="n">reg_val</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">tmp_arr</span><span class="p">,</span> <span class="n">tmp_vox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_array</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">conds</span><span class="p">:</span>
+            <span class="n">img_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">range_x</span><span class="p">,</span> <span class="n">range_y</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">conds_ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span>
+                            <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span><span class="p">)</span>
+                <span class="n">conds_val</span> <span class="o">=</span> <span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">&gt;=</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="ow">and</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">&gt;=</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                <span class="n">range_x</span><span class="p">,</span> <span class="n">range_y</span><span class="p">,</span> <span class="n">range_z</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">img_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">conds_ind</span> <span class="o">=</span> <span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span>
+                            <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span>
+                            <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_z</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_z</span><span class="p">)</span>
+                <span class="n">conds_val</span> <span class="o">=</span> <span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">&gt;=</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="ow">and</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">&gt;=</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+                            <span class="ow">and</span> <span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">&gt;=</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">+</span><span class="mi">1</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">conds_ind</span> <span class="ow">and</span> <span class="n">conds_val</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">reg_val</span> <span class="o">=</span> <span class="n">tmp_arr</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                      <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])]</span>
+                <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+
+                    <span class="n">reg_val</span> <span class="o">=</span> <span class="n">tmp_arr</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                      <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                                      <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">])]</span>
+
+                    <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">reg_val</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span> <span class="c"># 3D --&gt; 2D</span>
+                        <span class="k">if</span> <span class="n">reg_val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                            <span class="n">reg_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">reg_val</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,))</span>
+                            <span class="n">tmp_vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp_vox</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">tmp_vox</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                        <span class="k">elif</span> <span class="n">reg_val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                            <span class="n">reg_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">reg_val</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+                            <span class="n">tmp_vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp_vox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tmp_vox</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+                        <span class="k">elif</span> <span class="n">reg_val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                            <span class="n">reg_val</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">reg_val</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+                            <span class="n">tmp_vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">tmp_vox</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">tmp_vox</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, incorrect specification&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, incorrect specification&#39;</span><span class="p">)</span>
+        <span class="n">out_sp_img</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">reg_val</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="n">tmp_vox</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_sp_img</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_shape"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_shape">[docs]</a>    <span class="k">def</span> <span class="nf">get_shape</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` shape</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_shape (*tuple*) -- ``SpatialImage`` shape</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_shape = image.get_shape()</span>
+<span class="sd">        &gt;&gt;&gt; print image_shape</span>
+<span class="sd">        (5, 5)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">shape</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_type"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_type">[docs]</a>    <span class="k">def</span> <span class="nf">get_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` type</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_type (*str*) -- ``SpatialImage`` type</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_type = image.get_type()</span>
+<span class="sd">        &gt;&gt;&gt; print image_type</span>
+<span class="sd">        uint8</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.get_voxelsize"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.get_voxelsize">[docs]</a>    <span class="k">def</span> <span class="nf">get_voxelsize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Get ``SpatialImage`` voxelsize</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: image_voxelsize (*list*) -- ``SpatialImage`` voxelsize</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_voxelsize = image.get_voxelsize()</span>
+<span class="sd">        &gt;&gt;&gt; print image_voxelsize</span>
+<span class="sd">        [1.0, 1.0]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.set_extent"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.set_extent">[docs]</a>    <span class="k">def</span> <span class="nf">set_extent</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_extent</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ``SpatialImage`` physical extent</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param list image_extent: ``SpatialImage`` physical extent.</span>
+<span class="sd">                                Metadata are updated according to the new physical extent.</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_extent = [10.0, 10.0]</span>
+<span class="sd">        &gt;&gt;&gt; image.set_extent(image_extent)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_extent</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_extent</span><span class="p">)</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">():</span>
+            <span class="n">img_extent</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">img_extent</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">img_extent</span>
+            <span class="n">vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">img_extent</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">/</span><span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()[</span><span class="n">ind</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">img_extent</span><span class="p">)]</span>
+            <span class="n">vox</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">vox</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">set_voxelsize</span><span class="p">(</span><span class="n">vox</span><span class="p">)</span>
+            <span class="n">meta_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+            <span class="n">meta_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">img_extent</span>
+            <span class="n">meta_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">vox</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">meta_dict</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.set_metadata"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.set_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">set_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_metadata</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ``SpatialImage`` metadata</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param dict image_metadata: ``SpatialImage`` metadata</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_metadata = {&#39;name&#39;:&#39;img_test&#39;}</span>
+<span class="sd">        &gt;&gt;&gt; image.set_metadata(image_metadata)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">tmp_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_metadata</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">tmp_dict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">img_metadata</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">tmp_dict</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">tmp_dict</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">tmp_dict</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">])</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">min</span> <span class="o">=</span> <span class="n">tmp_dict</span><span class="p">[</span><span class="s">&#39;min&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">max</span> <span class="o">=</span> <span class="n">tmp_dict</span><span class="p">[</span><span class="s">&#39;max&#39;</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">=</span> <span class="n">tmp_dict</span><span class="p">[</span><span class="s">&#39;mean&#39;</span><span class="p">]</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.set_origin"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.set_origin">[docs]</a>    <span class="k">def</span> <span class="nf">set_origin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">img_origin</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ``SpatialImage`` origin</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param list image_origin: ``SpatialImage`` origin</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_origin = [2, 2]</span>
+<span class="sd">        &gt;&gt;&gt; image.set_origin(image_origin)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">img_origin</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">img_origin</span><span class="p">)</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">origin</span> <span class="o">=</span> <span class="n">img_origin</span>
+            <span class="n">img_met</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+            <span class="n">img_met</span><span class="p">[</span><span class="s">&#39;origin&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">origin</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">img_met</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.set_pixel"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.set_pixel">[docs]</a>    <span class="k">def</span> <span class="nf">set_pixel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ``SpatialImage`` pixel value</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param list indices: indices as list of integers</span>
+
+<span class="sd">        :param value: new value, type of ``SpatialImage`` array</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; indices = [1,1]</span>
+<span class="sd">        &gt;&gt;&gt; value = 2</span>
+<span class="sd">        &gt;&gt;&gt; image.set_pixel(indices, value)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">==</span><span class="n">img_dim</span><span class="p">:</span>
+            <span class="n">img_shape</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                <span class="n">range_x</span><span class="p">,</span> <span class="n">range_y</span> <span class="o">=</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                <span class="n">conds_ind</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span>
+            <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                <span class="n">range_x</span><span class="p">,</span> <span class="n">range_y</span><span class="p">,</span> <span class="n">range_z</span> <span class="o">=</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span> <span class="nb">xrange</span><span class="p">(</span><span class="n">img_shape</span><span class="p">[</span><span class="mi">2</span><span class="p">])</span>
+                <span class="n">conds_ind</span> <span class="o">=</span> <span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_x</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_y</span> <span class="ow">and</span> <span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="ow">in</span> <span class="n">range_z</span>
+            <span class="k">if</span> <span class="n">conds_ind</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span><span class="o">=</span><span class="n">val</span>
+                <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span><span class="o">=</span><span class="n">val</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, incorrect specification&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.set_region"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.set_region">[docs]</a>    <span class="k">def</span> <span class="nf">set_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Replace a region</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param list indices: indices as list of integers</span>
+<span class="sd">        :param val: new values (*np.ndarray* or value)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: out_sp_image (``SpatialImage``) -- ``SpatialImage`` instance</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; indices = [1,3,1,3]</span>
+<span class="sd">        &gt;&gt;&gt; out_sp_image = image.set_region(indices, 3)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">img_dim</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span>
+        <span class="n">conds_type</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span><span class="o">==</span><span class="mi">2</span><span class="o">*</span><span class="n">img_dim</span>
+        <span class="k">if</span> <span class="n">conds_type</span><span class="p">:</span>
+            <span class="n">conds_type_2</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span>
+            <span class="n">conds_type_3</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span>
+            <span class="n">tmp_arr</span><span class="p">,</span> <span class="n">tmp_vox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_array</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">conds_type_2</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">conds_shape</span> <span class="o">=</span> <span class="p">(((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="o">==</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                    <span class="ow">and</span> <span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span><span class="o">==</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                    <span class="n">conds_shape</span> <span class="o">=</span> <span class="p">(((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span><span class="o">==</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+                                    <span class="ow">and</span> <span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]))</span><span class="o">==</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+                                    <span class="ow">and</span> <span class="p">((</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">])</span><span class="o">-</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">]))</span><span class="o">==</span><span class="n">val</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]))</span>
+                <span class="k">if</span> <span class="n">conds_shape</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                        <span class="n">tmp_arr</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])]</span> <span class="o">=</span> <span class="n">val</span><span class="p">[:,:]</span>
+                    <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                        <span class="n">tmp_arr</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                                <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                                <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">])]</span> <span class="o">=</span> <span class="n">val</span><span class="p">[:,:,:]</span>
+            <span class="k">elif</span> <span class="n">conds_type_3</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+                    <span class="n">tmp_arr</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                            <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">])]</span> <span class="o">=</span> <span class="n">val</span>
+                <span class="k">elif</span> <span class="n">img_dim</span><span class="o">==</span><span class="mi">3</span><span class="p">:</span>
+                    <span class="n">tmp_arr</span><span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">1</span><span class="p">]),</span>
+                            <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">3</span><span class="p">]),</span>
+                            <span class="nb">min</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">]):</span><span class="nb">max</span><span class="p">(</span><span class="n">indices</span><span class="p">[</span><span class="mi">4</span><span class="p">],</span><span class="n">indices</span><span class="p">[</span><span class="mi">5</span><span class="p">])]</span> <span class="o">=</span> <span class="n">val</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;Warning, incorrect specification&#39;</span><span class="p">)</span>
+        <span class="n">out_sp_img</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">tmp_arr</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="n">tmp_vox</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">out_sp_img</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.set_type"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.set_type">[docs]</a>    <span class="k">def</span> <span class="nf">set_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ``SpatialImage`` type</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param str image_type: image type (see numpy types).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: out_sp_image (``SpatialImage``) -- ``SpatialImage`` instance</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_type = np.uint16</span>
+<span class="sd">        &gt;&gt;&gt; out_sp_image = image.set_type(image_type)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">val</span> <span class="ow">in</span> <span class="n">poss_types_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">or</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">poss_types_dict</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">poss_types_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span><span class="n">val</span><span class="o">==</span><span class="n">key</span> <span class="ow">or</span> <span class="n">val</span><span class="o">==</span><span class="n">poss_types_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]):</span>
+                    <span class="n">new_type</span> <span class="o">=</span> <span class="n">poss_types_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+
+            <span class="n">met_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+            <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">new_type</span><span class="p">)</span>
+            <span class="n">met_dict</span><span class="p">[</span><span class="s">&#39;type&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dtype</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">met_dict</span>
+            <span class="k">return</span> <span class="bp">self</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.set_voxelsize"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.set_voxelsize">[docs]</a>    <span class="k">def</span> <span class="nf">set_voxelsize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">val</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set ``SpatialImage`` voxelsize</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param list image_voxelsize: ``SpatialImage`` voxelsize</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array)</span>
+<span class="sd">        &gt;&gt;&gt; image_voxelsize = [0.5, 0.5]</span>
+<span class="sd">        &gt;&gt;&gt; image.set_voxelsize(image_voxelsize)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">val</span><span class="p">)</span><span class="o">==</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">():</span>
+            <span class="n">val</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">val</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="p">[</span><span class="n">val</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span> <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">shape</span><span class="p">)]</span>
+            <span class="n">ext</span> <span class="o">=</span> <span class="n">around_list</span><span class="p">(</span><span class="n">ext</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">extent</span> <span class="o">=</span> <span class="n">ext</span>
+            <span class="n">img_met</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_metadata</span><span class="p">()</span>
+            <span class="n">img_met</span><span class="p">[</span><span class="s">&#39;voxelsize&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">voxelsize</span>
+            <span class="n">img_met</span><span class="p">[</span><span class="s">&#39;extent&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extent</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">img_met</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.to_2D"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.to_2D">[docs]</a>    <span class="k">def</span> <span class="nf">to_2D</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        3D to 2D</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span><span class="o">==</span><span class="mi">3</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="mi">1</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">()):</span>
+            <span class="n">voxelsize</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_array</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">new_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,))</span>
+                <span class="n">new_vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">voxelsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">voxelsize</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">new_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,))</span>
+                <span class="n">new_vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">voxelsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">voxelsize</span><span class="p">[</span><span class="mi">2</span><span class="p">]]</span>
+            <span class="k">elif</span> <span class="n">shape</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="o">==</span><span class="mi">1</span><span class="p">:</span>
+                <span class="n">new_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="p">(</span><span class="mi">2</span><span class="p">,))</span>
+                <span class="n">new_vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">voxelsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">voxelsize</span><span class="p">[</span><span class="mi">1</span><span class="p">]]</span>
+            <span class="n">out_sp_img</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">new_arr</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="n">new_vox</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">out_sp_img</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;sp_img can not be reshaped&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.to_3D"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.to_3D">[docs]</a>    <span class="k">def</span> <span class="nf">to_3D</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        2D to 3D</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span><span class="o">==</span><span class="mi">2</span><span class="p">):</span>
+            <span class="n">voxelsize</span><span class="p">,</span> <span class="n">shape</span><span class="p">,</span> <span class="n">array</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_shape</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_array</span><span class="p">()</span>
+            <span class="n">new_arr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">array</span><span class="p">,</span> <span class="p">(</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">new_vox</span> <span class="o">=</span> <span class="p">[</span><span class="n">voxelsize</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">voxelsize</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mf">1.0</span><span class="p">]</span>
+            <span class="n">out_sp_img</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">input_array</span><span class="o">=</span><span class="n">new_arr</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="n">new_vox</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">out_sp_img</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span><span class="p">(</span><span class="s">&#39;sp_img is not a 2D SpatialImage&#39;</span><span class="p">)</span>
+            <span class="k">return</span>
+
+</div>
+<div class="viewcode-block" id="SpatialImage.revert_axis"><a class="viewcode-back" href="../../autodoc.html#components.spatial_image.SpatialImage.revert_axis">[docs]</a>    <span class="k">def</span> <span class="nf">revert_axis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="s">&#39;z&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Revert x, y, or z axis</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :param str axis: can be either &#39;x&#39;, &#39;y&#39; or &#39;z&#39;</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        ----------</span>
+<span class="sd">        :returns: out_sp_image (``SpatialImage``) -- ``SpatialImage`` instance</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from timagetk.components import SpatialImage</span>
+<span class="sd">        &gt;&gt;&gt; test_array = np.ones((5,5,5), dtype=np.uint8)</span>
+<span class="sd">        &gt;&gt;&gt; image = SpatialImage(input_array=test_array, voxelsize=[0.5, 0.5, 0.5])</span>
+<span class="sd">        &gt;&gt;&gt; image.revert_axis(axis=&#39;y&#39;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_dim</span><span class="p">()</span><span class="o">==</span><span class="mi">2</span><span class="p">:</span>
+            <span class="bp">self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_3D</span><span class="p">()</span>
+
+        <span class="n">arr</span><span class="p">,</span> <span class="n">vox</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_array</span><span class="p">(),</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_voxelsize</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">axis</span><span class="o">==</span><span class="s">&#39;x&#39;</span><span class="p">:</span>
+            <span class="n">new_arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[::</span><span class="o">-</span><span class="mi">1</span><span class="p">,:,:]</span>
+        <span class="k">if</span> <span class="n">axis</span><span class="o">==</span><span class="s">&#39;y&#39;</span><span class="p">:</span>
+            <span class="n">new_arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[:,::</span><span class="o">-</span><span class="mi">1</span><span class="p">,:]</span>
+        <span class="k">elif</span> <span class="n">axis</span><span class="o">==</span><span class="s">&#39;z&#39;</span><span class="p">:</span>
+            <span class="n">new_arr</span> <span class="o">=</span> <span class="n">arr</span><span class="p">[:,:,::</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">out_sp_image</span> <span class="o">=</span> <span class="n">SpatialImage</span><span class="p">(</span><span class="n">new_arr</span><span class="p">,</span> <span class="n">voxelsize</span><span class="o">=</span><span class="n">vox</span><span class="p">)</span>
+        <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">out_sp_image</span><span class="o">.</span><span class="n">get_shape</span><span class="p">():</span>
+            <span class="n">out_sp_image</span> <span class="o">=</span> <span class="n">out_sp_image</span><span class="o">.</span><span class="n">to_2D</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">out_sp_image</span></div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../index.html">Home</a>|&nbsp;</li>
+        <li><a href="../../install.html">Installation</a>|&nbsp;</li>
+        <li><a href="../../autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="../../examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="../../search.html">search </a> &raquo;</li>
+
+          <li><a href="../index.html" >Module code</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Sophie Ribes, Guillaume Baty, Grégoire Malandain.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>

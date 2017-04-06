@@ -1,0 +1,195 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Welcome &mdash; timagetk 1. documentation</title>
+    
+    <link rel="stylesheet" href="_static/sphinxdoc.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    './',
+        VERSION:     '1.',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="timagetk 1. documentation" href="#" /> 
+  </head>
+  <body>
+
+<div style="background-color: white; text-align: left; padding: 10px 10px 15px 15px">
+<a href="#"><img src="_static/logo_timagetk.png" width="200px" border="0" alt="timagetk"/></a>
+</div>
+
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">Home</a>|&nbsp;</li>
+        <li><a href="install.html">Installation</a>|&nbsp;</li>
+        <li><a href="autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="#">Table Of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Welcome</a></li>
+<li><a class="reference internal" href="#documentation">Documentation</a></li>
+<li><a class="reference internal" href="#installation">Installation</a></li>
+<li><a class="reference internal" href="#licence">Licence</a></li>
+<li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
+</ul>
+
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/index.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="welcome">
+<h1>Welcome<a class="headerlink" href="#welcome" title="Permalink to this headline">¶</a></h1>
+<p><strong>Tissue Image Toolkit</strong> (<em>timagetk</em>) is a Python language package dedicated
+to image processing of multicellular architectures such as plants or animals,
+and is intended for biologists, modelers and computer scientists.</p>
+<p>The package provides the following main functionalities (both in 2D and 3D):</p>
+<div class="sidebar">
+<p class="first sidebar-title">Tissue Image Toolkit</p>
+<a class="reference internal image-reference" href="_images/logo_timagetk.png"><img alt="_images/logo_timagetk.png" src="_images/logo_timagetk.png" style="width: 70px; height: 60px;" /></a>
+<p>Coordination: S.Ribes, G.Malandain</p>
+<dl class="docutils">
+<dt>Teams:</dt>
+<dd><ul class="first last simple">
+<li>Inria-Cirad-Inra <a class="reference external" href="https://team.inria.fr/virtualplants/">Virtual Plants</a></li>
+<li>Inria <a class="reference external" href="http://www-sop.inria.fr/morpheme/">Morpheme</a></li>
+<li><a class="reference external" href="https://team.inria.fr/morphogenetics/">Inria Project Lab Morphogenetics</a></li>
+</ul>
+</dd>
+</dl>
+<p>Stable release: 1.0.0</p>
+<p>Written in: C, Python</p>
+<p>Operaring system: Linux, Mac OS</p>
+<p class="last">Licence: Inria licence, no commercial use</p>
+</div>
+<ul class="simple">
+<li><strong>Linear filtering:</strong> gaussian, gradient, hessian, laplacian, etc.</li>
+<li><strong>Grayscale mathematical morphology:</strong> erosion, dilation, opening, closing, hat transform, sequential filters, etc.</li>
+<li><strong>Segmentation:</strong> h-transform, connected-component labeling, watershed, etc.</li>
+<li><strong>Registration:</strong> rigid, affine and deformable registration, composition of transformations, sequence registration, multi-view fusion etc.</li>
+<li><strong>Mathematical morphology and computation of features on labeled images:</strong> erosion, dilation, moments, spatial relationships, etc.</li>
+<li><strong>Temporal tracking based on graph-theory</strong></li>
+<li><strong>Unit tests and examples:</strong> see the <a class="reference internal" href="examples.html#ref-examples"><em>Examples</em></a></li>
+</ul>
+<p>Thanks to <a class="reference external" href="https://www.python.org/">Python</a> language these functionalities can
+be combined with many other Python libraries such as for example
+<a class="reference external" href="http://www.numpy.org/">NumPy</a> and <a class="reference external" href="http://scipy.org/about.html">SciPy</a> for scientific
+computing or <a class="reference external" href="http://matplotlib.org/">matplotlib</a> for curve plotting.</p>
+</div>
+<div class="section" id="documentation">
+<h1>Documentation<a class="headerlink" href="#documentation" title="Permalink to this headline">¶</a></h1>
+<p>This is the <a class="reference internal" href="autodoc.html#ref-documentation"><em>Documentation</em></a> for Tissue Image Toolkit version 1.0.0.</p>
+<p>To build <strong>timagetk</strong>&#8216;s dynamic documentation (<a class="reference external" href="http://www.sphinx-doc.org/en/stable/">sphinx</a>), open a shell prompt and type:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">sudo</span> <span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-U</span> <span class="pre">Sphinx</span></tt></li>
+</ul>
+<p>Go to the <strong>timagetk/timagetk/doc/</strong> folder and type:</p>
+<ul class="simple">
+<li><tt class="docutils literal"><span class="pre">make</span> <span class="pre">html</span></tt></li>
+</ul>
+<p>Open the file: <strong>timagetk/timagetk/build/html/index.html</strong></p>
+</div>
+<div class="section" id="installation">
+<h1>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h1>
+<p>There are many different ways to install Tissue Image Toolkit, and the best way depends on how you
+want to use it and what you already have installed. Order to help you,
+the <a class="reference internal" href="install.html#ref-installation"><em>Installation</em></a> instructions have been detailed.</p>
+</div>
+<div class="section" id="licence">
+<h1>Licence<a class="headerlink" href="#licence" title="Permalink to this headline">¶</a></h1>
+<p>You can distribute and/or modify Tissue Image Toolkit under the terms of the Inria licence.
+Many people have contributed to Tissue Image Toolkit. Some of the contributors are listed
+in the <a class="reference internal" href="credits.html#ref-credits"><em>Credits</em></a>. If Tissue Image Toolkit contributes to a project that leads
+to a scientific publication, please acknowledge this
+work by <a class="reference internal" href="citing.html#ref-citing"><em>Citing</em></a> the project.</p>
+<div class="toctree-wrapper compound">
+<ul class="simple">
+</ul>
+</div>
+</div>
+<div class="section" id="indices-and-tables">
+<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Permalink to this headline">¶</a></h1>
+<ul class="simple">
+<li><a class="reference internal" href="genindex.html"><em>Index</em></a></li>
+<li><a class="reference internal" href="py-modindex.html"><em>Module Index</em></a></li>
+<li><a class="reference internal" href="search.html"><em>Search Page</em></a></li>
+</ul>
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="#">Home</a>|&nbsp;</li>
+        <li><a href="install.html">Installation</a>|&nbsp;</li>
+        <li><a href="autodoc.html">Documentation</a>|&nbsp;</li>
+        <li><a href="examples.html">Examples</a>|&nbsp;</li>
+        <li><a href="search.html">search </a> &raquo;</li>
+ 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2016, Sophie Ribes, Guillaume Baty, Grégoire Malandain.
+      Created using <a href="http://sphinx-doc.org/">Sphinx</a> 1.2.2.
+    </div>
+  </body>
+</html>
