@@ -182,6 +182,8 @@ class SpatialImage(np.ndarray):
                 metadata_dict['mean'] = obj.mean()
 
             obj.metadata = metadata_dict
+            
+            obj.resolution = obj.resolution()
             return obj
 
 
@@ -202,6 +204,12 @@ class SpatialImage(np.ndarray):
 #    def __str__(self):
 #        return "SpatialImage instance, metadata: {}".format(self.get_metadata())
 
+    def resolution(self):
+        """
+        Ensure backward compatibility with older openalea.image package.
+        """
+        print DeprecationWarning("Attribute 'resolution' is deprecated and 'voxelsize' or 'get_voxelsize()' should be used instead!")
+        return self.voxelsize
 
     def equal(self, sp_img):
         """
