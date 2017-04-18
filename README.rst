@@ -18,7 +18,7 @@ for example NumPy and SciPy for scientific computing or matplotlib for curve plo
 Installation
 ************
 
-Follow the installation procedure provided with the `_documentation <https://virtualplants.github.io/timagetk>`_.
+Follow the installation procedure provided with the `documentation <https://virtualplants.github.io/timagetk>`_.
 
 
 **Stable release**: 1.0.0
