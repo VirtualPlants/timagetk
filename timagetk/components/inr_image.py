@@ -245,3 +245,11 @@ def write_inr_image(inr_file, sp_img):
 #                stream.write(mat.tostring("F") )
 #            else:
 #                raise Exception("Unhandled image dimension %d."%img.ndim)
+==== BASE ====
+        else:
+            print('Unknown extension, extensions can be either :'), poss_ext
+            return
+    else:
+        print('sp_img is not a SpatialImage')
+        return
+==== BASE ====
