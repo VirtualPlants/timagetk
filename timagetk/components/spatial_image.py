@@ -128,7 +128,9 @@ class SpatialImage(np.ndarray):
 
             if origin is None or origin==[]:
                 orig = [0 for ind in xrange(len(input_array.shape))]
-            elif origin is not None and isinstance(origin, list):
+            elif origin is not None and (isinstance(origin, list) or isinstance(origin, tuple)):
+                if isinstance(origin,tuple):
+                    origin = tuple_to_list(origin)
                 if len(origin)==(len(input_array.shape)):
                     orig = origin
                 else:
@@ -143,6 +145,8 @@ class SpatialImage(np.ndarray):
 
             if isinstance(voxelsize, tuple):    # SR --- BACK COMPAT
                 voxelsize = tuple_to_list(voxelsize)
+
+            print voxelsize
 
             if voxelsize is None or voxelsize==[]:
                 print('Warning, voxelsize is not defined')
@@ -331,8 +335,11 @@ class SpatialImage(np.ndarray):
          }
         """
         met_dict = self.metadata
-        if met_dict['shape'] != self.shape:
-            old_shape = met_dict['shape']
+        if not(met_dict.has_key('shape')) or met_dict['shape'] != self.shape:
+            if met_dict.has_key('shape'):
+                old_shape = met_dict['shape']
+            else:
+                old_shape = list((0,)*self.ndim)
             met_dict['shape'], met_dict['dim'], met_dict['type'] = self.shape, self.ndim, str(self.dtype)
             if (self.ndim==2 and old_shape[0]==self.shape[1] and old_shape[1]==self.shape[0]): #--- transposition
                 vox = [met_dict['voxelsize'][1], met_dict['voxelsize'][0]]
@@ -934,3 +941,51 @@ class SpatialImage(np.ndarray):
         if 1 in out_sp_image.get_shape():
             out_sp_image = out_sp_image.to_2D()
         return out_sp_image
+
+try:
+    from openalea.image.spatial_image import SpatialImage as OASpatialImage  
+except:
+    pass
+else:
+    # OASpatialImage.origin = None
+    OASpatialImage.metadata = {}
+
+    import types
+    from copy import deepcopy
+    OA_new_spatial_image = types.MethodType(deepcopy(OASpatialImage.__dict__['__new__'].__func__), OASpatialImage)
+    TITK_new_spatial_image = types.MethodType(deepcopy(SpatialImage.__dict__['__new__'].__func__), OASpatialImage)
+    def new_spatial_image(cls, cls2, input_array, voxelsize=None, vdim=None, info=None, dtype=None, **kwargs):
+        origin = kwargs.get('origin',None)
+        oa_image = OA_new_spatial_image(input_array, voxelsize, vdim, info, dtype)
+        return TITK_new_spatial_image(oa_image, origin=origin, voxelsize=voxelsize, dtype=dtype, metadata_dict=None)
+    OASpatialImage.__new__ = types.MethodType(new_spatial_image, OASpatialImage)
+    # OASpatialImage.__new__ = SpatialImage.__dict__['__new__']
+
+    OASpatialImage.equal = SpatialImage.__dict__['equal']
+    OASpatialImage.get_array = SpatialImage.__dict__['get_array']
+    OASpatialImage.get_dim = SpatialImage.__dict__['get_dim']
+    OASpatialImage.get_extent = SpatialImage.__dict__['get_extent']
+    OASpatialImage.get_metadata = SpatialImage.__dict__['get_metadata']
+    OASpatialImage.get_min = SpatialImage.__dict__['get_min']
+    OASpatialImage.get_max = SpatialImage.__dict__['get_max']
+    OASpatialImage.get_mean = SpatialImage.__dict__['get_mean']
+    OASpatialImage.get_origin = SpatialImage.__dict__['get_origin']
+    OASpatialImage.get_pixel = SpatialImage.__dict__['get_pixel']
+    OASpatialImage.get_region = SpatialImage.__dict__['get_region']
+    OASpatialImage.get_shape = SpatialImage.__dict__['get_shape']
+    OASpatialImage.get_type = SpatialImage.__dict__['get_type']
+    OASpatialImage.get_voxelsize = SpatialImage.__dict__['get_voxelsize']
+
+    OASpatialImage.set_extent = SpatialImage.__dict__['set_extent']
+    OASpatialImage.set_metadata = SpatialImage.__dict__['set_metadata']
+    OASpatialImage.set_origin = SpatialImage.__dict__['set_origin']
+    OASpatialImage.set_pixel = SpatialImage.__dict__['set_pixel']
+    OASpatialImage.set_region = SpatialImage.__dict__['set_region']
+    OASpatialImage.set_type = SpatialImage.__dict__['set_type']
+    OASpatialImage.set_voxelsize = SpatialImage.__dict__['set_voxelsize']
+
+    OASpatialImage.to_2D = SpatialImage.__dict__['to_2D']
+    OASpatialImage.to_3D = SpatialImage.__dict__['to_3D']
+    OASpatialImage.revert_axis = SpatialImage.__dict__['revert_axis']
+
+    SpatialImage = OASpatialImage
