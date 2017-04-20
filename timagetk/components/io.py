@@ -26,23 +26,7 @@ except ImportError:
 
 __all__ = ["imread", "imsave"]
 
-
-#
-#
-#
-#
-#
-
-
-_possible_extensions_ = ['.inr', '.inr.gz', '.inr.zip', '.mha', '.mha.gz', '.tiff', '.tif']
-
-
-#
-#
-#
-#
-#
-
+poss_ext = ['.inr', '.inr.gz', '.inr.zip', '.mha', '.mha.gz', '.tiff', '.tif']
 
 def imread(img_file):
     """
@@ -71,8 +55,12 @@ def imread(img_file):
     if conds:
         (filepath, filename) = os.path.split(img_file)
         (shortname, extension) = os.path.splitext(filename)
-        if extension in _possible_extensions_:
-            if extension == '.inr' or extension == '.inr.gz' or extension == '.inr.zip':
+        if (extension == '.gz') or (extension == '.zip'):
+            zip_ext = extension
+            (shortname, extension) = os.path.splitext(shortname)
+            extension += zip_ext
+        if extension in poss_ext:
+            if (extension=='.inr' or extension=='.inr.gz' or extension=='.inr.zip'):
                 try:
                     from timagetk.components.inr_image import read_inr_image
                 except ImportError:
@@ -102,13 +90,6 @@ def imread(img_file):
         return
 
 
-#
-#
-#
-#
-#
-
-
 def imsave(img_file, sp_img):
     """
     Save an image (2D/3D).
@@ -132,7 +113,7 @@ def imsave(img_file, sp_img):
     if conds:
         (filepath, filename) = os.path.split(img_file)
         (shortname, extension) = os.path.splitext(filename)
-        if extension in _possible_extensions_:
+        if extension in poss_ext:
             if extension == '.inr' or extension == '.inr.gz' or extension == '.inr.zip':
                 try:
                     from timagetk.components.inr_image import write_inr_image

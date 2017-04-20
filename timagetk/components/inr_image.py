@@ -50,6 +50,10 @@ def read_inr_image(inr_file):
     if conds:
         (filepath, filename) = os.path.split(inr_file)
         (shortname, extension) = os.path.splitext(filename)
+        if (extension == '.gz') or (extension == '.zip'):
+            zip_ext = extension
+            (shortname, extension) = os.path.splitext(shortname)
+            extension += zip_ext
         if extension in poss_ext:
             if (extension=='.inr.gz' or extension=='.inr.zip'):
                 with gzip.open(inr_file, 'rb') as fzip:
@@ -151,6 +155,10 @@ def write_inr_image(inr_file, sp_img):
     if conds:
         (filepath, filename) = os.path.split(inr_file)
         (shortname, extension) = os.path.splitext(filename)
+        if (extension == '.gz') or (extension == '.zip'):
+            zip_ext = extension
+            (shortname, extension) = os.path.splitext(shortname)
+            extension += zip_ext
         if extension in poss_ext:
             if (extension=='.inr.gz' or extension=='.inr.zip'):
                 f = gzip.GzipFile(inr_file, 'wb')
