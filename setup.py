@@ -115,6 +115,8 @@ setup(
     ],
     entry_points = {
         'openalea.image': ['openalea.image/image_plugin = timagetk.plugins.plugin'],
+        'oalab.plugin': ['oalab/image = timagetk.plugins.plugin',
+        ],
                     },
     license="Free To Use But Restricted",
     platforms=['LINUX','MAC']

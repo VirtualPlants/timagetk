@@ -17,6 +17,8 @@ This module contains plugins for image algorithms: filtering, semgentation, ...
 """
 
 from openalea.core.plugin import PluginDef
+from openalea.oalab.mimedata.plugin import QMimeCodecPlugin
+
 from openalea.core.authors import gbaty, sribes, gmalandain
 
 
@@ -350,6 +352,20 @@ class SequenceAffineRegistrationPlugin(SequenceRegistrationPlugin):
     implement = 'Sequence Registration'
     objectname = 'sequence_registration_affine'
     label = 'Sequence affine registration'
+
+
+# --- Mimetype codec plugin
+@PluginDef
+class IImageCodecPlugin(QMimeCodecPlugin):
+    implement = 'IQMimeCodec'
+    qtdecode = [
+        ('openalealab/data', 'openalea/interface.IImage'),
+        ('text/uri-list', 'openalea/interface.IImage'),
+    ]
+
+    def __call__(self):
+        from timagetk.plugins.mimedata import IImageCodec
+        return IImageCodec
 
 
 ###############################################################################
