@@ -76,7 +76,7 @@ def read_tiff_image(tiff_file):
                                 elif (isinstance(tag.value, float) and len(tag.value)==1):
                                     #--- todo float management ?
                                     pass
-                            elif 'width' or 'length' in tag.name:
+                            else:
                                 metadata_dict[str(tag.name)] = tag.value
 
                 if ('resolution' in metadata_dict and 'image_width' in metadata_dict and 'image_length' in metadata_dict):
@@ -94,18 +94,20 @@ def read_tiff_image(tiff_file):
                             description = description.replace('\n', ',')
                         if description.endswith(','):
                             description = description[0:-1]
-                        out_dict = dict(x.split('=') for x in description.split(','))
+                        out_dict = dict(x.split('=') for x in description.split(',') if len(x.split('='))==2)
                         for key in out_dict:
                             if key == 'spacing':
                                 metadata_dict['vox_z'] = float(out_dict[key])
                                 vox.append(float(out_dict[key]))
                             elif key == 'slices':
                                 metadata_dict['shape_z'] = int(out_dict[key])
-                                vox.append(1.0) # Seems that 'spacing' is not defined when equal to 1.0...
                             else:
-                                print "Could not detect either 'spacing' nor 'slices' in image metadata..."
+                                pass
                         del out_dict
                 tif.close()
+                # Seems that 'spacing' is not defined when equal to 1.0...
+                if ('shape_z' in metadata_dict) and not ('vox_z' in metadata_dict):
+                    vox.append(1.0)
                 if (len(vox)==metadata_dict['dim']):
                     out_sp_img = SpatialImage(input_array=tmp_arr, voxelsize=vox)
                 else:
