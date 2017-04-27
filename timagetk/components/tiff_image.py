@@ -101,6 +101,9 @@ def read_tiff_image(tiff_file):
                                 vox.append(float(out_dict[key]))
                             elif key == 'slices':
                                 metadata_dict['shape_z'] = int(out_dict[key])
+                                vox.append(1.0) # Seems that 'spacing' is not defined when equal to 1.0...
+                            else:
+                                print "Could not detect either 'spacing' nor 'slices' in image metadata..."
                         del out_dict
                 tif.close()
                 if (len(vox)==metadata_dict['dim']):
