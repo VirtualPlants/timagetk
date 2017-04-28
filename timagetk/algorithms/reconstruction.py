@@ -62,6 +62,8 @@ def im2surface(image, threshold_value=45, only_altitude=False,
     img_th = img_th >= threshold_value
     img_th = SpatialImage(img_th.astype(np.uint8), voxelsize=resolution)
 
+    threshold = image >= threshold_value
+
     # ~ labeling, n = component_labeling(img_th, connectivity_26, number_labels=1)
     labeling = connexe(img_th, param_str_1='-labels -connectivity 26 -debug -parallel')
     del img_th
