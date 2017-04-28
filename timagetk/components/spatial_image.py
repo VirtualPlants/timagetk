@@ -183,7 +183,7 @@ class SpatialImage(np.ndarray):
 
             obj.metadata = metadata_dict
             
-            obj.resolution = obj.resolution()
+            obj.resolution = obj.voxelsize
             return obj
 
 
