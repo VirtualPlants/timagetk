@@ -18,7 +18,7 @@
 __license__= "Cecill-C"
 __revision__ = " $Id$ "
 
-# This is a copy of deprecated package 'vplants.mars_alt.mars.reconstruction'
+# This is a revised copy of (deprecated?) package 'vplants.mars_alt.mars.reconstruction'
 # It was using library that are not available anymore (morpheme).
 
 from os.path import join
@@ -27,7 +27,10 @@ import scipy.ndimage as ndimage
 import types
 
 from timagetk.components import SpatialImage
-from openalea.image.algo.morpho import connectivity_4, connectivity_6, connectivity_8, connectivity_26, component_labeling
+from timagetk.algorithms import connexe
+
+from openalea.image.algo.basic import stroke, end_margin
+from openalea.image.algo.morpho import connectivity_4, connectivity_6,connectivity_8, connectivity_26, component_labeling
 
 
 def im2surface(image, threshold_value=45, only_altitude=False, front_half_only=False):
@@ -45,12 +48,12 @@ def im2surface(image, threshold_value=45, only_altitude=False, front_half_only=F
         - `mip_img` (|SpatialImage|) - maximum intensity projection. *None* if only_altitude in True
         - `alt_img` (|SpatialImage|) - altitude of maximum intensity projection
     """
-    #~ image, was_path = lazy_image_or_path(image)
     resolution = image.resolution
-
     threshold = image >= threshold_value
 
-    labeling, n = component_labeling(threshold, connectivity_26, number_labels=1)
+    #~ labeling, n = component_labeling(threshold, connectivity_26, number_labels=1)
+    labeling = connexe(threshold.astype(np.uint16), param_str_1='-labels -connectivity 26')
+    del threshold
 
     iterations = 15
     dilation1 = ndimage.binary_dilation(labeling, connectivity_8, iterations)
