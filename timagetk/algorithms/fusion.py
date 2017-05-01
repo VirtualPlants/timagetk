@@ -192,3 +192,4 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
         print('Incorrect specifications:')
         print "Specifications log: conds_init={}; conds_list_img={}; conds_list_trsf={}".format(conds_init, conds_list_img, conds_list_trsf)
         return
+==== BASE ====
