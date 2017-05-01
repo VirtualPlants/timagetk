@@ -80,7 +80,6 @@ def fusion(list_images, iterations=None, man_trsf_list=None, all_iter_mean_img=F
     #--- end check
     if conds_init and 1 not in conds_list_img and 1 not in conds_list_trsf:
 
-        succ_ref_img = []
         vox_list = [sp_img.get_voxelsize() for sp_img in list_images]
         vox_list = [i for i in itertools.chain.from_iterable(vox_list)] # voxel list
         ext_list = [sp_img.get_extent() for sp_img in list_images]
@@ -91,26 +90,32 @@ def fusion(list_images, iterations=None, man_trsf_list=None, all_iter_mean_img=F
             min_vox, val = np.min(vox_list), int(np.max(ext_list)/np.min(vox_list))
             tmp_arr = np.zeros((val, val, val), dtype=list_images[0].dtype)
             template_img = SpatialImage(tmp_arr, voxelsize=[min_vox, min_vox, min_vox])
+            del tmp_arr
         # -- Use first image in list to initialise reference template (ref. image for first round of blockmatching):
         init_ref = apply_trsf(list_images[0], bal_transformation=None, template_img=template_img)
-        succ_ref_img.append(init_ref)
 
         # -- FIRST iteration of 3-steps registrations: rigid, affine & vectorfield
         # All images in 'list_images' are registered on the first of the list
         init_trsf_list, init_img_list = [], []
+        print "\n\n## -- Computing initial mean image..."
         for ind, sp_img in enumerate(list_images):
-            if ind>0: #
+            print "# - Performing 3-steps successive registration of image #{} on #{}.".format(ind, 0)
+            if ind>0:
+                print "...Rigid regitration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
                 trsf_rig, res_rig = blockmatching(sp_img, init_ref,
                                                   init_result_transformation=man_trsf_list[ind-1],
                                                   param_str_2='-trsf-type rigid -py-ll 1')
                 # - Update the `man_trsf_list` for the next iteration
                 if man_trsf_list[ind-1] is not None:
                     man_trsf_list[ind-1] = trsf_rig
+                print "...Affine regitration..."
                 trsf_aff, res_aff = blockmatching(sp_img, init_ref,
                                                   left_transformation=trsf_rig,
                                                   param_str_2='-trsf-type affine')
 
+                print "...Composing Rigid & Affine transformations..."
                 tmp_trsf = compose_trsf([trsf_rig, trsf_aff])
+                print "...Vectorfield regitration..."
                 trsf_def, res_def = blockmatching(sp_img, init_ref,
                                                   init_result_transformation=tmp_trsf,
                                                   param_str_2='-trsf-type vectorfield')
@@ -118,17 +123,19 @@ def fusion(list_images, iterations=None, man_trsf_list=None, all_iter_mean_img=F
                 out_trsf = BalTransformation(c_bal_trsf=trsf_def)
                 init_trsf_list.append(out_trsf)
                 init_img_list.append(res_def)
+        del out_trsf, trsf_def, res_def, trsf_aff, res_aff, trsf_rig, res_rig
         # - Add the reference image to the list of images that will be averaged:
         init_img_list.append(init_ref)
-        # - Computing the mean image from previous 3-steps registrations
+        print "# - Computing the mean image from previous 3-steps registrations..."
         mean_ref = mean_images(init_img_list)
-        # - Computing the mean transformation from previous 3-steps registrations
+        print "# - Computing the mean transformation from previous 3-steps registrations..."
         mean_trsf = mean_trsfs(init_trsf_list)
-        # - Computing the inverted mean transformation:
+        print "# - Computing the inverted mean transformation..."
         mean_trsf_inv = inv_trsf(mean_trsf)
-        # - Apply it to the mean image and add this invTrsf_image to a list:
+        del mean_trsf
+        print "# - Apply it to the mean image..."
         mean_ref_update = apply_trsf(mean_ref, mean_trsf_inv, template_img=template_img)
-        succ_ref_img.append(mean_ref_update)
+        del mean_ref, mean_trsf_inv
 
         # -- REMAINING iterations of 3-steps registrations: rigid, affine & vectorfield
         # For each iteration we use `mean_ref_update` from previous round of registration
@@ -136,38 +143,48 @@ def fusion(list_images, iterations=None, man_trsf_list=None, all_iter_mean_img=F
         # Now even the first image from `list_images` is 3-steps registered !!
         man_trsf_list = [None] + man_trsf_list
         for index in range(0, iterations):
+            print "\n\n## -- Interation #{} for mean image computation..."
             # Again, all images in 'list_images' are registered on the first of the list
             init_trsf_list, init_img_list = [], []
             for ind, sp_img in enumerate(list_images):
+                print "# - Performing 3-steps successive registration of image #{} on previous mean image.".format(ind)
+                print "...Rigid regitration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
                 trsf_rig, res_rig = blockmatching(sp_img, mean_ref_update,
                                                   init_result_transformation=man_trsf_list[ind],
                                                   param_str_2='-trsf-type rigid -py-ll 1')
                 # - Update the `man_trsf_list` for the next iteration
                 if man_trsf_list[ind] is not None:
                     man_trsf_list[ind] = trsf_rig
+                print "...Affine regitration..."
                 trsf_aff, res_aff = blockmatching(sp_img, mean_ref_update,
                                                   left_transformation=trsf_rig,
                                                   param_str_2='-trsf-type affine')
+                print "...Composing Rigid & Affine transformations..."
                 tmp_trsf = compose_trsf([trsf_rig, trsf_aff])
+                print "...Vectorfield regitration..."
                 trsf_def, res_def = blockmatching(sp_img, mean_ref_update,
                                                   init_result_transformation=tmp_trsf,
                                                   param_str_2='-trsf-type vectorfield')
                 out_trsf = BalTransformation(c_bal_trsf=trsf_def)
                 init_trsf_list.append(out_trsf)
                 init_img_list.append(res_def)
+            del out_trsf, trsf_def, res_def, trsf_aff, res_aff, trsf_rig, res_rig
             # - Add the mean reference image of this round to the list of images that will be averaged:
             init_img_list.append(mean_ref_update)
             # - Compute the mean_image, mean_trsf, mean_trsf_inv & mean_ref_update
+            print "# - Computing the mean image from previous 3-steps registrations..."
             mean_ref = mean_images(init_img_list)
+            print "# - Computing the mean transformation from previous 3-steps registrations..."
             mean_trsf = mean_trsfs(init_trsf_list)
+            print "# - Computing the inverted mean transformation..."
             mean_trsf_inv = inv_trsf(mean_trsf)
+            del mean_trsf
+            print "# - Apply it to the mean image..."
             # This update the reference image for the next round!
             mean_ref_update = apply_trsf(mean_ref, mean_trsf_inv, template_img=template_img)
-            succ_ref_img.append(mean_ref_update)
-        if all_iter_mean_img:
-            return succ_ref_img
-        else:
-            return succ_ref_img[-1] # why keep them all (without using them) and returning the last one?
+            del mean_ref, mean_trsf_inv
+
+        return mean_ref_update
     else:
         print('Incorrect specifications:')
         print "Specs: conds_init={}; conds_list_img={}; conds_list_trsf={}".format(conds_init, conds_list_img, conds_list_trsf)
