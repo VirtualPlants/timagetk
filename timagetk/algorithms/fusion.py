@@ -25,7 +25,7 @@ except ImportError:
 __all__ = ['fusion']
 
 
-def fusion(list_images, iterations=None, man_trsf_list=None, all_iter_mean_img=False):
+def fusion(list_images, iterations=None, man_trsf_list=None):
     """
     Multiview reconstruction (registration)
 
@@ -43,9 +43,6 @@ def fusion(list_images, iterations=None, man_trsf_list=None, all_iter_mean_img=F
         Successively obtained `rig_trsf` will be used as
          `init_result_transformation` for blockmaching REMAINING
           iterations of rigid step.
-
-    :param bool all_iter_mean_img: should all averaged image from 3-steps
-         registration iterations be returned, optional. Default: False
 
     Returns
     ----------
