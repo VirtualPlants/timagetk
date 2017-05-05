@@ -19,13 +19,13 @@ try:
     from timagetk.algorithms import blockmatching
     from timagetk.algorithms import compose_trsf, apply_trsf, mean_trsfs, inv_trsf
     from timagetk.algorithms import mean_images
-    from timagetk.components import SpatialImage
+    from timagetk.components import SpatialImage, imsave
 except ImportError:
     raise ImportError('Import Error')
 __all__ = ['fusion']
 
 
-def fusion(list_images, iterations=None, man_trsf_list=None):
+def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""):
     """
     Multiview reconstruction (registration)
 
@@ -96,23 +96,23 @@ def fusion(list_images, iterations=None, man_trsf_list=None):
         init_trsf_list, init_img_list = [], []
         print "\n\n## -- Computing initial mean image..."
         for ind, sp_img in enumerate(list_images):
-            print "# - Performing 3-steps successive registration of image #{} on #{}.".format(ind, 0)
             if ind>0:
-                print "...Rigid regitration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
+                print "# - Performing 3-steps successive registration of image #{} on #{}.".format(ind, 0)
+                print "...Rigid registration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
                 trsf_rig, res_rig = blockmatching(sp_img, init_ref,
                                                   init_result_transformation=man_trsf_list[ind-1],
                                                   param_str_2='-trsf-type rigid -py-ll 1')
                 # - Update the `man_trsf_list` for the next iteration
                 if man_trsf_list[ind-1] is not None:
                     man_trsf_list[ind-1] = trsf_rig
-                print "...Affine regitration..."
+                print "...Affine registration..."
                 trsf_aff, res_aff = blockmatching(sp_img, init_ref,
                                                   left_transformation=trsf_rig,
                                                   param_str_2='-trsf-type affine')
 
                 print "...Composing Rigid & Affine transformations..."
                 tmp_trsf = compose_trsf([trsf_rig, trsf_aff])
-                print "...Vectorfield regitration..."
+                print "...Vectorfield registration..."
                 trsf_def, res_def = blockmatching(sp_img, init_ref,
                                                   init_result_transformation=tmp_trsf,
                                                   param_str_2='-trsf-type vectorfield')
@@ -132,6 +132,9 @@ def fusion(list_images, iterations=None, man_trsf_list=None):
         del mean_trsf
         print "# - Apply it to the mean image..."
         mean_ref_update = apply_trsf(mean_ref, mean_trsf_inv, template_img=template_img)
+        if mean_imgs_prefix != "":
+            print "Saving the mean image..."
+            imsave(mean_imgs_prefix+"-mean_img_iter0.inr", mean_ref_update)
         del mean_ref, mean_trsf_inv
 
         # -- REMAINING iterations of 3-steps registrations: rigid, affine & vectorfield
@@ -140,25 +143,25 @@ def fusion(list_images, iterations=None, man_trsf_list=None):
         # Now even the first image from `list_images` is 3-steps registered !!
         man_trsf_list = [None] + man_trsf_list
         for index in range(0, iterations):
-            print "\n\n## -- Interation #{} for mean image computation..."
+            print "\n\n## -- Interation #{} for mean image computation...".format(index)
             # Again, all images in 'list_images' are registered on the first of the list
             init_trsf_list, init_img_list = [], []
             for ind, sp_img in enumerate(list_images):
                 print "# - Performing 3-steps successive registration of image #{} on previous mean image.".format(ind)
-                print "...Rigid regitration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
+                print "...Rigid registration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
                 trsf_rig, res_rig = blockmatching(sp_img, mean_ref_update,
                                                   init_result_transformation=man_trsf_list[ind],
                                                   param_str_2='-trsf-type rigid -py-ll 1')
                 # - Update the `man_trsf_list` for the next iteration
                 if man_trsf_list[ind] is not None:
                     man_trsf_list[ind] = trsf_rig
-                print "...Affine regitration..."
+                print "...Affine registration..."
                 trsf_aff, res_aff = blockmatching(sp_img, mean_ref_update,
                                                   left_transformation=trsf_rig,
                                                   param_str_2='-trsf-type affine')
                 print "...Composing Rigid & Affine transformations..."
                 tmp_trsf = compose_trsf([trsf_rig, trsf_aff])
-                print "...Vectorfield regitration..."
+                print "...Vectorfield registration..."
                 trsf_def, res_def = blockmatching(sp_img, mean_ref_update,
                                                   init_result_transformation=tmp_trsf,
                                                   param_str_2='-trsf-type vectorfield')
@@ -179,10 +182,13 @@ def fusion(list_images, iterations=None, man_trsf_list=None):
             print "# - Apply it to the mean image..."
             # This update the reference image for the next round!
             mean_ref_update = apply_trsf(mean_ref, mean_trsf_inv, template_img=template_img)
+            if mean_imgs_prefix != "":
+                print "Saving the mean image..."
+                imsave(mean_imgs_prefix+"-mean_img_iter{}.inr".format(index+1), mean_ref_update)
             del mean_ref, mean_trsf_inv
 
         return mean_ref_update
     else:
         print('Incorrect specifications:')
-        print "Specs: conds_init={}; conds_list_img={}; conds_list_trsf={}".format(conds_init, conds_list_img, conds_list_trsf)
+        print "Specifications log: conds_init={}; conds_list_img={}; conds_list_trsf={}".format(conds_init, conds_list_img, conds_list_trsf)
         return
