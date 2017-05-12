@@ -115,7 +115,7 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
                 print "...Vectorfield registration..."
                 trsf_def, res_def = blockmatching(sp_img, init_ref,
                                                   init_result_transformation=tmp_trsf,
-                                                  param_str_2='-trsf-type vectorfield')
+                                                  param_str_2='-trsf-type vectorfield -py-ll 1 -elastic-sigma 1.0')
 
                 out_trsf = BalTransformation(c_bal_trsf=trsf_def)
                 init_trsf_list.append(out_trsf)
@@ -164,7 +164,7 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
                 print "...Vectorfield registration..."
                 trsf_def, res_def = blockmatching(sp_img, mean_ref_update,
                                                   init_result_transformation=tmp_trsf,
-                                                  param_str_2='-trsf-type vectorfield')
+                                                  param_str_2='-trsf-type vectorfield -py-ll 1 -elastic-sigma 1.0')
                 out_trsf = BalTransformation(c_bal_trsf=trsf_def)
                 init_trsf_list.append(out_trsf)
                 init_img_list.append(res_def)
