@@ -25,7 +25,7 @@ except ImportError:
 __all__ = ['fusion']
 
 
-def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""):
+def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix="", vf_params="", time=False):
     """
     Multiview reconstruction (registration)
 
@@ -101,21 +101,21 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
                 print "...Rigid registration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
                 trsf_rig, res_rig = blockmatching(sp_img, init_ref,
                                                   init_result_transformation=man_trsf_list[ind-1],
-                                                  param_str_2='-trsf-type rigid -py-ll 1')
+                                                  param_str_2='-trsf-type rigid -py-ll 1{}'.format(" -time" if time else ""))
                 # - Update the `man_trsf_list` for the next iteration
                 if man_trsf_list[ind-1] is not None:
                     man_trsf_list[ind-1] = trsf_rig
                 print "...Affine registration..."
                 trsf_aff, res_aff = blockmatching(sp_img, init_ref,
                                                   left_transformation=trsf_rig,
-                                                  param_str_2='-trsf-type affine')
+                                                  param_str_2='-trsf-type affine{}'.format(" -time" if time else ""))
 
                 print "...Composing Rigid & Affine transformations..."
                 tmp_trsf = compose_trsf([trsf_rig, trsf_aff])
                 print "...Vectorfield registration..."
                 trsf_def, res_def = blockmatching(sp_img, init_ref,
                                                   init_result_transformation=tmp_trsf,
-                                                  param_str_2='-trsf-type vectorfield -py-ll 1 -elastic-sigma 1.0')
+                                                  param_str_2='-trsf-type vectorfield {}{}'.format(vf_params, " -time" if time else ""))
 
                 out_trsf = BalTransformation(c_bal_trsf=trsf_def)
                 init_trsf_list.append(out_trsf)
@@ -151,20 +151,20 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
                 print "...Rigid registration{}...".format(" with 'init-res-trsf'" if man_trsf_list[ind-1] is not None else "")
                 trsf_rig, res_rig = blockmatching(sp_img, mean_ref_update,
                                                   init_result_transformation=man_trsf_list[ind],
-                                                  param_str_2='-trsf-type rigid -py-ll 1')
+                                                  param_str_2='-trsf-type rigid -py-ll 1{}'.format(" -time" if time else ""))
                 # - Update the `man_trsf_list` for the next iteration
                 if man_trsf_list[ind] is not None:
                     man_trsf_list[ind] = trsf_rig
                 print "...Affine registration..."
                 trsf_aff, res_aff = blockmatching(sp_img, mean_ref_update,
                                                   left_transformation=trsf_rig,
-                                                  param_str_2='-trsf-type affine')
+                                                  param_str_2='-trsf-type affine{}'.format(" -time" if time else ""))
                 print "...Composing Rigid & Affine transformations..."
                 tmp_trsf = compose_trsf([trsf_rig, trsf_aff])
                 print "...Vectorfield registration..."
                 trsf_def, res_def = blockmatching(sp_img, mean_ref_update,
                                                   init_result_transformation=tmp_trsf,
-                                                  param_str_2='-trsf-type vectorfield -py-ll 1 -elastic-sigma 1.0')
+                                                  param_str_2='-trsf-type vectorfield {}{}'.format(vf_params, " -time" if time else ""))
                 out_trsf = BalTransformation(c_bal_trsf=trsf_def)
                 init_trsf_list.append(out_trsf)
                 init_img_list.append(res_def)
