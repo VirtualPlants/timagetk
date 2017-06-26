@@ -19,7 +19,7 @@ __license__= "Cecill-C"
 __revision__ = " $Id$ "
 
 # This is a revised copy of (deprecated?) package 'vplants.mars_alt.mars.reconstruction'
-# It was using library that are not available anymore (morpheme).
+# It was using a library that is not available anymore (morpheme).
 
 from os.path import join
 import numpy as np
