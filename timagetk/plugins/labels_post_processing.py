@@ -60,7 +60,7 @@ def labels_post_processing(input_image, method=None, **kwds):
     if conds:
         if method is None:
             return labels_erosion(input_image)
-        elif method is not None:
+        else:
             if method in poss_methods:
                 try:
                     from openalea.core.service.plugin import plugin_function
@@ -68,15 +68,16 @@ def labels_post_processing(input_image, method=None, **kwds):
                     if func is not None:
                         return func(input_image, **kwds)
                 except:
+                    print "Plugin functionnality not available !"
                     radius_val = kwds.get('radius', None)
                     it_val = kwds.get('iterations', None)
                     if method=='labels_erosion':
                         return labels_erosion(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='labels_dilation':
+                    if method=='labels_dilation':
                         return labels_dilation(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='labels_opening':
+                    if method=='labels_opening':
                         return labels_opening(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='labels_closing':
+                    if method=='labels_closing':
                         return labels_closing(input_image, radius=radius_val, iterations=it_val)
             else:
                 print('Available methods :'), poss_methods
@@ -106,11 +107,11 @@ def labels_erosion(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-erosion -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -139,11 +140,11 @@ def labels_dilation(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-dilation -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -172,11 +173,11 @@ def labels_opening(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-opening -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -205,11 +206,11 @@ def labels_closing(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-closing -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)

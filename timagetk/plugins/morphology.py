@@ -84,27 +84,27 @@ def morphology(input_image, method=None, **kwds):
                     max_radius_val = kwds.get('max_radius', None)
                     if method=='erosion':
                         return morphology_erosion(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='dilation':
+                    if method=='dilation':
                         return morphology_dilation(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='opening':
+                    if method=='opening':
                         return morphology_opening(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='closing':
+                    if method=='closing':
                         return morphology_closing(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='morpho_gradient':
+                    if method=='morpho_gradient':
                         return morphology_gradient(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='contrast':
+                    if method=='contrast':
                         return morphology_contrast(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='hat_transform':
+                    if method=='hat_transform':
                         return morphology_hat_transform(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='inverse_hat_transform':
+                    if method=='inverse_hat_transform':
                         return morphology_inverse_hat_transform(input_image, radius=radius_val, iterations=it_val)
-                    elif method=='oc_alternate_sequential_filter':
+                    if method=='oc_alternate_sequential_filter':
                         return morphology_oc_alternate_sequential_filter(input_image, max_radius=max_radius_val)
-                    elif method=='co_alternate_sequential_filter':
+                    if method=='co_alternate_sequential_filter':
                         return morphology_co_alternate_sequential_filter(input_image, max_radius=max_radius_val)
-                    elif method=='coc_alternate_sequential_filter':
+                    if method=='coc_alternate_sequential_filter':
                         return morphology_coc_alternate_sequential_filter(input_image, max_radius=max_radius_val)
-                    elif method=='oco_alternate_sequential_filter':
+                    if method=='oco_alternate_sequential_filter':
                         return morphology_oco_alternate_sequential_filter(input_image, max_radius=max_radius_val)
             else:
                 print('Available methods :'), poss_methods
@@ -134,11 +134,11 @@ def morphology_erosion(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-operation erosion -iterations %d -radius %d -v' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -167,11 +167,11 @@ def morphology_dilation(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-dilation -iterations %d -radius %d' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -200,11 +200,11 @@ def morphology_opening(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-operation opening -iterations %d -radius %d' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -233,11 +233,11 @@ def morphology_closing(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-operation closing -iterations %d -radius %d' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -266,11 +266,11 @@ def morphology_hat_transform(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-operation closinghat -iterations %d -radius %d' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -299,11 +299,11 @@ def morphology_inverse_hat_transform(input_image, radius=None, iterations=None, 
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-operation openinghat -iterations %d -radius %d' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -332,11 +332,11 @@ def morphology_gradient(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = abs(int(radius))
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = abs(int(iterations))
         params = '-operation gradient -iterations %d -radius %d' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -365,11 +365,11 @@ def morphology_contrast(input_image, radius=None, iterations=None, **kwds):
     if conds:
         if radius is None:
             radius = 1
-        elif radius is not None:
+        else:
             radius = int(radius)
         if iterations is None:
             iterations = 1
-        elif iterations is not None:
+        else:
             iterations = int(iterations)
         params = '-operation contrast -iterations %d -radius %d' % (iterations, radius)
         return morpho(input_image, param_str_2=params)
@@ -398,7 +398,7 @@ def morphology_oc_alternate_sequential_filter(input_image, max_radius=None, **kw
             max_radius = 1
             output_img = morphology_oc_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        else:
             max_radius = abs(int(max_radius))
             sizes = range(1, max_radius+1)
             output_img = input_image
@@ -433,7 +433,7 @@ def morphology_co_alternate_sequential_filter(input_image, max_radius=None, **kw
             max_radius = 1
             output_img = morphology_co_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        else:
             max_radius = abs(int(max_radius))
             sizes = range(1,max_radius+1)
             output_img = input_image
@@ -468,7 +468,7 @@ def morphology_coc_alternate_sequential_filter(input_image, max_radius=None, **k
             max_radius = 1
             output_img = morphology_coc_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        else:
             max_radius = abs(int(max_radius))
             sizes = range(1,max_radius+1)
             output_img = input_image
@@ -505,7 +505,7 @@ def morphology_oco_alternate_sequential_filter(input_image, max_radius=None, **k
             max_radius = 1
             output_img = morphology_oco_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        else:
             max_radius = abs(int(max_radius))
             sizes = range(1,max_radius+1)
             output_img = input_image
