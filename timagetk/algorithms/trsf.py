@@ -106,7 +106,8 @@ def apply_trsf(image, bal_transformation=None, template_img=None,
     :param *BalTransformation* bal_transformation: input *BalTransformation* transformation
 
     :param template_img: optional, default is None. template_img is used for output image geometry
-                                                    and can be either SpatialImage or a list of dimensions
+                                                    and can be either SpatialImage or a list of dimensions.
+                                                    If a list of dimension, voxelsize is defined by `image`.
 
     :param str param_str_1: APPLY_TRSF_DEFAULT
 
@@ -128,13 +129,13 @@ def apply_trsf(image, bal_transformation=None, template_img=None,
 
         if template_img is None:
             kwds = spatial_image_to_bal_image_fields(image)
-        elif template_img is not None:
+        else:
             if isinstance(template_img, SpatialImage):
                 if template_img.get_dim()==2:
                     template_img = template_img.to_3D()
                 x, y, z = template_img.get_shape()
                 vx, vy, vz = template_img.get_voxelsize()
-                val_vox = ''.join([' -template-voxel ', str(vx), ' ', str(vy), ' ', str(vz)])
+                val_vox = ' -template-voxel {} {} {}'.format(vx, vy, vz)
             elif isinstance(template_img, list):
                 if len(template_img)==3:
                     tmp_img = np.zeros((template_img[0], template_img[1], template_img[2]), dtype=image.dtype)
@@ -144,9 +145,13 @@ def apply_trsf(image, bal_transformation=None, template_img=None,
                 if template_img.get_dim()==2:
                     template_img = template_img.to_3D()
                 x, y, z = template_img.get_shape()
-                val_vox = ''
-            val_dim = ''.join([' -template-dim ', str(x), ' ', str(y), ' ', str(z)])
-            param_str_1 = ''.join([param_str_1, str(val_dim), str(val_vox)])
+                # Get the voxelsize from the input image:
+                vx, vy, vz = image.get_voxelsize()
+                val_vox = ' -template-voxel {} {} {}'.format(vx, vy, vz)
+            else:
+                raise TypeError("Parameter `template_img` should be a SpatialImage or a list!")
+            val_dim = ' -template-dim {} {} {}'.format(x, y, z)
+            param_str_1 = ''.join([param_str_1, val_dim, val_vox])
             kwds = spatial_image_to_bal_image_fields(template_img)
 
         if dtype is not None:
@@ -262,9 +267,9 @@ def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT, param_str_2=
 
         x, y, z = template_img.get_shape()
         vx, vy, vz = template_img.get_voxelsize()
-        val_dim = ''.join([' -template-dim ', str(x), ' ', str(y), ' ', str(z)])
-        val_vox = ''.join([' -template-voxel ', str(vx), ' ', str(vy), ' ', str(vz)])
-        param_str_1 = ''.join([param_str_1, str(val_dim), str(val_vox)])
+        val_dim = ' -template-dim {} {} {}'.format(x, y, z)
+        val_vox = ' -template-voxel {} {} {}'.format(vx, vy, vz)
+        param_str_1 = ''.join([param_str_1, val_dim, val_vox])
         bal_image = BalImage(template_img)
     else:
         template_img = None
