@@ -24,6 +24,26 @@ except ImportError:
 
 __all__ = ['linear_filtering']
 
+DEFAULT_METHOD = 'gaussian_smoothing'
+POSS_METHODS = ['gaussian_smoothing', 'gradient', 'gradient_modulus', 'hessian', 'laplacian',
+                'gradient_hessian', 'gradient_laplacian', 'zero_crossings_hessian',
+                'zero_crossings_laplacian']
+
+
+def _method_img_check(input_image):
+    """
+    Used to check `input_image` type and isometry.
+    """
+    # - Check the `input_image` is indeed a `SpatialImage`
+    conds = isinstance(input_image, SpatialImage)
+    if not conds:
+        raise TypeError('Input image must be a `SpatialImage` object.')
+    # - Check the isometry of the image:
+    vx, vy, vz = input_image.get_voxelsize()
+    if (vx != vy) or (vy != vz):
+        warnings.warn("The image is NOT isometric, this method operates on voxels!!")
+    return
+
 
 def linear_filtering(input_image, method=None, **kwds):
     """
@@ -59,47 +79,41 @@ def linear_filtering(input_image, method=None, **kwds):
     >>> grad_mod_image = linear_filtering(input_image, method='gradient_modulus')
     >>> lap_image = linear_filtering(input_image, method='laplacian')
     """
-    poss_methods = ['gaussian_smoothing', 'gradient', 'gradient_modulus', 'hessian', 'laplacian',
-                    'gradient_hessian', 'gradient_laplacian', 'zero_crossings_hessian',
-                    'zero_crossings_laplacian']
+    # - Check `input_image` type and isometry:
+    _method_img_check(input_image)
+    # - Set the 'DEFAULT_METHOD' if needed:
+    if method is None:
+        method = DEFAULT_METHOD
+    # - Check the provided method is implemented:
+    if method not in POSS_METHODS:
+        print('Available methods :'), POSS_METHODS
+        raise NotImplementedError(method)
 
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        if method is None:
-            return linear_filtering_gaussian_smoothing(input_image)
-        elif method is not None:
-            if method in poss_methods:
-                try:
-                    from openalea.core.service.plugin import plugin_function
-                    func = plugin_function('openalea.image', method)
-                    if func is not None:
-                        return func(input_image, **kwds)
-                except:
-                    if method=='gaussian_smoothing':
-                        std_dev_val = kwds.get('std_dev', None)
-                        return linear_filtering_gaussian_smoothing(input_image, std_dev=std_dev_val)
-                    elif method=='gradient':
-                        return linear_filtering_gradient(input_image)
-                    elif method=='gradient_modulus':
-                        return linear_filtering_gradient_modulus(input_image)
-                    elif method=='hessian':
-                        return linear_filtering_hessian(input_image)
-                    elif method=='laplacian':
-                        return linear_filtering_laplacian(input_image)
-                    elif method=='gradient_hessian':
-                        return linear_filtering_gradient_hessian(input_image)
-                    elif method=='gradient_laplacian':
-                        return linear_filtering_gradient_laplacian(input_image)
-                    elif method=='zero_crossings_hessian':
-                        return linear_filtering_zero_crossings_hessian(input_image)
-                    elif method=='zero_crossings_laplacian':
-                        return linear_filtering_zero_crossings_laplacian(input_image)
-            else:
-                print('Available methods :'), poss_methods
-                raise NotImplementedError(method)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    try:
+        from openalea.core.service.plugin import plugin_function
+        func = plugin_function('openalea.image', method)
+        if func is not None:
+            return func(input_image, **kwds)
+    except:
+        if method=='gaussian_smoothing':
+            std_dev_val = kwds.get('std_dev', None)
+            return linear_filtering_gaussian_smoothing(input_image, std_dev=std_dev_val)
+        if method=='gradient':
+            return linear_filtering_gradient(input_image)
+        if method=='gradient_modulus':
+            return linear_filtering_gradient_modulus(input_image)
+        if method=='hessian':
+            return linear_filtering_hessian(input_image)
+        if method=='laplacian':
+            return linear_filtering_laplacian(input_image)
+        if method=='gradient_hessian':
+            return linear_filtering_gradient_hessian(input_image)
+        if method=='gradient_laplacian':
+            return linear_filtering_gradient_laplacian(input_image)
+        if method=='zero_crossings_hessian':
+            return linear_filtering_zero_crossings_hessian(input_image)
+        if method=='zero_crossings_laplacian':
+            return linear_filtering_zero_crossings_laplacian(input_image)
 
 
 def linear_filtering_gaussian_smoothing(input_image, std_dev=None, **kwds):
@@ -115,17 +129,13 @@ def linear_filtering_gaussian_smoothing(input_image, std_dev=None, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        if std_dev is None:
-            std_dev = 1.0
-        elif std_dev is not None:
-            std_dev = abs(float(std_dev))
-        params = '-smoothing -sigma %s' % std_dev
-        return linearfilter(input_image, param_str_2=params)
+    _method_img_check(input_image)
+    if std_dev is None:
+        std_dev = 1.0
     else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+        std_dev = abs(float(std_dev))
+    params = '-smoothing -sigma %s' % std_dev
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_gradient_modulus(input_image):
@@ -140,13 +150,9 @@ def linear_filtering_gradient_modulus(input_image):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-gradient-modulus'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    _method_img_check(input_image)
+    params = '-gradient-modulus'
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_gradient(input_image):
@@ -161,13 +167,9 @@ def linear_filtering_gradient(input_image):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-gradient'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    _method_img_check(input_image)
+    params = '-gradient'
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_hessian(input_image):
@@ -182,13 +184,9 @@ def linear_filtering_hessian(input_image):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-hessian'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    _method_img_check(input_image)
+    params = '-hessian'
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_laplacian(input_image):
@@ -203,13 +201,9 @@ def linear_filtering_laplacian(input_image):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-laplacian'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    _method_img_check(input_image)
+    params = '-laplacian'
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_zero_crossings_hessian(input_image, **kwds):
@@ -224,13 +218,8 @@ def linear_filtering_zero_crossings_hessian(input_image, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-zero-crossings-hessian'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    params = '-zero-crossings-hessian'
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_zero_crossings_laplacian(input_image, **kwds):
@@ -245,13 +234,9 @@ def linear_filtering_zero_crossings_laplacian(input_image, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-zero-crossings-laplacian'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    _method_img_check(input_image)
+    params = '-zero-crossings-laplacian'
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_gradient_hessian(input_image, **kwds):
@@ -266,13 +251,9 @@ def linear_filtering_gradient_hessian(input_image, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-gradient-hessian'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    _method_img_check(input_image)
+    params = '-gradient-hessian'
+    return linearfilter(input_image, param_str_2=params)
 
 
 def linear_filtering_gradient_laplacian(input_image, **kwds):
@@ -287,10 +268,6 @@ def linear_filtering_gradient_laplacian(input_image, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        params = '-gradient-laplacian'
-        return linearfilter(input_image, param_str_2=params)
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    _method_img_check(input_image)
+    params = '-gradient-laplacian'
+    return linearfilter(input_image, param_str_2=params)
