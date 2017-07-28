@@ -357,6 +357,89 @@ def mean_trsfs(list_trsf):
         return
 
 
+def resample_image(input_im, new_voxelsize=None, new_shape=None, resampling_factor=1.):
+    """
+    Allow to resample any image given a new shape, new voxelsize or resampling_factor.
+    
+    If:
+     - resampling_factor < 1: over-sampling;
+     - resampling_factor > 1: down-sampling;
+     - resampling_factor = 1: unchanged.
+    
+    Note: this is a work in progress!
+    """
+    print "Input image infos:"
+    # - Get input_im infos:
+    im_vxs = input_im.voxelsize
+    print "  -- voxelsize: {}".format(im_vxs)
+    im_dtype = input_im.dtype
+    print "  -- dtype: {}".format(im_dtype)
+    im_shape = input_im.shape
+    print "  -- shape: {}".format(im_shape)
+    # - `new_voxelsize` case:
+    if new_voxelsize is not None:
+        # - Check only one resampling method has been selected:
+        try:
+            assert (new_shape is None) and (resampling_factor==1)
+        except AssertionError:
+            raise AssertionError("You have defined to many parameters, please provide EITHER new_voxelsize, new_shape OR resampling_factor!")
+        else:
+            # -- Compute resampling factors for each direction:
+            interp_factor = np.divide(im_vxs, new_voxelsize)
+    # - `new_shape` case:
+    elif new_shape is not None :
+        # - Check only one resampling method has been selected:
+        raise NotImplementedError("This method is not implemented yet!")
+    # - `resampling_factor` case:
+    elif resampling_factor !=1 :
+        # - Check only one resampling method has been selected:
+        try:
+            assert (new_shape is None) and (resampling_factor==1)
+        except AssertionError:
+            raise AssertionError("You have defined to many parameters, please provide EITHER new_voxelsize, new_shape OR resampling_factor!")
+        else:
+            # -- Compute resampling factors for each direction:
+            interp_factor = np.repeat(resampling_factor, len(im_vxs))
+    else:
+        raise AssertionError("You need to define one resampling method by setting one of them!")
+
+    print "Resampling factor obtained: {}".format(interp_factor)
+    # -- Create a template image with isometric voselsize and the right shape:
+    template_im_shape = map(int, im_shape * interp_factor)
+    template_im_vxs = im_vxs / interp_factor
+    print "Isometric resampling to:"
+    print "  -- voxelsize {} (original: {})".format(template_im_vxs, input_im.voxelsize)
+    print "  -- shape {} (original: {})".format(template_im_shape, input_im.shape)
+    template_im = SpatialImage(np.zeros(template_im_shape),
+                               voxelsize=template_im_vxs.tolist(),
+                               dtype=im_dtype)
+    # -- Create the corresponding identity transformation:
+    identity_trsf = create_trsf(template_im, param_str_1='-identity')
+    # -- Apply it on `input_im` to interpolate:
+    interp_im = apply_trsf(input_im, bal_transformation=identity_trsf,
+                           template_img=template_im, dtype=im_dtype)
+    return interp_im
+
+
+def isometric_resampling(input_im, method='min'):
+    """
+    Transform the image to an isometric version according to a method or a given voxelsize.
+    
+    Params:
+     - method (str|float): change voxelsize to 'min', 'max' of original voxelsize or to a given value.
+    """
+    if method == 'min':
+        vxs = np.min(input_im.voxelsize)
+    elif method == 'max':
+        vxs = np.max(input_im.voxelsize)
+    elif isinstance(method, float):
+        vxs = method
+    else:
+        raise ValueError("Given paremeter not understood, please refers to the doc.")
+    vxs = np.repeat(vxs, len(input_im.voxelsize)).tolist()
+    return resample_image(input_im, vxs)
+
+
 add_doc(inv_trsf, libblockmatching.API_Help_invTrsf)
 add_doc(apply_trsf, libblockmatching.API_Help_applyTrsf)
 add_doc(compose_trsf, libblockmatching.API_Help_composeTrsf)
