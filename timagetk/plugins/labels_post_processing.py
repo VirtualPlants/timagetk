@@ -26,7 +26,6 @@ except ImportError:
 
 __all__ = ['labels_post_processing']
 
-DEFAULT_METHOD = 'labels_erosion'
 POSS_METHODS = ['labels_erosion', 'labels_dilation', 'labels_opening', 'labels_closing']
 
 
@@ -45,25 +44,29 @@ def _method_img_check(input_image):
     return
 
 
-def _method_param_check(radius, iterations):
+def _method_param_check(**kwds):
     """
     Set parameters default values and make sure they are of the right type.
     """
-    if radius is None:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if iterations is None:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
-    return radius, iterations
+    str_param = ""
+    str_param += ' -radius %d' % (kwds.get('radius', 1))
+    str_param += ' -iterations %d' % (kwds.get('iterations', 1))
+    str_param += ' -connectivity %d' % (kwds.get('connectivity', 18))
+    if kwds.get('param', True):
+        str_param += ' -param'
+    if kwds.get('verbose', True):
+        str_param += ' -verbose'
+    if kwds.get('parallel', True):
+        str_param += ' -parallel'
+    if kwds.get('time', True):
+        str_param += ' -time'
+        str_param += ' -parallel-type '+kwds.get('parallel-type', 'thread')
+    return str_param
 
 
-def labels_post_processing(input_image, method=None, **kwds):
+def labels_post_processing(input_image, method, **kwds):
     """
     Labels post-processing algorithms. Available methods are :
-
     * labels_erosion
     * labels_dilation
     * labels_opening
@@ -71,15 +74,32 @@ def labels_post_processing(input_image, method=None, **kwds):
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input *SpatialImage*
-
-    :param str method: used method (example: 'labels_erosion')
+    input_image: *SpatialImage* 
+        input *SpatialImage*
+    method: str
+        used method (example: 'labels_erosion')
+    radius: int, optional; default = 1
+        radius of the structuring element
+    iterations: int, optional; default = 1
+        number of iteration of the morphological operation
+    connectivity: value in 6|10|18|26, default = 18
+        structuring element is among the 6-, 10-, 18- & 26-neighborhoods.
+    param: bool, optional; default = False
+        print parameters
+    parallel: bool, optional; default = True
+        set usage of parrallel mode
+    parallel-type str in none|openmp|omp|pthread|thread, default=thread
+        type of parrallelism to use
+    time: bool, optional; default = True
+        print elapsed time
+    try_plugin: bool, optional; default = True
+        manually control the use of openalea 'plugin' functionality 
 
     Returns
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
 
-    :WARNING: If your images are not isometric, the morphological 
+    *WARNING*: If your images are not isometric, the morphological 
      operation will not be the same in every directions!
 
     Example
@@ -94,117 +114,126 @@ def labels_post_processing(input_image, method=None, **kwds):
     """
     # - Check `input_image` type and isometry:
     _method_img_check(input_image)
-    # - Set the 'DEFAULT_METHOD' if needed:
-    if method is None:
-        method = DEFAULT_METHOD
     # - Check the provided method is implemented:
     try:
         assert method in POSS_METHODS
     except:
         print('Available methods :'), POSS_METHODS
         raise NotImplementedError(method)
-
+    # - Try 'plugin function' or use direct wrapping:
     try:
+        assert kwds.get('try_plugin', True)
         from openalea.core.service.plugin import plugin_function
         func = plugin_function('openalea.image', method)
         if func is not None:
             return func(input_image, **kwds)
     except:
         print "Plugin functionnality not available !"
-        radius_val = kwds.get('radius', None)
-        it_val = kwds.get('iterations', None)
         if method=='labels_erosion':
-            return labels_erosion(input_image, radius=radius_val, iterations=it_val)
+            return labels_erosion(input_image, **kwds)
         if method=='labels_dilation':
-            return labels_dilation(input_image, radius=radius_val, iterations=it_val)
+            return labels_dilation(input_image, **kwds)
         if method=='labels_opening':
-            return labels_opening(input_image, radius=radius_val, iterations=it_val)
+            return labels_opening(input_image, **kwds)
         if method=='labels_closing':
-            return labels_closing(input_image, radius=radius_val, iterations=it_val)
+            return labels_closing(input_image, **kwds)
 
 
-def labels_erosion(input_image, radius=None, iterations=None, **kwds):
+def labels_erosion(input_image, **kwds):
     """
     Labels erosion.
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input *SpatialImage*
-
-    :param int radius: optinal, radius. Default: radius=1
-
-    :param int iterations: optional, number of iterations. Default: iterations=1
+    input_image: *SpatialImage* 
+        input *SpatialImage*
+    method: str
+        used method (example: 'labels_erosion')
+    radius: int, optional; default = 1
+        radius of the structuring element
+    iterations: int, optional; default = 1
+        number of iteration of the morphological operation
 
     Returns
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
     _method_img_check(input_image)
-    radius, iterations = _method_param_check(radius, iterations)
-    params = '-erosion -iterations %d -radius %d' % (iterations, radius)
+    params = '-erosion'
+    params +=  _method_param_check(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
-def labels_dilation(input_image, radius=None, iterations=None, **kwds):
+def labels_dilation(input_image, **kwds):
     """
     Labels dilation.
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input *SpatialImage*
-
-    :param int radius: optinal, radius. Default: radius=1
-
-    :param int iterations: optional, number of iterations. Default: iterations=1
+    input_image: *SpatialImage* 
+        input *SpatialImage*
+    method: str
+        used method (example: 'labels_erosion')
+    radius: int, optional; default = 1
+        radius of the structuring element
+    iterations: int, optional; default = 1
+        number of iteration of the morphological operation
 
     Returns
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
     _method_img_check(input_image)
-    radius, iterations = _method_param_check(radius, iterations)
-    params = '-dilation -iterations %d -radius %d' % (iterations, radius)
+    params = '-dilation'
+    params +=  _method_param_check(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
-def labels_opening(input_image, radius=None, iterations=None, **kwds):
+def labels_opening(input_image, **kwds):
     """
     Labels opening.
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input *SpatialImage*
-
-    :param int radius: optinal, radius. Default: radius=1
-
-    :param int iterations: optional, number of iterations. Default: iterations=1
+    input_image: *SpatialImage* 
+        input *SpatialImage*
+    method: str
+        used method (example: 'labels_erosion')
+    radius: int, optional; default = 1
+        radius of the structuring element
+    iterations: int, optional; default = 1
+        number of iteration of the morphological operation
 
     Returns
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
     _method_img_check(input_image)
-    radius, iterations = _method_param_check(radius, iterations)
-    params = '-opening -iterations %d -radius %d' % (iterations, radius)
+    params = '-opening'
+    params +=  _method_param_check(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
-def labels_closing(input_image, radius=None, iterations=None, **kwds):
+def labels_closing(input_image, **kwds):
     """
     Labels closing.
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input *SpatialImage*
-
-    :param int radius: optinal, radius. Default: radius=1
-
-    :param int iterations: optional, number of iterations. Default: iterations=1
+    input_image: *SpatialImage* 
+        input *SpatialImage*
+    method: str
+        used method (example: 'labels_erosion')
+    radius: int, optional; default = 1
+        radius of the structuring element
+    iterations: int, optional; default = 1
+        number of iteration of the morphological operation
 
     Returns
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    radius, iterations = _method_param_check(radius, iterations)
-    params = '-closing -iterations %d -radius %d' % (iterations, radius)
+    _method_img_check(input_image)
+    params = '-closing'
+    params +=  _method_param_check(**kwds)
     return cell_filter(input_image, param_str_2=params)
