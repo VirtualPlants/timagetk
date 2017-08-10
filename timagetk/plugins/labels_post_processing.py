@@ -68,7 +68,8 @@ def get_param_str_2(**kwds):
     return str_param
 
 
-def labels_post_processing(input_image, method, **kwds):
+def labels_post_processing(input_image, method=None, **kwds):
+==== BASE ====
     """
     Labels post-processing algorithms. Available methods are :
     * labels_erosion
