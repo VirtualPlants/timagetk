@@ -58,9 +58,9 @@ def _method_param_check(**kwds):
         str_param += ' -verbose'
     if kwds.get('parallel', True):
         str_param += ' -parallel'
+        str_param += ' -parallel-type '+kwds.get('parallel-type', 'thread')
     if kwds.get('time', True):
         str_param += ' -time'
-        str_param += ' -parallel-type '+kwds.get('parallel-type', 'thread')
     return str_param
 
 
@@ -72,6 +72,8 @@ def labels_post_processing(input_image, method, **kwds):
     * labels_opening
     * labels_closing
 
+    Most parameters works only if 'try_plugin=False' is given!
+    
     Parameters
     ----------
     input_image: *SpatialImage* 
