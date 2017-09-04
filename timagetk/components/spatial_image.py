@@ -66,6 +66,25 @@ def tuple_to_list(input_tuple):
     else:
         return []
 
+def dimensionality_test(dim, list2test):
+    """ Quick testing of dimensionality with print in case of error."""
+    d = len(list2test)
+    try:
+        assert d == dim
+    except:
+        raise ValueError("Provided values dimensionality ({}) is not of the same than the array ({})!".format(d, dim))
+
+def tuple_array_to_list(val):
+    """ Returns a list if a tuple or array is provided, else raise Error message."""
+    if isinstance(val, np.ndarray):
+        val = val.tolist()
+    elif isinstance(val, tuple):
+        val = list(val)
+    if not isinstance(val, list):
+        raise TypeError("Accepted type are tuple, list and np.array!")
+    else:
+        return val
+
 
 class SpatialImage(np.ndarray):
     """
@@ -101,90 +120,87 @@ class SpatialImage(np.ndarray):
         >>> isinstance(image_1, SpatialImage) and isinstance(image_2, SpatialImage)
         True
         """
-
-        if isinstance(input_array, np.ndarray) and len(input_array.shape) in [2,3]:
-
-            def_type = poss_types_dict[0]
-            def_vox_2D, def_vox_3D = [1.0, 1.0], [1.0, 1.0, 1.0]
-            def_orig_2D, def_orig_3D = [0, 0], [0, 0, 0]
-
-            if dtype is None or dtype==[]:
-                if (input_array.dtype is not None):
-                    dtype = input_array.dtype
-            elif dtype is not None:
-                if (str(dtype) in poss_types_dict.keys() or dtype in poss_types_dict.values()):
-                    for key in poss_types_dict:
-                        if (str(dtype)==key or dtype==poss_types_dict[key]):
-                            dtype = poss_types_dict[key]
-                else:
-                    print('Available types :'), poss_types_dict
-                    print('Setting type to unsigned integer')
-                    dtype = def_type
-
-            if input_array.flags.f_contiguous:
-                obj = np.asarray(input_array, dtype=dtype).view(cls)
-            else :
-                obj = np.asarray(input_array, dtype=dtype, order='F').view(cls)
-
-            if origin is None or origin==[]:
-                orig = [0 for ind in xrange(len(input_array.shape))]
-            elif origin is not None and isinstance(origin, list):
-                if len(origin)==(len(input_array.shape)):
-                    orig = origin
-                else:
-                    print('Warning, incorrect specification')
-                    if len(input_array.shape)==2:
-                        orig = def_orig_2D
-                    elif len(input_array.shape)==3:
-                        orig = def_orig_3D
-                    print('Setting origin to :'), orig
-
-            obj.origin = orig
-
-            if isinstance(voxelsize, tuple):    # SR --- BACK COMPAT
-                voxelsize = tuple_to_list(voxelsize)
-
-            if voxelsize is None or voxelsize==[]:
-                print('Warning, voxelsize is not defined')
-                if (len(input_array.shape)==2):
-                    obj.voxelsize = def_vox_2D
-                elif (len(input_array.shape)==3):
-                    obj.voxelsize = def_vox_3D
-                print('Setting voxelsize to : '), obj.voxelsize
-            elif voxelsize is not None and len(voxelsize)>0:
-                if (len(input_array.shape)!=len(voxelsize)):
-                    print('Warning, incorrect specification')
-                    if (len(input_array.shape)==2):
-                        obj.voxelsize = def_vox_2D
-                    elif (len(input_array.shape)==3):
-                        obj.voxelsize = def_vox_3D
-                    print('Setting voxelsize to : '), obj.voxelsize
-                elif (len(input_array.shape)==len(voxelsize)):
-                    vox = around_list(voxelsize)
-                    obj.voxelsize = vox
-
-            ext = [obj.voxelsize[ind]*input_array.shape[ind] for ind in xrange(len(input_array.shape))]
-            ext = around_list(ext)
-            obj.extent = ext
-
-            if metadata_dict is None or metadata_dict==[]:
-                metadata_dict = {}
-
-            if isinstance(metadata_dict, dict):
-                metadata_dict['voxelsize'] = obj.voxelsize
-                metadata_dict['shape'] = obj.shape
-                metadata_dict['dim'] = obj.ndim
-                metadata_dict['origin'] = obj.origin
-                metadata_dict['extent'] = obj.extent
-                metadata_dict['type'] = str(obj.dtype)
-                metadata_dict['min'] = obj.min()
-                metadata_dict['max'] = obj.max()
-                metadata_dict['mean'] = obj.mean()
-
-            obj.metadata = metadata_dict
-            
-            obj.resolution = obj.voxelsize
-            return obj
+        # - Test input array: should be a numpy array of dimension 2 or 3:
+        try:
+            assert isinstance(input_array, np.ndarray)
+        except:
+            raise TypeError("Input array is not a numpy array!")
+        try:
+            assert len(input_array.shape) in [2,3]
+        except:
+            raise ValueError("Input array must have a dimensionnality equal to 2 or 3")
+        # - Define default values:
+        def_type = poss_types_dict[0]
+        def_vox_2D, def_vox_3D = [1.0, 1.0], [1.0, 1.0, 1.0]
+        def_orig_2D, def_orig_3D = [0, 0], [0, 0, 0]
+        # - Check 'dtype':
+        if dtype is None or dtype==[]:
+            if (input_array.dtype is not None):
+                dtype = input_array.dtype
+        elif dtype is not None:
+            if (str(dtype) in poss_types_dict.keys() or dtype in poss_types_dict.values()):
+                for key in poss_types_dict:
+                    if (str(dtype)==key or dtype==poss_types_dict[key]):
+                        dtype = poss_types_dict[key]
+            else:
+                print('Available types :'), poss_types_dict
+                print('Setting type to unsigned integer')
+                dtype = def_type
+        # - Check & set 'flags' value, set 'dtype' value:
+        if input_array.flags.f_contiguous:
+            obj = np.asarray(input_array, dtype=dtype).view(cls)
+        else :
+            obj = np.asarray(input_array, dtype=dtype, order='F').view(cls)
+        # - Check 'origins' value:
+        if (origin is not None) and (len(input_array.shape) == len(origin)):
+            orig = origin
+        else:
+            print "Warning, incorrect origin specification"
+            if len(input_array.shape)==2:
+                orig = def_orig_2D
+            else:
+                orig = def_orig_3D
+            print "Set origin to default value:", orig
+        obj.origin = orig
+        # - Check & set 'voxelsize' value:
+        if isinstance(voxelsize, tuple):    # SR --- BACK COMPAT
+            voxelsize = tuple_to_list(voxelsize)
+        if (voxelsize is not None) and (len(input_array.shape) == len(voxelsize)):
+            vxs = around_list(voxelsize)
+        else:
+            print "Warning, incorrect voxelsize specification!"
+            if len(input_array.shape) == 2:
+                vxs = def_vox_2D
+            else:
+                vxs = def_vox_3D
+            print "Set voxelsize to default value:", vxs
+        obj.voxelsize = vxs
+        # - Set 'extent' value:
+        ext = [obj.voxelsize[ind]*input_array.shape[ind] for ind in xrange(len(input_array.shape))]
+        ext = around_list(ext)
+        obj.extent = ext
+        # - Create the metadata dictionary:
+        if metadata_dict is None or metadata_dict==[]:
+            metadata_dict = {}
+        else:
+            try:
+                assert type(metadata_dict, dict)
+            except:
+                raise TypeError("metadata_dict should be a dictionary!")
+        if isinstance(metadata_dict, dict):
+            metadata_dict['voxelsize'] = obj.voxelsize
+            metadata_dict['shape'] = obj.shape
+            metadata_dict['dim'] = obj.ndim
+            metadata_dict['origin'] = obj.origin
+            metadata_dict['extent'] = obj.extent
+            metadata_dict['type'] = str(obj.dtype)
+            metadata_dict['min'] = obj.min()
+            metadata_dict['max'] = obj.max()
+            metadata_dict['mean'] = obj.mean()
+        obj.metadata = metadata_dict
+        # - Backward compatibility with 'openalea.image' `SpatiaImage`:
+        obj.resolution = obj.voxelsize
+        return obj
 
 
     def __array_finalize__(self, obj):
@@ -646,16 +662,18 @@ class SpatialImage(np.ndarray):
         >>> image_extent = [10.0, 10.0]
         >>> image.set_extent(image_extent)
         """
-        if isinstance(img_extent, list) and len(img_extent)==self.get_dim():
-            img_extent = around_list(img_extent)
-            self.extent = img_extent
-            vox = [img_extent[ind]/self.get_shape()[ind] for ind, val in enumerate(img_extent)]
-            vox = around_list(vox)
-            self.set_voxelsize(vox)
-            meta_dict = self.get_metadata()
-            meta_dict['extent'] = img_extent
-            meta_dict['voxelsize'] = vox
-            self.metadata = meta_dict
+        dimensionality_test(self.get_dim(), img_extent)
+        img_extent = tuple_array_to_list(img_extent)
+        img_extent = around_list(img_extent)
+        self.extent = img_extent
+        vox = [img_extent[ind]/self.get_shape()[ind] for ind, val in enumerate(img_extent)]
+        vox = around_list(vox)
+        self.set_voxelsize(vox)
+        meta_dict = self.get_metadata()
+        meta_dict['extent'] = img_extent
+        meta_dict['voxelsize'] = vox
+        self.metadata = meta_dict
+        return "Set extent to '{}'".format(self.extent)
 
 
     def set_metadata(self, img_metadata):
@@ -704,11 +722,13 @@ class SpatialImage(np.ndarray):
         >>> image_origin = [2, 2]
         >>> image.set_origin(image_origin)
         """
-        if isinstance(img_origin, list) and len(img_origin)==self.get_dim():
-            self.origin = img_origin
-            img_met = self.get_metadata()
-            img_met['origin'] = self.origin
-            self.metadata = img_met
+        dimensionality_test(self.get_dim(), img_origin)
+        img_origin = tuple_array_to_list(img_origin)
+        self.origin = img_origin
+        img_met = self.get_metadata()
+        img_met['origin'] = self.origin
+        self.metadata = img_met
+        return "Set origin to '{}'".format(self.origin)
 
 
     def set_pixel(self, indices, val):
@@ -842,7 +862,7 @@ class SpatialImage(np.ndarray):
             return self
 
 
-    def set_voxelsize(self, val):
+    def set_voxelsize(self, img_vxs):
         """
         Set ``SpatialImage`` voxelsize
 
@@ -859,16 +879,18 @@ class SpatialImage(np.ndarray):
         >>> image_voxelsize = [0.5, 0.5]
         >>> image.set_voxelsize(image_voxelsize)
         """
-        if isinstance(val, list) and len(val)==self.get_dim():
-            val = around_list(val)
-            self.voxelsize = val
-            ext = [val[ind]*self.shape[ind] for ind, v in enumerate(self.shape)]
-            ext = around_list(ext)
-            self.extent = ext
-            img_met = self.get_metadata()
-            img_met['voxelsize'] = self.voxelsize
-            img_met['extent'] = self.extent
-            self.metadata = img_met
+        dimensionality_test(self.get_dim(), img_vxs)
+        img_vxs = tuple_array_to_list(img_vxs)
+        img_vxs = around_list(img_vxs)
+        self.voxelsize = img_vxs
+        ext = [img_vxs[ind]*self.shape[ind] for ind, v in enumerate(self.shape)]
+        ext = around_list(ext)
+        self.extent = ext
+        img_met = self.get_metadata()
+        img_met['voxelsize'] = self.voxelsize
+        img_met['extent'] = self.extent
+        self.metadata = img_met
+        return "Set voxelsize to '{}'".format(self.voxelsize)
 
 
     def to_2D(self):
