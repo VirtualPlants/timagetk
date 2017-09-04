@@ -77,6 +77,25 @@ def tuple_to_list(input_tuple):
     else:
         return []
 
+def dimensionality_test(dim, list2test):
+    """ Quick testing of dimensionality with print in case of error."""
+    d = len(list2test)
+    try:
+        assert d == dim
+    except:
+        raise ValueError("Provided values dimensionality ({}) is not of the same than the array ({})!".format(d, dim))
+
+def tuple_array_to_list(val):
+    """ Returns a list if a tuple or array is provided, else raise Error message."""
+    if isinstance(val, np.ndarray):
+        val = val.tolist()
+    elif isinstance(val, tuple):
+        val = list(val)
+    if not isinstance(val, list):
+        raise TypeError("Accepted type are tuple, list and np.array!")
+    else:
+        return val
+
 
 def dimensionality_test(dim, list2test):
     """ Quick testing of dimensionality with print in case of error."""
