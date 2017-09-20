@@ -53,6 +53,13 @@ def imread(img_file):
     if conds:
         (filepath, filename) = os.path.split(img_file)
         (shortname, extension) = os.path.splitext(filename)
+
+        if extension in ['.gz','.zip']:
+            extension = os.path.splitext(shortname)[1] + extension
+            shortname = os.path.splitext(shortname)[0]
+
+        print extension, [extension == ext for ext in poss_ext]
+
         if extension in poss_ext:
             if (extension=='.inr' or extension=='.inr.gz' or extension=='.inr.zip'):
                 try:

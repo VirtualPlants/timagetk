@@ -50,6 +50,9 @@ def read_inr_image(inr_file):
     if conds:
         (filepath, filename) = os.path.split(inr_file)
         (shortname, extension) = os.path.splitext(filename)
+        if extension in ['.gz','.zip']:
+            extension = os.path.splitext(shortname)[1] + extension
+            shortname = os.path.splitext(shortname)[0]
         if extension in poss_ext:
             if (extension=='.inr.gz' or extension=='.inr.zip'):
                 with gzip.open(inr_file, 'rb') as fzip:
