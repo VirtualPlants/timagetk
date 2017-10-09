@@ -95,12 +95,12 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
     """
 
     def __init__(self, trsf_type=None, trsf_unit=None, c_bal_trsf=None):
-
+        """
+        """
+        self._c_bal_trsf = BAL_TRSF()
         if c_bal_trsf is None:
-            self._c_bal_trsf = BAL_TRSF()
             # WARNING: BAL_InitTransformation set type to undef!
             libblockmatching.BAL_InitTransformation(self.c_ptr) # type to undef !
-
             if trsf_unit is not None:
                 self._c_bal_trsf.transformation_unit = trsf_unit
 
@@ -116,21 +116,19 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
             self.trsf_type = self._c_bal_trsf.type
             #libblockmatching.BAL_AllocTransformation(self.c_ptr, self._c_bal_trsf.type,
             #                                         pointer(self._c_bal_trsf.vx))
-
-        elif c_bal_trsf is not None:
-
-            self._c_bal_trsf = BAL_TRSF()
-
+        else:
             if isinstance(c_bal_trsf, BAL_TRSF):
+                print "Got instance BAL_TRSF"
                 libblockmatching.BAL_AllocTransformation(self.c_ptr, c_bal_trsf.type,
                                                          pointer(c_bal_trsf.vx))
                 libblockmatching.BAL_CopyTransformation(pointer(c_bal_trsf), self.c_ptr)
-
             elif isinstance(c_bal_trsf, BalTransformation):
+                print "Got instance BalTransformation"
                 libblockmatching.BAL_AllocTransformation(self.c_ptr, c_bal_trsf._c_bal_trsf.type,
                                                          c_bal_trsf.vx.c_ptr)
                 libblockmatching.BAL_CopyTransformation(pointer(c_bal_trsf._c_bal_trsf), self.c_ptr)
-
+            else:
+                raise TypeError("Unknown type '{}' for 'c_bal_trsf'...".format(type(c_bal_trsf)))
 
             self.trsf_unit = self._c_bal_trsf.transformation_unit
             self.mat = BalMatrix(c_bal_matrix=self._c_bal_trsf.mat) #---- BalMatrix instance

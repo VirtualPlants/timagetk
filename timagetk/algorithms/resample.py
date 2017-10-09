@@ -10,17 +10,18 @@
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-#--- Aug. 2016
+# --- Aug. 2016
 import numpy as np
+
 try:
     from timagetk.components import SpatialImage
     from timagetk.algorithms import apply_trsf
 except ImportError:
     raise ImportError('Import Error')
 
-__all__ = ['resample_isotropic','subsample']
+__all__ = ['resample_isotropic', 'subsample']
 
 
 def resample_isotropic(image, voxelsize, option='gray'):
@@ -43,30 +44,130 @@ def resample_isotropic(image, voxelsize, option='gray'):
     -------
     >>> output_image = resample_isotropic(input_image, voxelsize=0.4)
     """
-    if isinstance(image, SpatialImage) and image.get_dim()==3:
+    # Check the input parameters:
+    poss_opt = ['gray', 'label']
+    if option not in poss_opt:
+        raise ValueError("Possible options are: {}".format(poss_opt))
+    if not (isinstance(image, SpatialImage) and image.get_dim() == 3):
+        raise TypeError("'image' must be a SpatialImage instance")
 
-        poss_opt = ['gray', 'label']
-        if option not in poss_opt:
-            option = 'gray'
+    if not isinstance(voxelsize, float):
+        voxelsize = float(voxelsize)
+    extent = image.get_extent()
+    new_vox = [voxelsize, voxelsize, voxelsize]
+    # new_shape = [int(np.ceil(extent[ind] / new_vox[ind])) for ind in
+    #              range(image.get_dim())]
+    # Smaller approximation error with round than np.ceil ?!
+    new_shape = [int(round(extent[ind] / new_vox[ind])) for ind in
+                 range(image.get_dim())]
+    tmp_img = np.zeros((new_shape[0], new_shape[1], new_shape[2]),
+                       dtype=image.dtype)
+    tmp_img = SpatialImage(tmp_img, voxelsize=new_vox)
 
-        extent = image.get_extent()
-        new_vox = [voxelsize, voxelsize, voxelsize]
-        new_shape = [int(np.ceil(extent[ind]/new_vox[ind])) for ind in range(image.get_dim())]
-        tmp_img = np.zeros((new_shape[0],new_shape[1],new_shape[2]),dtype=image.dtype)
-        tmp_img = SpatialImage(tmp_img, voxelsize=new_vox)
+    if option == 'gray':
+        param_str_2 = '-resize -interpolation linear'
+    elif option == 'label':
+        param_str_2 = '-resize -interpolation nearest'
 
-        if option=='gray':
-            param_str_2 = '-resize -interpolation linear'
-        elif option=='label':
-            param_str_2 = '-resize -interpolation nearest'
+    out_img = apply_trsf(image, bal_transformation=None, template_img=tmp_img,
+                         param_str_2=param_str_2)
+    if 1 in out_img.get_shape():
+        out_img = out_img.to_2D()
+    return out_img
 
-        out_img = apply_trsf(image, bal_transformation=None, template_img=tmp_img, param_str_2=param_str_2)
-        if 1 in out_img.get_shape():
-            out_img = out_img.to_2D()
-        return out_img
+
+# Similar to 'resample_isotropic':
+# def resample_image(input_im, new_voxelsize=None, new_shape=None, resampling_factor=1.):
+#     """
+#     Allow to resample any image given a new shape, new voxelsize or resampling_factor.
+#
+#     If:
+#      - resampling_factor < 1: over-sampling;
+#      - resampling_factor > 1: down-sampling;
+#      - resampling_factor = 1: unchanged.
+#
+#     Note: this is a work in progress!
+#     """
+#     print "Input image infos:"
+#     # - Get input_im infos:
+#     im_vxs = input_im.voxelsize
+#     print "  -- voxelsize: {}".format(im_vxs)
+#     im_dtype = input_im.dtype
+#     print "  -- dtype: {}".format(im_dtype)
+#     im_shape = input_im.shape
+#     print "  -- shape: {}".format(im_shape)
+#     # - `new_voxelsize` case:
+#     if new_voxelsize is not None:
+#         # - Check only one resampling method has been selected:
+#         try:
+#             assert (new_shape is None) and (resampling_factor==1)
+#         except AssertionError:
+#             raise AssertionError("You have defined to many parameters, please provide EITHER new_voxelsize, new_shape OR resampling_factor!")
+#         else:
+#             # -- Compute resampling factors for each direction:
+#             interp_factor = np.divide(im_vxs, new_voxelsize)
+#     # - `new_shape` case:
+#     elif new_shape is not None :
+#         # - Check only one resampling method has been selected:
+#         raise NotImplementedError("This method is not implemented yet!")
+#     # - `resampling_factor` case:
+#     elif resampling_factor !=1 :
+#         # - Check only one resampling method has been selected:
+#         try:
+#             assert (new_shape is None) and (resampling_factor==1)
+#         except AssertionError:
+#             raise AssertionError("You have defined to many parameters, please provide EITHER new_voxelsize, new_shape OR resampling_factor!")
+#         else:
+#             # -- Compute resampling factors for each direction:
+#             interp_factor = np.repeat(resampling_factor, len(im_vxs))
+#     else:
+#         raise AssertionError("You need to define one resampling method by setting one of them!")
+#
+#     print "Resampling factor obtained: {}".format(interp_factor)
+#     # -- Create a template image with isometric voselsize and the right shape:
+#     template_im_shape = map(int, im_shape * interp_factor)
+#     template_im_vxs = im_vxs / interp_factor
+#     print "Isometric resampling to:"
+#     print "  -- voxelsize {} (original: {})".format(template_im_vxs, input_im.voxelsize)
+#     print "  -- shape {} (original: {})".format(template_im_shape, input_im.shape)
+#     template_im = SpatialImage(np.zeros(template_im_shape),
+#                                voxelsize=template_im_vxs.tolist(),
+#                                dtype=im_dtype)
+#     # -- Create the corresponding identity transformation:
+#     identity_trsf = create_trsf(template_im, param_str_1='-identity')
+#     # -- Apply it on `input_im` to interpolate:
+#     interp_im = apply_trsf(input_im, bal_transformation=identity_trsf,
+#                            template_img=template_im, dtype=im_dtype)
+#     return interp_im
+
+
+def isometric_resampling(input_im, method='min', option='gray'):
+    """
+    Transform the image to an isometric version according to a method or a given voxelsize.
+
+    Parameters
+    ----------
+    input_im : SpatialImage
+        image to resample
+    method : str|float, optional
+        change voxelsize to 'min' (default), 'max' of original voxelsize or to a
+        given value.
+    option : str, optional
+        option can be either 'gray' or 'label'
+    """
+    poss_methods = ['min', 'max']
+    if method not in poss_methods and not isinstance(method, float):
+        raise ValueError(
+            "Possible values for 'methods' are a float, 'min' or 'max'.")
+    if method == 'min':
+        vxs = np.min(input_im.voxelsize)
+    elif method == 'max':
+        vxs = np.max(input_im.voxelsize)
     else:
-        print('sp_img must be a SpatialImage instance')
-        return
+        vxs = method
+    # vxs = np.repeat(vxs, len(input_im.voxelsize)).tolist()
+    # return resample_image(input_im, vxs)
+    return resample_isotropic(input_im, vxs, option)
 
 
 def subsample(image, factor=[2, 2, 1], option='gray'):
@@ -93,23 +194,29 @@ def subsample(image, factor=[2, 2, 1], option='gray'):
     if option not in poss_opt:
         option = 'gray'
 
-
     if isinstance(image, SpatialImage) and image.get_dim() in [2, 3]:
-        if image.get_dim()==2:
+        if image.get_dim() == 2:
             image = image.to_3D()
             factor.append(1)
 
         shape, extent = image.get_shape(), image.get_extent()
-        new_shape = [int(np.ceil(shape[ind]/factor[ind])) for ind in range(image.get_dim())]
-        new_vox = [extent[ind]/new_shape[ind] for ind in range(image.get_dim())]
-        tmp_img = np.zeros((new_shape[0],new_shape[1],new_shape[2]),dtype=image.dtype)
+        # new_shape = [int(np.ceil(shape[ind] / factor[ind])) for ind in
+        #              range(image.get_dim())]
+        # Smaller approximation error with round than np.ceil ?!
+        new_shape = [int(round(shape[ind] / factor[ind])) for ind in
+                     range(image.get_dim())]
+        new_vox = [extent[ind] / new_shape[ind] for ind in
+                   range(image.get_dim())]
+        tmp_img = np.zeros((new_shape[0], new_shape[1], new_shape[2]),
+                           dtype=image.dtype)
         tmp_img = SpatialImage(tmp_img, voxelsize=new_vox)
-        if option=='gray':
+        if option == 'gray':
             param_str_2 = '-resize -interpolation linear'
-        elif option=='label':
+        elif option == 'label':
             param_str_2 = '-resize -interpolation nearest'
 
-        out_img = apply_trsf(image, bal_transformation=None, template_img=tmp_img, param_str_2=param_str_2)
+        out_img = apply_trsf(image, bal_transformation=None,
+                             template_img=tmp_img, param_str_2=param_str_2)
         if 1 in out_img.get_shape():
             out_img = out_img.to_2D()
         return out_img

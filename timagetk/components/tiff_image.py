@@ -65,7 +65,7 @@ def read_tiff_image(tiff_file):
                     tmp_arr = np.transpose(np.squeeze(tif.asarray()), (2,1,0))
 
                 metadata_dict['shape'], metadata_dict['dim'] = tmp_arr.shape, len(tmp_arr.shape)
-                int_tags = ['x_resolution', 'y_resolution', 'image_width', 'image_length', 'image_description']
+                int_tags = ['x_resolution', 'y_resolution', 'image_width', 'image_length', 'image_description', 'location']
                 for page in tif:
                     for tag in page.tags.values():
                         if tag.name in int_tags:
@@ -78,6 +78,9 @@ def read_tiff_image(tiff_file):
                                     pass
                             else:
                                 metadata_dict[str(tag.name)] = tag.value
+
+                if 'location' in metadata_dict:
+                    metadata_dict['filepath'], metadata_dict['filename'] = os.split(metadata_dict['location'])
 
                 if ('resolution' in metadata_dict and 'image_width' in metadata_dict and 'image_length' in metadata_dict):
                     metadata_dict['width'] = metadata_dict['image_width']/metadata_dict['resolution']
@@ -109,11 +112,11 @@ def read_tiff_image(tiff_file):
                 if ('shape_z' in metadata_dict) and not ('vox_z' in metadata_dict):
                     vox.append(1.0)
                 if (len(vox)==metadata_dict['dim']):
-                    out_sp_img = SpatialImage(input_array=tmp_arr, voxelsize=vox)
+                    out_sp_img = SpatialImage(input_array=tmp_arr, voxelsize=vox, metadata_dict=metadata_dict)
                 else:
-                    out_sp_img = SpatialImage(input_array=tmp_arr, voxelsize=[])
-                    print('Warning, unknown voxelsize')
-                del metadata_dict
+                    out_sp_img = SpatialImage(input_array=tmp_arr, voxelsize=[], metadata_dict=metadata_dict)
+                    #~ print('Warning, unknown voxelsize')
+                #~ del metadata_dict
                 return out_sp_img
         else:
             print('Unknown extension, extensions can be either :'), poss_ext

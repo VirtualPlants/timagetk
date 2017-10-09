@@ -184,7 +184,7 @@ class SpatialImage(np.ndarray):
             metadata_dict = {}
         else:
             try:
-                assert type(metadata_dict, dict)
+                assert isinstance(metadata_dict, dict)
             except:
                 raise TypeError("metadata_dict should be a dictionary!")
         if isinstance(metadata_dict, dict):

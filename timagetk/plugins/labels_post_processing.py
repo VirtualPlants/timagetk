@@ -58,7 +58,7 @@ def _method_param_check(**kwds):
         str_param += ' -verbose'
     if kwds.get('parallel', True):
         str_param += ' -parallel'
-        str_param += ' -parallel-type '+kwds.get('parallel-type', 'thread')
+        str_param += ' -parallel-type '+kwds.get('parallel_type', 'thread')
     if kwds.get('time', True):
         str_param += ' -time'
     return str_param
@@ -73,10 +73,10 @@ def labels_post_processing(input_image, method, **kwds):
     * labels_closing
 
     Most parameters works only if 'try_plugin=False' is given!
-    
+
     Parameters
     ----------
-    input_image: *SpatialImage* 
+    input_image: *SpatialImage*
         input *SpatialImage*
     method: str
         used method (example: 'labels_erosion')
@@ -95,13 +95,13 @@ def labels_post_processing(input_image, method, **kwds):
     time: bool, optional; default = True
         print elapsed time
     try_plugin: bool, optional; default = True
-        manually control the use of openalea 'plugin' functionality 
+        manually control the use of openalea 'plugin' functionality
 
     Returns
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
 
-    *WARNING*: If your images are not isometric, the morphological 
+    *WARNING*: If your images are not isometric, the morphological
      operation will not be the same in every directions!
 
     Example
@@ -147,7 +147,7 @@ def labels_erosion(input_image, **kwds):
 
     Parameters
     ----------
-    input_image: *SpatialImage* 
+    input_image: *SpatialImage*
         input *SpatialImage*
     method: str
         used method (example: 'labels_erosion')
@@ -172,7 +172,7 @@ def labels_dilation(input_image, **kwds):
 
     Parameters
     ----------
-    input_image: *SpatialImage* 
+    input_image: *SpatialImage*
         input *SpatialImage*
     method: str
         used method (example: 'labels_erosion')
@@ -197,7 +197,7 @@ def labels_opening(input_image, **kwds):
 
     Parameters
     ----------
-    input_image: *SpatialImage* 
+    input_image: *SpatialImage*
         input *SpatialImage*
     method: str
         used method (example: 'labels_erosion')
@@ -222,7 +222,7 @@ def labels_closing(input_image, **kwds):
 
     Parameters
     ----------
-    input_image: *SpatialImage* 
+    input_image: *SpatialImage*
         input *SpatialImage*
     method: str
         used method (example: 'labels_erosion')

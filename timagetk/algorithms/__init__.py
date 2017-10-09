@@ -17,10 +17,10 @@ from timagetk.algorithms.regionalext import regionalext
 from timagetk.algorithms.connexe import connexe
 from timagetk.algorithms.watershed import watershed
 from timagetk.algorithms.blockmatching import blockmatching
-from timagetk.algorithms.trsf import inv_trsf, apply_trsf, compose_trsf, create_trsf, mean_trsfs, resample_image, isometric_resampling
+from timagetk.algorithms.trsf import inv_trsf, apply_trsf, compose_trsf, create_trsf, mean_trsfs
 from timagetk.algorithms.fusion import fusion
 from timagetk.algorithms.img_metrics import mean_squared_error, psnr
-from timagetk.algorithms.resample import subsample, resample_isotropic
+from timagetk.algorithms.resample import subsample, resample_isotropic, isometric_resampling
 from timagetk.algorithms.geometrical_features import GeometricalFeatures
 from timagetk.algorithms.temporal_matching import TemporalMatching
 from timagetk.algorithms.sets_metrics import sets_metrics
