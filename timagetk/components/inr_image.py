@@ -13,8 +13,11 @@
 Management of the .inr format
 """
 
-import os, gzip
+import gzip
+import os
+
 import numpy as np
+
 try:
     from cStringIO import StringIO # C version
 except:
@@ -121,6 +124,7 @@ def read_inr_image(inr_file):
 #            elif (vdim!=1):
 #                mat = mat.reshape((vdim,shape_x,shape_y,shape_z), order="F" )
 #                mat = mat.transpose(1,2,3,0)
+            # TODO: Create filename & filepath metadata and give it to metadata_dict parameter of 'SpatialImage'
             out_sp_img = SpatialImage(input_array=mat,voxelsize=img_vox)
             f.close()
             prop.clear()

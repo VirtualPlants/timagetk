@@ -29,7 +29,9 @@ and outputs (write).
 # documentation and unit tests (see test_spatial_image.py)
 
 from __future__ import division
+
 import numpy as np
+
 __all__ = ['SpatialImage']
 EPS, DEC_VAL = 1e-9, 6
 
@@ -120,6 +122,7 @@ class SpatialImage(np.ndarray):
         >>> isinstance(image_1, SpatialImage) and isinstance(image_2, SpatialImage)
         True
         """
+        # TODO: SpatialImage should have filename attribute or metadata!
         # - Test input array: should be a numpy array of dimension 2 or 3:
         try:
             assert isinstance(input_array, np.ndarray)
