@@ -17,8 +17,8 @@ try:
     from timagetk.wrapping.clib import libvtexec, add_doc, return_value
     from timagetk.wrapping.vt_image import vt_image, new_vt_image
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['LINEARFILTER_DEFAULT', 'linearfilter']
 LINEARFILTER_DEFAULT = '-x 0 -y 0 -z 0 -sigma 1.0'

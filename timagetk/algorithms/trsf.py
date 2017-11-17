@@ -15,6 +15,11 @@
 #--- Aug. 2016
 from ctypes import POINTER
 import numpy as np
+# --- Aug. 2016
+from ctypes import POINTER
+
+import numpy as np
+
 try:
     from timagetk.wrapping.clib import libblockmatching, add_doc
     from timagetk.wrapping.balImage import BAL_IMAGE
@@ -233,8 +238,8 @@ def compose_trsf(list_trsf, template_img=None,
     return trsf_out
 
 
-def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT, param_str_2=None,
-                trsf_type=None, trsf_unit=None):
+def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT,
+                param_str_2=None, trsf_type=None, trsf_unit=None):
     """
     Creation of classical *BalTransformation* transformations such as identity,
     translation, rotation,sinusoidal, random, etc.
@@ -262,7 +267,7 @@ def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT, param_str_2=
     >>> identity_trsf = create_trsf()
     """
     if template_img is not None and isinstance(template_img, SpatialImage):
-        if template_img.get_dim()==2:
+        if template_img.get_dim() == 2:
             template_img = template_img.to_3D()
 
         x, y, z = template_img.get_shape()
@@ -273,7 +278,7 @@ def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT, param_str_2=
         bal_image = BalImage(template_img)
     else:
         template_img = None
-        #raise NotImplementedError
+        # raise NotImplementedError
 
     if trsf_type is None:
         trsf_type = BalTransformation.AFFINE_3D
@@ -284,7 +289,12 @@ def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT, param_str_2=
     mat_out = trsf_out.mat
     init_c_bal_matrix(mat_out.c_struct, l=4, c=4)
     allocate_c_bal_matrix(mat_out.c_struct, np.zeros((4, 4), dtype=np.float64))
-    libblockmatching.API_createTrsf(trsf_out.c_ptr, None if template_img is None else bal_image.c_ptr, param_str_1, param_str_2)
+    if template_img is None:
+        libblockmatching.API_createTrsf(trsf_out.c_ptr, None, param_str_1,
+                                        param_str_2)
+    else:
+        libblockmatching.API_createTrsf(trsf_out.c_ptr, bal_image.c_ptr,
+                                        param_str_1, param_str_2)
     return trsf_out
 
 
