@@ -29,6 +29,7 @@ from openalea.image.algo.morpho import connectivity_6
 from openalea.image.algo.morpho import connectivity_8
 from timagetk.algorithms import connexe
 from timagetk.components import SpatialImage
+from timagetk.plugins import linear_filtering
 
 
 def im2surface(image, threshold_value=45, only_altitude=False,
@@ -56,12 +57,14 @@ def im2surface(image, threshold_value=45, only_altitude=False,
         altitude of maximum intensity projection
     """
     resolution = image.resolution
-    threshold = image >= threshold_value
+    # Added gaussian smoothing to reduce
+    img_th = linear_filtering(image, 'gaussian_smoothing', std_dev=2.0)
+    img_th = img_th >= threshold_value
+    img_th = SpatialImage(img_th.astype(np.uint8), voxelsize=resolution)
 
-    # ~ labeling, n = component_labeling(threshold, connectivity_26, number_labels=1)
-    labeling = connexe(threshold.astype(np.uint16),
-                       param_str_1='-labels -connectivity 26')
-    del threshold
+    # ~ labeling, n = component_labeling(img_th, connectivity_26, number_labels=1)
+    labeling = connexe(img_th, param_str_1='-labels -connectivity 26 -debug')
+    del img_th
 
     iterations = 15
     dilation1 = ndimage.binary_dilation(labeling, connectivity_8, iterations)
