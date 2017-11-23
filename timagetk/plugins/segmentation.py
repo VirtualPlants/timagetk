@@ -77,7 +77,6 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
                 raise NotImplementedError(method)
     else:
         raise TypeError('Input image and seeds image must be a SpatialImage')
-        return
 
 
 def seeded_watershed(input_image, seeds_image, control=None, **kwds):
@@ -109,4 +108,3 @@ def seeded_watershed(input_image, seeds_image, control=None, **kwds):
         return watershed(input_image, seeds_image, param_str_2=params)
     else:
         raise TypeError('Input images must be a SpatialImage')
-        return

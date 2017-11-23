@@ -21,12 +21,14 @@ from __future__ import division
 
 import os
 
+import scipy.ndimage as nd
+
 try:
     from timagetk.components import SpatialImage
 except ImportError:
     raise ImportError('Unable to import SpatialImage')
 
-__all__ = ["imread", "imsave"]
+__all__ = ["imread", "imsave", "apply_mask"]
 
 poss_ext = ['.inr', '.inr.gz', '.inr.zip', '.mha', '.mha.gz', '.tiff', '.tif']
 
@@ -145,3 +147,48 @@ def imsave(img_file, sp_img):
             except ImportError:
                 raise ImportError('Unable to import .mha functionalities')
             write_mha_image(img_file, sp_img)
+
+
+def apply_mask(img, mask_filename, masking_value=0, crop_mask=False):
+    """
+    Load and apply a z-projection mask (2D) to a SpatialImage (2D/3D).
+    In case of an intensity image, allows to remove unwanted signal intensities.
+    If the SpatialImage is 3D, it is applied in z-direction.
+    The mask should contain a distinct "masking value".
+
+    Parameters
+    ----------
+    img : SpatialImage
+        SpatialImage to modify with the mask
+    mask_filename : str
+        string giving the location of the mask file
+    masking_value : int, optional
+        value (default 0) defining the masked region
+    crop_mask : bool, optional
+        if True (default False), the returned SpatialImage is cropped around the
+        non-masked region
+
+    Returns
+    -------
+    masked_image : SpatialImage
+        the masked SpatialImage.
+    """
+    try:
+        from pillow import Image
+    except ImportError:
+        from PIL import Image
+    xsh, ysh, zsh = im.get_shape()
+    # Read the mask file:
+    mask_im = Image.open(mask_filename)
+    # Detect non-masked values positions
+    mask_im = np.array(mask_im) != masking_value
+    # Transform mask to 3D by repeating the 2D-mask along the z-axis:
+    mask_im = np.repeat(mask_im[:, :, np.newaxis], zsh, axis=2)
+    # Remove masked values from `img`:
+    masked_im = img * mask_im
+    # Crop the mask if required:
+    if crop_mask:
+        bbox = nd.find_objects(mask_im)
+        masked_im = masked_im[bbox]
+
+    return masked_im
