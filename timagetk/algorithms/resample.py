@@ -178,7 +178,7 @@ def subsample(image, factor=[2, 2, 1], option='gray'):
     ----------
     :param *SpatialImage* image: input *SpatialImage*
 
-    :param list factor: list of dimensions or *SpatialImage*
+    :param list factor: int|float or xyz-list of subsampling values
 
     :param str option: option can be either 'gray' or 'label'
 
@@ -194,32 +194,43 @@ def subsample(image, factor=[2, 2, 1], option='gray'):
     if option not in poss_opt:
         option = 'gray'
 
-    if isinstance(image, SpatialImage) and image.get_dim() in [2, 3]:
-        if image.get_dim() == 2:
-            image = image.to_3D()
-            factor.append(1)
+    try:
+        assert isinstance(image, SpatialImage)
+    except:
+        raise ValueError("Input image must be a SpatialImage")
+    try:
+        assert image.get_dim() in [2, 3]
+    except:
+        raise ValueError("Image dimensionality is different than 2D or 3D")
 
-        shape, extent = image.get_shape(), image.get_extent()
-        # new_shape = [int(np.ceil(shape[ind] / factor[ind])) for ind in
-        #              range(image.get_dim())]
-        # Smaller approximation error with round than np.ceil ?!
-        new_shape = [int(round(shape[ind] / factor[ind])) for ind in
-                     range(image.get_dim())]
-        new_vox = [extent[ind] / new_shape[ind] for ind in
-                   range(image.get_dim())]
-        tmp_img = np.zeros((new_shape[0], new_shape[1], new_shape[2]),
-                           dtype=image.dtype)
-        tmp_img = SpatialImage(tmp_img, voxelsize=new_vox)
-        if option == 'gray':
-            param_str_2 = '-resize -interpolation linear'
-        elif option == 'label':
-            param_str_2 = '-resize -interpolation nearest'
+    n_dim = image.get_dim()
+    if isinstance(factor, int) or isinstance(factor, float):
+        factor = [factor] * n_dim
 
-        out_img = apply_trsf(image, bal_transformation=None,
-                             template_img=tmp_img, param_str_2=param_str_2)
-        if 1 in out_img.get_shape():
-            out_img = out_img.to_2D()
-        return out_img
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    if n_dim == 2:
+        image = image.to_3D()
+        factor.append(1)
+
+    shape, extent = image.get_shape(), image.get_extent()
+    # new_shape = [int(np.ceil(shape[ind] / factor[ind])) for ind in
+    #              range(image.get_dim())]
+    # Smaller approximation error with round than np.ceil ?!
+    new_shape = [int(round(shape[ind] / factor[ind])) for ind in
+                 range(image.get_dim())]
+    new_vox = [extent[ind] / new_shape[ind] for ind in
+               range(image.get_dim())]
+    tmp_img = np.zeros((new_shape[0], new_shape[1], new_shape[2]),
+                       dtype=image.dtype)
+    tmp_img = SpatialImage(tmp_img, voxelsize=new_vox)
+
+    if option == 'gray':
+        param_str_2 = '-resize -interpolation linear'
+    elif option == 'label':
+        param_str_2 = '-resize -interpolation nearest'
+
+    out_img = apply_trsf(image, bal_transformation=None,
+                         template_img=tmp_img, param_str_2=param_str_2)
+    if 1 in out_img.get_shape():
+        out_img = out_img.to_2D()
+
+    return out_img

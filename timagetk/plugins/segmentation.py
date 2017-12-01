@@ -58,25 +58,30 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
                                        method='seeded_watershed')
     """
     poss_methods = ['seeded_watershed']
-    conds = isinstance(input_image, SpatialImage) and isinstance(seeds_image, SpatialImage)
-    if conds:
-        if method is None:
-            return seeded_watershed(input_image, seeds_image)
-        elif method is not None:
-            if method in poss_methods:
-                try:
-                    from openalea.core.service.plugin import plugin_function
-                    func = plugin_function('openalea.image', method)
-                    if func is not None:
-                        return func(input_image, seeds_image, **kwds)
-                except:
-                    control_val = kwds.get('control', None)
-                    return seeded_watershed(input_image, seeds_image, control=control_val)
-            else:
-                print('Available methods :'), poss_methods
-                raise NotImplementedError(method)
-    else:
-        raise TypeError('Input image and seeds image must be a SpatialImage')
+    try:
+        assert isinstance(input_image, SpatialImage)
+    except:
+        raise ValueError("Input image must be a SpatialImage")
+    try:
+        assert isinstance(seeds_image, SpatialImage)
+    except:
+        raise ValueError("Seeds image must be a SpatialImage")
+
+    if method is None:
+        return seeded_watershed(input_image, seeds_image)
+    elif method is not None:
+        if method in poss_methods:
+            try:
+                from openalea.core.service.plugin import plugin_function
+                func = plugin_function('openalea.image', method)
+                if func is not None:
+                    return func(input_image, seeds_image, **kwds)
+            except:
+                control_val = kwds.get('control', None)
+                return seeded_watershed(input_image, seeds_image, control=control_val)
+        else:
+            print('Available methods :'), poss_methods
+            raise NotImplementedError(method)
 
 
 def seeded_watershed(input_image, seeds_image, control=None, **kwds):
@@ -97,14 +102,10 @@ def seeded_watershed(input_image, seeds_image, control=None, **kwds):
     :return: ``SpatialImage`` instance -- image and metadata
     """
     poss_controls = ['most', 'first', 'min']
-    conds = isinstance(input_image, SpatialImage) and isinstance(seeds_image, SpatialImage)
-    if conds:
-        if control is None:
+    if control is None:
+        control = 'most'
+    elif control is not None:
+        if control not in poss_controls:
             control = 'most'
-        elif control is not None:
-            if control not in poss_controls:
-                control = 'most'
-        params = '-labelchoice ' + str(control)
-        return watershed(input_image, seeds_image, param_str_2=params)
-    else:
-        raise TypeError('Input images must be a SpatialImage')
+    params = '-labelchoice ' + str(control)
+    return watershed(input_image, seeds_image, param_str_2=params)
