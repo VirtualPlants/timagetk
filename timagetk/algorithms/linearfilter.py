@@ -53,16 +53,18 @@ def linearfilter(image, param_str_1=LINEARFILTER_DEFAULT, param_str_2=None, dtyp
     >>> param_str_2 = '-x 0 -y 0 -z 0 -sigma 2.0'
     >>> output_image = linearfilter(input_image, param_str_2=param_str_2)
     """
-    if isinstance(image, SpatialImage):
-        if dtype is None:
-            dtype = image.dtype
-        vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
-        rvalue = libvtexec.API_linearFilter(vt_input.c_ptr, vt_res.c_ptr,
-                                            param_str_1, param_str_2)
-        out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
-        vt_input.free(), vt_res.free()
-        return out_sp_img
-    else:
+    try:
+        assert isinstance(image, SpatialImage)
+    except:
         raise TypeError('Input image must be a SpatialImage')
-        return
+
+    if dtype is None:
+        dtype = image.dtype
+    vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
+    rvalue = libvtexec.API_linearFilter(vt_input.c_ptr, vt_res.c_ptr,
+                                        param_str_1, param_str_2)
+    out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
+    vt_input.free(), vt_res.free()
+    return out_sp_img
+
 add_doc(linearfilter, libvtexec.API_Help_linearFilter)
