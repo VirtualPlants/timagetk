@@ -185,20 +185,27 @@ class SpatialImage(np.ndarray):
                 orig = def_orig_3D
             print "Set origin to default value:", orig
         obj.origin = orig
+
         # - Check & set 'voxelsize' value:
         if isinstance(voxelsize, tuple):  # SR --- BACK COMPAT
             voxelsize = tuple_to_list(voxelsize)
-        if (voxelsize is not None) and (
-                    len(input_array.shape) == len(voxelsize)):
-            vxs = around_list(voxelsize)
-        else:
+        if isinstance(voxelsize, np.ndarray):
+            voxelsize = voxelsize.tolist()
+        if not isinstance(voxelsize, list):
+            voxelsize = None
+        try:
+            assert len(input_array.shape) == len(voxelsize)
+        except:
             print "Warning, incorrect voxelsize specification!"
             if len(input_array.shape) == 2:
                 vxs = def_vox_2D
             else:
                 vxs = def_vox_3D
             print "Set voxelsize to default value:", vxs
+        else:
+            vxs = around_list(voxelsize)
         obj.voxelsize = vxs
+
         # - Set 'extent' value:
         ext = [obj.voxelsize[ind] * input_array.shape[ind] for ind in
                xrange(len(input_array.shape))]
