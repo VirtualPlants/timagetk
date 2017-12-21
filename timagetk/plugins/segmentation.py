@@ -23,7 +23,34 @@ except ImportError:
     raise ImportError('Import Error')
 
 
-__all__ = ['segmentation']
+__all__ = ['segmentation', 'seeded_watershed']
+
+def _method_param_check(**kwds):
+    """
+    Set parameters default values and make sure they are of the right type.
+    """
+    str_param = ""
+    if kwds.get('param', True):
+        str_param += ' -param'
+    if kwds.get('debug', False):
+        str_param += ' -debug'
+    if kwds.get('parallel', True):
+        str_param += ' -parallel'
+        str_param += ' -parallel-type '+kwds.get('parallel_type', 'thread')
+    if kwds.get('time', True):
+        str_param += ' -time'
+    return str_param
+
+def _method_img_check(input_image):
+    """
+    Used to check `input_image` type and isometry.
+    """
+    # - Check the `input_image` is indeed a `SpatialImage`
+    conds = isinstance(input_image, SpatialImage)
+    if not conds:
+        raise TypeError('Input image must be a `SpatialImage` object.')
+    else:
+        return
 
 
 def segmentation(input_image, seeds_image, method=None, **kwds):
@@ -58,30 +85,25 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
                                        method='seeded_watershed')
     """
     poss_methods = ['seeded_watershed']
-    try:
-        assert isinstance(input_image, SpatialImage)
-    except:
-        raise ValueError("Input image must be a SpatialImage")
-    try:
-        assert isinstance(seeds_image, SpatialImage)
-    except:
-        raise ValueError("Seeds image must be a SpatialImage")
-
+    # - Check `input_image` type and isometry:
+    _method_img_check(input_image)
     if method is None:
-        return seeded_watershed(input_image, seeds_image)
-    elif method is not None:
-        if method in poss_methods:
-            try:
-                from openalea.core.service.plugin import plugin_function
-                func = plugin_function('openalea.image', method)
-                if func is not None:
-                    return func(input_image, seeds_image, **kwds)
-            except:
-                control_val = kwds.get('control', None)
-                return seeded_watershed(input_image, seeds_image, control=control_val)
-        else:
-            print('Available methods :'), poss_methods
-            raise NotImplementedError(method)
+        return seeded_watershed(input_image, seeds_image, **kwds)
+
+    try:
+        assert method in poss_methods
+    except:
+        print('Available methods :'), poss_methods
+        raise NotImplementedError(method)
+
+    try:
+        from openalea.core.service.plugin import plugin_function
+        func = plugin_function('openalea.image', method)
+        if func is not None:
+            return func(input_image, seeds_image, **kwds)
+    except:
+        control_val = kwds.get('control', None)
+        return seeded_watershed(input_image, seeds_image, control=control_val, **kwds)
 
 
 def seeded_watershed(input_image, seeds_image, control=None, **kwds):
@@ -104,8 +126,12 @@ def seeded_watershed(input_image, seeds_image, control=None, **kwds):
     poss_controls = ['most', 'first', 'min']
     if control is None:
         control = 'most'
-    elif control is not None:
+    else:
         if control not in poss_controls:
-            control = 'most'
-    params = '-labelchoice ' + str(control)
+            raise NotImplementedError("Available control methods: {}".format(poss_controls))
+        else:
+            params = '-labelchoice ' + str(control)
+
+    params += _method_param_check(**kwds)
+    print params
     return watershed(input_image, seeds_image, param_str_2=params)
