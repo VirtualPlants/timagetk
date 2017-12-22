@@ -124,6 +124,7 @@ def seeded_watershed(input_image, seeds_image, control=None, **kwds):
     :return: ``SpatialImage`` instance -- image and metadata
     """
     poss_controls = ['most', 'first', 'min']
+    params = ""
     if control is None:
         control = 'most'
     else:
