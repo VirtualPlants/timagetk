@@ -30,7 +30,7 @@ def _method_param_check(**kwds):
     Set parameters default values and make sure they are of the right type.
     """
     str_param = ""
-    if kwds.get('param', True):
+    if kwds.get('param', False):
         str_param += ' -param'
     if kwds.get('debug', False):
         str_param += ' -debug'

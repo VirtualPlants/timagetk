@@ -140,18 +140,16 @@ class SpatialImage(np.ndarray):
         # - Test input array: should be a numpy array of dimension 2 or 3:
         try:
             assert isinstance(input_array, np.ndarray)
-        except:
+        except AssertionError:
             raise TypeError("Input array is not a numpy array!")
         try:
             assert len(input_array.shape) in [2, 3]
-        except:
-            # raise ValueError(
-            #     "Input array must have a dimensionality equal to 2 or 3")
-            print ValueError(
-                "Input array must have a dimensionality equal to 2 or 3")
+        except AssertionError:
+            print ValueError("Input array must have a dimensionality equal to 2 or 3")
             return None  # WEIRD behavior... seems required by some functions
             # Original behavior was to test if the dim was 2D or 3D but was not
             # doing anything otherwise (no else declared!).
+
         # - Define default values:
         def_type = poss_types[0]
         def_vox_2D, def_vox_3D = [1.0, 1.0], [1.0, 1.0, 1.0]
@@ -178,12 +176,12 @@ class SpatialImage(np.ndarray):
         if (origin is not None) and (len(input_array.shape) == len(origin)):
             orig = origin
         else:
-            print "Warning, incorrect origin specification"
+            print "Warning: incorrect origin specification,",
             if len(input_array.shape) == 2:
                 orig = def_orig_2D
             else:
                 orig = def_orig_3D
-            print "Set origin to default value:", orig
+            print "set to default value:", orig
         obj.origin = orig
 
         # - Check & set 'voxelsize' value:
@@ -196,12 +194,12 @@ class SpatialImage(np.ndarray):
         try:
             assert len(input_array.shape) == len(voxelsize)
         except:
-            print "Warning, incorrect voxelsize specification!"
+            print "Warning: incorrect voxelsize specification,",
             if len(input_array.shape) == 2:
                 vxs = def_vox_2D
             else:
                 vxs = def_vox_3D
-            print "Set voxelsize to default value:", vxs
+            print "set to default value:", vxs
         else:
             vxs = around_list(voxelsize)
         obj.voxelsize = vxs
