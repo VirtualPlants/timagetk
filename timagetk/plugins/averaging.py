@@ -10,7 +10,7 @@
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 This module contains a generic implementation of several averaging algorithms.
@@ -21,8 +21,11 @@ try:
 except ImportError:
     raise ImportError('Import Error')
 
-
 __all__ = ['averaging']
+
+POSS_METHODS = ['mean_averaging', 'robust_mean_averaging', 'median_averaging',
+                'minimum_averaging', 'maximum_averaging']
+DEFAULT_METHOD = POSS_METHODS[0]
 
 
 def averaging(list_images, method=None, **kwds):
@@ -55,31 +58,36 @@ def averaging(list_images, method=None, **kwds):
     >>> rob_mean_image = averaging(list_images, method='robust_mean_averaging')
     >>> mean_image = averaging(list_images, method='mean_averaging')
     """
-    poss_methods = ['mean_averaging', 'robust_mean_averaging', 'median_averaging',
-                    'minimum_averaging', 'maximum_averaging']
-    if method is None:
-        return mean_averaging(list_images)
-    elif method is not None:
-        if method in poss_methods:
-            try:
-                from openalea.core.service.plugin import plugin_function
-                func = plugin_function('openalea.image', method)
-                if func is not None:
-                    return func(list_images, **kwds)
-            except ImportError:
-                if method=='mean_averaging':
-                    return mean_averaging(list_images, **kwds)
-                elif method=='robust_mean_averaging':
-                    return robust_mean_averaging(list_images, **kwds)
-                elif method=='median_averaging':
-                    return median_averaging(list_images, **kwds)
-                elif method=='minimum_averaging':
-                    return min_averaging(list_images, **kwds)
-                elif method=='maximum_averaging':
-                    return max_averaging(list_images, **kwds)
+    if not method:
+        method = DEFAULT_METHOD
+
+    try:
+        assert method in POSS_METHODS
+    except AssertionError:
+        raise NotImplementedError(
+            "Unknown method '{}', available methods are: {}".format(method,
+                                                                    POSS_METHODS))
+
+    try:
+        assert kwds.get('try_plugin', True)
+        from openalea.core.service.plugin import plugin_function
+    except ImportError:
+        if method == 'mean_averaging':
+            return mean_averaging(list_images, **kwds)
+        elif method == 'robust_mean_averaging':
+            return robust_mean_averaging(list_images, **kwds)
+        elif method == 'median_averaging':
+            return median_averaging(list_images, **kwds)
+        elif method == 'minimum_averaging':
+            return min_averaging(list_images, **kwds)
+        elif method == 'maximum_averaging':
+            return max_averaging(list_images, **kwds)
+    else:
+        func = plugin_function('openalea.image', method)
+        if func is not None:
+            return func(list_images, **kwds)
         else:
-            print('Available methods :'), poss_methods
-            raise NotImplementedError(method)
+            raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
 def mean_averaging(list_images, **kwds):

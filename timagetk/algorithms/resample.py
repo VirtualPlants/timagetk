@@ -44,18 +44,20 @@ def resample(image, voxelsize, option='gray'):
     out_img : SpatialImage
         the resampled image
     """
+    dim = image.get_dim()
     try:
-        assert len(voxelsize) == image.get_dim()
+        assert len(voxelsize) == dim
     except AssertionError:
-        raise ValueError("Parameter 'voxelsize' length ({}) does not match the dimension of the image ({}).".format(len(voxelsize), image.get_dim()))
+        raise ValueError("Parameter 'voxelsize' length ({}) does not match the dimension of the image ({}).".format(len(voxelsize), dim))
 
     extent = image.get_extent()
-    new_shape = [int(round(extent[ind] / voxelsize[ind])) for ind in
-                 range(image.get_dim())]
-    # - Initialise a template image
+    new_shape = [int(round(extent[ind] / voxelsize[ind])) for ind in range(dim)]
+    # - Initialise a template image:
     tmp_img = np.zeros((new_shape[0], new_shape[1], new_shape[2]),
                        dtype=image.dtype)
-    tmp_img = SpatialImage(tmp_img, voxelsize=voxelsize)
+    tmp_img = SpatialImage(tmp_img, voxelsize=voxelsize,
+                           origin=image.get_origin(),
+                           metadata_dict=image.get_metadata())
 
     if option == 'gray':
         param_str_2 = '-resize -interpolation linear'
@@ -189,8 +191,8 @@ def isometric_resampling(input_im, method='min', option='gray', dry_run=False):
         if True (default False), do not performs the resampling but return the size and voxelsize
 
     """
-    poss_methods = ['min', 'max']
-    if method not in poss_methods and not isinstance(method, float):
+    POSS_METHODS = ['min', 'max']
+    if method not in POSS_METHODS and not isinstance(method, float):
         raise ValueError(
             "Possible values for 'methods' are a float, 'min' or 'max'.")
     if method == 'min':
@@ -203,7 +205,8 @@ def isometric_resampling(input_im, method='min', option='gray', dry_run=False):
     if dry_run:
         vxs = np.repeat(vxs, len(input_im.voxelsize)).tolist()
         extent = input_im.get_extent()
-        size = [int(round(extent[ind] / vxs[ind])) for ind in range(input_im.get_dim())]
+        dim = input_im.get_dim()
+        size = [int(round(extent[ind] / vxs[ind])) for ind in range(dim)]
         return size, vxs
     return resample_isotropic(input_im, vxs, option)
 
@@ -259,7 +262,9 @@ def subsample(image, factor=[2, 2, 1], option='gray'):
                range(image.get_dim())]
     tmp_img = np.zeros((new_shape[0], new_shape[1], new_shape[2]),
                        dtype=image.dtype)
-    tmp_img = SpatialImage(tmp_img, voxelsize=new_vox)
+    tmp_img = SpatialImage(tmp_img, voxelsize=new_vox,
+                           origin=image.get_origin(),
+                           metadata_dict=image.get_metadata())
 
     if option == 'gray':
         param_str_2 = '-resize -interpolation linear'

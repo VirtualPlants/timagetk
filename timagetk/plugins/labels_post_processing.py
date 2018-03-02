@@ -44,7 +44,7 @@ def _method_img_check(input_image):
     return
 
 
-def _method_param_check(**kwds):
+def get_param_str_2(**kwds):
     """
     Set parameters default values and make sure they are of the right type.
     """
@@ -162,7 +162,7 @@ def labels_erosion(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-erosion'
-    params +=  _method_param_check(**kwds)
+    params +=  get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
@@ -187,7 +187,7 @@ def labels_dilation(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-dilation'
-    params +=  _method_param_check(**kwds)
+    params +=  get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
@@ -212,7 +212,7 @@ def labels_opening(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-opening'
-    params +=  _method_param_check(**kwds)
+    params +=  get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
@@ -237,5 +237,5 @@ def labels_closing(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-closing'
-    params +=  _method_param_check(**kwds)
+    params +=  get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)

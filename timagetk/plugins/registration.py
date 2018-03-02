@@ -81,7 +81,7 @@ def registration(floating_img, reference_img, method=None, **kwds):
     >>> trsf_aff, res_aff = registration(floating_image, reference_image, method='affine_registration')
     >>> trsf_def, res_def = registration(floating_image, reference_image, method='deformable_registration')
     """
-    poss_methods = ['rigid_registration', 'affine_registration',
+    POSS_METHODS = ['rigid_registration', 'affine_registration',
                     'deformable_registration']
     # - Assert we have two SpatialImage:
     try:
@@ -115,7 +115,8 @@ def registration(floating_img, reference_img, method=None, **kwds):
     # - Try to use the `plugin_function` or use the defined API:
     try:
         assert kwds.get('try_plugin', True)
-    except:
+        from openalea.core.service.plugin import plugin_function
+    except AssertionError or ImportError:
         if method == 'rigid_registration':
             trsf_out, res_image = rigid_registration(floating_img,
                                                      reference_img, init_trsf,
@@ -133,17 +134,18 @@ def registration(floating_img, reference_img, method=None, **kwds):
                                                           **kwds)
             return trsf_out, res_image
         else:
-            print 'Available methods :', poss_methods
+            print 'Available methods :', POSS_METHODS
             raise NotImplementedError(method)
     else:
-        from openalea.core.service.plugin import plugin_function
         func = plugin_function('openalea.image', method)
         if func is not None:
             return func(floating_img, reference_img, init_trsf, left_trsf,
                         **kwds)
+        else:
+            raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
-def _method_param_check(**kwds):
+def get_param_str_2(**kwds):
     """
     Set parameters default values and make sure they are of the right type.
     """
@@ -219,7 +221,7 @@ def rigid_registration(floating_img, reference_img, init_trsf=None,
     res_rig : SpatialImage
         interpolated *SpatialImage* after registration
     """
-    param_str_2 = _method_param_check(**kwds)
+    param_str_2 = get_param_str_2(**kwds)
 
     # - Make sure the provided initialisation trsf matrix is linear:
     if init_trsf:
@@ -292,7 +294,7 @@ def affine_registration(floating_img, reference_img, init_trsf=None,
     res_aff : SpatialImage
         interpolated *SpatialImage* after registration
     """
-    param_str_2 = _method_param_check(**kwds)
+    param_str_2 = get_param_str_2(**kwds)
 
     # - If no initialisation trsf-matrix were provided, initialise affine deformation estimation with rigid trsf:
     if not init_trsf or not left_trsf:
@@ -375,7 +377,7 @@ def deformable_registration(floating_img, reference_img, init_trsf=None,
     res_def : SpatialImage
         interpolated *SpatialImage* after registration
     """
-    param_str_2 = _method_param_check(**kwds)
+    param_str_2 = get_param_str_2(**kwds)
 
     # - If no initialisation trsf-matrix were provided, initialise non-linear deformation estimation with rigid trsf:
     if not init_trsf or not left_trsf:

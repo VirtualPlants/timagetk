@@ -62,7 +62,7 @@ def cell_filtering(input_image, method=None, **kwds):
     >>> dilation_image = cell_filtering(input_image, radius=2, iterations=2, method='dilation')
     >>> oc_asf_image = cell_filtering(input_image, max_radius=3, method='oc_alternate_sequential_filter')
     """
-    poss_methods = ['erosion', 'dilation', 'opening', 'closing', 'morpho_gradient', 'contrast',
+    POSS_METHODS = ['erosion', 'dilation', 'opening', 'closing', 'morpho_gradient', 'contrast',
                     'hat_transform', 'inverse_hat_transform', 'oc_alternate_sequential_filter',
                     'co_alternate_sequential_filter', 'coc_alternate_sequential_filter',
                     'oco_alternate_sequential_filter']
@@ -72,7 +72,7 @@ def cell_filtering(input_image, method=None, **kwds):
         if method is None:
             return cell_filtering_erosion(input_image)
         elif method is not None:
-            if method in poss_methods:
+            if method in POSS_METHODS:
                 try:
                     from openalea.core.service.plugin import plugin_function
                     func = plugin_function('openalea.image', method)
@@ -107,7 +107,7 @@ def cell_filtering(input_image, method=None, **kwds):
                     elif method=='oco_alternate_sequential_filter':
                         return cell_filtering_oco_alternate_sequential_filter(input_image, max_radius=max_radius_val)
             else:
-                print('Available methods :'), poss_methods
+                print('Available methods :'), POSS_METHODS
                 raise NotImplementedError(method)
     else:
         raise TypeError('Input image must be a SpatialImage')

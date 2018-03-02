@@ -54,13 +54,13 @@ def region_labeling(input_image, method=None, **kwds):
     >>> reg_lab_image = region_labeling(reg_min_image, low_threshold=1,
                                         high_threshold=3, method='connected_components')
     """
-    poss_methods = ['connected_components']
+    POSS_METHODS = ['connected_components']
     conds = isinstance(input_image, SpatialImage)
     if conds:
         if method is None:
             return connected_components(input_image)
         elif method is not None:
-            if method in poss_methods:
+            if method in POSS_METHODS:
                 try:
                     from openalea.core.service.plugin import plugin_function
                     func = plugin_function('openalea.image', method)
@@ -73,7 +73,7 @@ def region_labeling(input_image, method=None, **kwds):
                         return connected_components(input_image, low_threshold=low_threshold_val,
                                                     high_threshold=high_threshold_val)
             else:
-                print('Available methods :'), poss_methods
+                print('Available methods :'), POSS_METHODS
                 raise NotImplementedError(method)
     else:
         raise TypeError('Input image must be a SpatialImage')
