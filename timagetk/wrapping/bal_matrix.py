@@ -188,10 +188,10 @@ class BalMatrix(object):
 
     def __init__(self, np_array=None, c_bal_matrix=None, **kwds):
 
-        if np_array is not None:
+        if np_array:
             self._np_array = np_array
             self._c_bal_matrix = np_array_to_bal_matrix(self._np_array, **kwds)
-        elif c_bal_matrix is not None:
+        elif c_bal_matrix:
             self._c_bal_matrix = c_bal_matrix
             self._np_array = self.to_np_array()
         else:

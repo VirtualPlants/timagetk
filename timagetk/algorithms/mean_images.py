@@ -60,7 +60,7 @@ def mean_images(list_spatial_images, list_spatial_masks=None,
     if False not in conds:
         dtype_list = [sp_img.dtype for ind, sp_img in enumerate(list_spatial_images)]
         comm_type = np.find_common_type(dtype_list, [])
-        if list_spatial_masks is None:
+        if not list_spatial_masks:
             mask_ptr = None
         else:
             list_c_vt_spatial_masks = POINTER(_VT_IMAGE) * len(list_spatial_images)

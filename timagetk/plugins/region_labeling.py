@@ -57,14 +57,14 @@ def region_labeling(input_image, method=None, **kwds):
     POSS_METHODS = ['connected_components']
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if method is None:
+        if not method:
             return connected_components(input_image)
-        elif method is not None:
+        elif method:
             if method in POSS_METHODS:
                 try:
                     from openalea.core.service.plugin import plugin_function
                     func = plugin_function('openalea.image', method)
-                    if func is not None:
+                    if func:
                         return func(input_image, **kwds)
                 except:
                     if method=='connected_components':
@@ -98,11 +98,11 @@ def connected_components(input_image, low_threshold=None, high_threshold=None, *
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if low_threshold is None:
+        if not low_threshold:
             low_threshold = 1
         else:
             low_threshold = abs(int(low_threshold))
-        if high_threshold is None:
+        if not high_threshold:
             high_threshold = 3
         else:
             high_threshold = abs(int(high_threshold))

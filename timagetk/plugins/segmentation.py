@@ -26,8 +26,9 @@ __all__ = ['segmentation', 'seeded_watershed']
 
 
 POSS_METHODS = ['seeded_watershed']
+DEFAULT_METHOD = POSS_METHODS[0]
 POSS_CONTROLS = ['most', 'first', 'min']
-
+DEFAULT_CONTROL = POSS_CONTROLS[0]
 
 def get_param_str_2(**kwds):
     """
@@ -84,8 +85,8 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a `SpatialImage` object.')
 
-    if method is None:
-        return seeded_watershed(input_image, seeds_image, **kwds)
+    if not method:
+        method = DEFAULT_METHOD
 
     try:
         assert method in POSS_METHODS
@@ -97,13 +98,13 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
     try:
         assert kwds.get('try_plugin', True)
         from openalea.core.service.plugin import plugin_function
-    except ImportError or AssertionError:
+    except AssertionError or ImportError:
         control_val = kwds.get('control', None)
         return seeded_watershed(input_image, seeds_image, control=control_val,
                                 **kwds)
     else:
         func = plugin_function('openalea.image', method)
-        if func is not None:
+        if func:
             return func(input_image, seeds_image, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
@@ -134,7 +135,7 @@ def seeded_watershed(input_image, seeds_image, control=None, **kwds):
         else:
             param_str_2 = '-labelchoice ' + str(control)
     else:
-        pass  # watershed 'param_str_1' is set to WATERSHED_DEFAULT
+        param_str_2 = '-labelchoice ' + DEFAULT_CONTROL
 
     param_str_2 += get_param_str_2(**kwds)
     return watershed(input_image, seeds_image, param_str_2=param_str_2)

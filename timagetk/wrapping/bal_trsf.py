@@ -74,7 +74,7 @@ def free_bal_trsf(c_or_bal_trsf):
     free_bal_trsf(c_or_bal_trsf)
     """
     c_bal_trsf = bal_trsf_c_struct(c_or_bal_trsf)
-    if c_bal_trsf is None:
+    if not c_bal_trsf:
         return
     c_bal_trsf.mat = None
     c_bal_trsf.vx = None
@@ -98,10 +98,10 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
         """
         """
         self._c_bal_trsf = BAL_TRSF()
-        if c_bal_trsf is None:
+        if not c_bal_trsf:
             # WARNING: BAL_InitTransformation set type to undef!
             libblockmatching.BAL_InitTransformation(self.c_ptr) # type to undef !
-            if trsf_unit is not None:
+            if trsf_unit:
                 self._c_bal_trsf.transformation_unit = trsf_unit
 
             self.trsf_unit = self._c_bal_trsf.transformation_unit
@@ -110,7 +110,7 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
             self.vy = BalImage(c_bal_image=self._c_bal_trsf.vy) #---- BalImage instance
             self.vz = BalImage(c_bal_image=self._c_bal_trsf.vz) #---- BalImage instance
 
-            if trsf_type is not None:
+            if trsf_type:
                 self._c_bal_trsf.type = trsf_type
 
             self.trsf_type = self._c_bal_trsf.type
@@ -118,12 +118,12 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
             #                                         pointer(self._c_bal_trsf.vx))
         else:
             if isinstance(c_bal_trsf, BAL_TRSF):
-                print "Got instance BAL_TRSF"
+                # print "Got instance BAL_TRSF"
                 libblockmatching.BAL_AllocTransformation(self.c_ptr, c_bal_trsf.type,
                                                          pointer(c_bal_trsf.vx))
                 libblockmatching.BAL_CopyTransformation(pointer(c_bal_trsf), self.c_ptr)
             elif isinstance(c_bal_trsf, BalTransformation):
-                print "Got instance BalTransformation"
+                # print "Got instance BalTransformation"
                 libblockmatching.BAL_AllocTransformation(self.c_ptr, c_bal_trsf._c_bal_trsf.type,
                                                          c_bal_trsf.vx.c_ptr)
                 libblockmatching.BAL_CopyTransformation(pointer(c_bal_trsf._c_bal_trsf), self.c_ptr)
@@ -132,9 +132,19 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
 
             self.trsf_unit = self._c_bal_trsf.transformation_unit
             self.mat = BalMatrix(c_bal_matrix=self._c_bal_trsf.mat) #---- BalMatrix instance
-            self.vx = BalImage(c_bal_image=self._c_bal_trsf.vx) #---- BalImage instance
-            self.vy = BalImage(c_bal_image=self._c_bal_trsf.vy) #---- BalImage instance
-            self.vz = BalImage(c_bal_image=self._c_bal_trsf.vz) #---- BalImage instance
+            # TODO: move this if/else behaviour to BalImage (avoid unecessary warnings raise when calling SpatialImage!
+            if not self._c_bal_trsf.vx:
+                self.vx = BalImage(c_bal_image=self._c_bal_trsf.vx) #---- BalImage instance
+            else:
+                self.vx = None
+            if not self._c_bal_trsf.vx:
+                self.vy = BalImage(c_bal_image=self._c_bal_trsf.vy) #---- BalImage instance
+            else:
+                self.vy = None
+            if not self._c_bal_trsf.vx:
+                self.vz = BalImage(c_bal_image=self._c_bal_trsf.vz) #---- BalImage instance
+            else:
+                self.vz = None
             self.trsf_type = self._c_bal_trsf.type
 
 

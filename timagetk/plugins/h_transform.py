@@ -82,7 +82,7 @@ def h_transform(input_image, method=None, **kwds):
             return h_transform_max(input_image, h=h_val)
     else:
         func = plugin_function('openalea.image', method)
-        if func is not None:
+        if func:
             return func(input_image, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
@@ -104,7 +104,7 @@ def h_transform_min(input_image, h=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if h is None:
+        if not h:
             h = 1
         else:
             h = abs(int(h))
@@ -131,7 +131,7 @@ def h_transform_max(input_image, h=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if h is None:
+        if not h:
             h = 1
         else:
             h = abs(int(h))

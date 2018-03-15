@@ -69,14 +69,14 @@ def cell_filtering(input_image, method=None, **kwds):
 
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if method is None:
+        if not method:
             return cell_filtering_erosion(input_image)
-        elif method is not None:
+        elif method:
             if method in POSS_METHODS:
                 try:
                     from openalea.core.service.plugin import plugin_function
                     func = plugin_function('openalea.image', method)
-                    if func is not None:
+                    if func:
                         return func(input_image, **kwds)
                 except:
                     radius_val = kwds.get('radius', None)
@@ -132,13 +132,13 @@ def cell_filtering_erosion(input_image, radius=None, iterations=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = abs(int(radius))
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = abs(int(iterations))
         params = '-operation erosion -iterations %d -radius %d -v' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -165,13 +165,13 @@ def cell_filtering_dilation(input_image, radius=None, iterations=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = abs(int(radius))
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = abs(int(iterations))
         params = '-dilation -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -198,13 +198,13 @@ def cell_filtering_opening(input_image, radius=None, iterations=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = abs(int(radius))
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = abs(int(iterations))
         params = '-operation opening -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -231,13 +231,13 @@ def cell_filtering_closing(input_image, radius=None, iterations=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = abs(int(radius))
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = abs(int(iterations))
         params = '-operation closing -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -264,13 +264,13 @@ def cell_filtering_hat_transform(input_image, radius=None, iterations=None, **kw
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = abs(int(radius))
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = abs(int(iterations))
         params = '-operation closinghat -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -297,13 +297,13 @@ def cell_filtering_inverse_hat_transform(input_image, radius=None, iterations=No
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = abs(int(radius))
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = abs(int(iterations))
         params = '-operation openinghat -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -330,13 +330,13 @@ def cell_filtering_gradient(input_image, radius=None, iterations=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = abs(int(radius))
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = abs(int(iterations))
         params = '-operation gradient -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -363,13 +363,13 @@ def cell_filtering_contrast(input_image, radius=None, iterations=None, **kwds):
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if radius is None:
+        if not radius:
             radius = 1
-        elif radius is not None:
+        elif radius:
             radius = int(radius)
-        if iterations is None:
+        if not iterations:
             iterations = 1
-        elif iterations is not None:
+        elif iterations:
             iterations = int(iterations)
         params = '-operation contrast -iterations %d -radius %d' % (iterations, radius)
         return cell_filter(input_image, param_str_2=params)
@@ -394,11 +394,11 @@ def cell_filtering_oc_alternate_sequential_filter(input_image, max_radius=None, 
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if max_radius is None:
+        if not max_radius:
             max_radius = 1
             output_img = cell_filtering_oc_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        elif max_radius:
             max_radius = abs(int(max_radius))
             sizes = range(1, max_radius+1)
             output_img = input_image
@@ -429,11 +429,11 @@ def cell_filtering_co_alternate_sequential_filter(input_image, max_radius=None, 
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if max_radius is None:
+        if not max_radius:
             max_radius = 1
             output_img = cell_filtering_co_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        elif max_radius:
             max_radius = abs(int(max_radius))
             sizes = range(1,max_radius+1)
             output_img = input_image
@@ -464,11 +464,11 @@ def cell_filtering_coc_alternate_sequential_filter(input_image, max_radius=None,
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if max_radius is None:
+        if not max_radius:
             max_radius = 1
             output_img = cell_filtering_coc_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        elif max_radius:
             max_radius = abs(int(max_radius))
             sizes = range(1,max_radius+1)
             output_img = input_image
@@ -501,11 +501,11 @@ def cell_filtering_oco_alternate_sequential_filter(input_image, max_radius=None,
     """
     conds = isinstance(input_image, SpatialImage)
     if conds:
-        if max_radius is None:
+        if not max_radius:
             max_radius = 1
             output_img = cell_filtering_oco_alternate_sequential_filter(input_image, max_radius)
             return output_img
-        elif max_radius is not None:
+        elif max_radius:
             max_radius = abs(int(max_radius))
             sizes = range(1,max_radius+1)
             output_img = input_image

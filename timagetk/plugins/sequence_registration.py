@@ -113,7 +113,7 @@ def sequence_registration(list_images, method=None, **kwds):
         return list_compo_trsf, list_res_img
     else:
         func = plugin_function('openalea.image', method)
-        if func is not None:
+        if func:
             return func(list_images, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
@@ -281,3 +281,4 @@ def sequence_registration_deformable(list_images):
     list_res_img.append(list_images[-1])  # add reference image 't_ref'
 
     return list_compo_trsf, list_res_img
+

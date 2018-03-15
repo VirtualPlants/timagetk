@@ -84,7 +84,7 @@ def averaging(list_images, method=None, **kwds):
             return max_averaging(list_images, **kwds)
     else:
         func = plugin_function('openalea.image', method)
-        if func is not None:
+        if func:
             return func(list_images, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
