@@ -134,7 +134,7 @@ def resample_isotropic(image, voxelsize, option='gray'):
 #     im_shape = input_im.shape
 #     print "  -- shape: {}".format(im_shape)
 #     # - `new_voxelsize` case:
-#     if new_voxelsize is not None:
+#     if new_voxelsize:
 #         # - Check only one resampling method has been selected:
 #         try:
 #             assert (new_shape is None) and (resampling_factor==1)

@@ -23,7 +23,7 @@ def bal_mystr_c_ptr(c_or_bal_mystr, BAL_MYSTR, BalMyStr):
     BAL_MYSTR can be either : BAL_IMAGE, BAL_MATRIX
     BalMyStr can be either : BalImage, BalMatrix
     """
-    if c_or_bal_mystr is None:
+    if not c_or_bal_mystr:
         return
     elif isinstance(c_or_bal_mystr, BAL_MYSTR):
         return pointer(c_or_bal_mystr)
@@ -39,7 +39,7 @@ def bal_mystr_c_struct(c_or_bal_mystr, BAL_MYSTR, BalMyStr):
     BAL_MYSTR can be either : BAL_IMAGE, BAL_MATRIX
     BalMyStr can be either : BalImage, BalMatrix
     """
-    if c_or_bal_mystr is None:
+    if not c_or_bal_mystr:
         return
     elif isinstance(c_or_bal_mystr, BAL_MYSTR):
         return c_or_bal_mystr

@@ -70,7 +70,7 @@ def watershed(image, seeds, param_str_1=WATERSHED_DEFAULT, param_str_2=None,
     except AssertionError:
         raise ValueError("Parameter 'seeds' is not a SpatialImage")
 
-    if dtype is None:
+    if not dtype:
         dtype = seeds.dtype
     # - Initialise objects:
     vt_img = vt_image(image)

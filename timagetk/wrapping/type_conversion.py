@@ -130,18 +130,18 @@ VT_TO_ARG = {
 
 
 def vt_type(np_type=None, vt_type=None):
-    if np_type is not None:
+    if np_type:
         return np_type_to_vt_type(np_type)
-    elif vt_type is not None:
+    elif vt_type:
         return vt_type
     else:
         return None
 
 
 def np_type(np_type=None, vt_type=None):
-    if np_type is not None:
+    if np_type:
         return np_type
-    elif vt_type is not None:
+    elif vt_type:
         return vt_type_to_np_type(vt_type)
     else:
         return None

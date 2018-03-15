@@ -89,7 +89,7 @@ def free_bal_image(c_or_bal_image):
     """
     c_struct = bal_image_c_struct(c_or_bal_image)
     c_ptr = pointer(c_struct)
-    if c_ptr is not None:
+    if c_ptr:
         # data memory is managed in python side, set pointer to NULL to avoid to free it twice
         # (double free or corruption)
         c_struct.data = None
@@ -175,7 +175,7 @@ def init_c_bal_image(c_bal_image, **kwds):
     vt_type_kwds = dict(vt_type=kwds.get('vt_type'),
                         np_type=kwds.get('np_type'))
     vtype = vt_type(**vt_type_kwds)
-    if vtype is None:
+    if not vtype:
         vtype = DEFAULT_VT_TYPE
 
     name = kwds.get('name', DEFAULT_NAME)
@@ -281,7 +281,7 @@ def bal_image_to_spatial_image(c_or_bal_image, **kwds):
     # SR 21/03
     _nptype = vt_type_to_np_type(b.type)
 
-    if b.data is None:
+    if not b.data:
         _np_array = np.ndarray(size)
     else:
         _ct_array = (_cdtype * size).from_address(b.data)
@@ -302,10 +302,10 @@ class BalImage(object):
 
     def __init__(self, spatial_image=None, c_bal_image=None, **kwds):
 
-        if spatial_image is not None:
+        if spatial_image:
             self._spatial_image = spatial_image
             self._c_bal_image = spatial_image_to_bal_image(self._spatial_image, **kwds)
-        elif c_bal_image is not None:
+        elif c_bal_image:
             self._c_bal_image = c_bal_image
             self._spatial_image = self.to_spatial_image()
         else:

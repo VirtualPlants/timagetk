@@ -384,7 +384,7 @@ class TiffWriter(object):
         """
         if byteorder not in (None, '<', '>'):
             raise ValueError("invalid byteorder %s" % byteorder)
-        if byteorder is None:
+        if not byteorder:
             byteorder = '<' if sys.byteorder == 'little' else '>'
         if imagej and bigtiff:
             warnings.warn("writing incompatible bigtiff ImageJ")
@@ -585,7 +585,7 @@ class TiffWriter(object):
                 if data.dtype.char not in 'B':
                     raise ValueError("ImageJ does not support data type '%s' "
                                      "for RGB" % data.dtype.char)
-            elif photometric is None:
+            elif not photometric:
                 photometric = 'minisblack'
                 planarconfig = None
             if planarconfig == 'planar':
@@ -594,7 +594,7 @@ class TiffWriter(object):
                 planarconfig = 'contig' if ijrgb else None
 
         # verify colormap and indices
-        if colormap is not None:
+        if colormap:
             if data.dtype.char not in 'BH':
                 raise ValueError("invalid data dtype for palette mode")
             colormap = numpy.asarray(colormap, dtype=byteorder+'H')
@@ -622,10 +622,10 @@ class TiffWriter(object):
         extrasamples = 0
         if volume and data.ndim < 3:
             volume = False
-        if colormap is not None:
+        if colormap:
             photometric = 'palette'
             planarconfig = None
-        if photometric is None:
+        if not photometric:
             if planarconfig:
                 photometric = 'rgb'
             elif data.ndim > 2 and shape[-1] in (3, 4):
@@ -646,7 +646,7 @@ class TiffWriter(object):
                 raise ValueError("not a RGB(A) image")
             if len(shape) < 4:
                 volume = False
-            if planarconfig is None:
+            if not planarconfig:
                 if shape[-1] in (3, 4):
                     planarconfig = 'contig'
                 elif shape[-4 if volume else -3] in (3, 4):
@@ -802,7 +802,7 @@ class TiffWriter(object):
         if self._software:
             addtag('software', 's', 0, self._software, writeonce=True)
             self._software = None  # only save to first page in file
-        if datetime is None:
+        if not datetime:
             datetime = self._now()
         addtag('datetime', 's', 0, datetime.strftime("%Y:%m:%d %H:%M:%S"),
                writeonce=True)
@@ -820,7 +820,7 @@ class TiffWriter(object):
                {'u': 1, 'i': 2, 'f': 3, 'c': 6}[data.dtype.kind])
         addtag('photometric', 'H', 1, {'miniswhite': 0, 'minisblack': 1,
                                        'rgb': 2, 'palette': 3}[photometric])
-        if colormap is not None:
+        if colormap:
             addtag('color_map', 'H', colormap.size, colormap)
         addtag('samples_per_pixel', 'H', 1, samplesperpixel)
         if planarconfig and samplesperpixel > 1:
@@ -1174,7 +1174,7 @@ class lazyattr(object):
         self.func = func
 
     def __get__(self, instance, owner):
-        if instance is None:
+        if not instance:
             return self
         value = self.func(instance)
         if value is NotImplemented:
@@ -1379,9 +1379,9 @@ class TiffFile(object):
             The directory where the memory-mapped file will be created.
 
         """
-        if key is None and series is None:
+        if not key is None and series:
             series = 0
-        if series is not None:
+        if series:
             try:
                 series = self.series[series]
             except (KeyError, TypeError):
@@ -1390,7 +1390,7 @@ class TiffFile(object):
         else:
             pages = self.pages
 
-        if key is None:
+        if not key:
             pass
         elif isinstance(key, int):
             pages = [pages[key]]
@@ -1467,7 +1467,7 @@ class TiffFile(object):
         else:
             result = stack_pages(pages, memmap=memmap, tempdir=tempdir)
 
-        if key is None:
+        if not key:
             try:
                 result.shape = series.shape
             except ValueError:
@@ -2038,7 +2038,7 @@ class TiffPage(object):
                     except KeyError:
                         raise ValueError("%s.value (%s) not supported" %
                                          (name, tags[name].value))
-            elif default is not None:
+            elif default:
                 setattr(self, name, validate[default] if validate else default)
 
         if 'bits_per_sample' in tags:
@@ -2304,7 +2304,7 @@ class TiffPage(object):
         if maxsize and product(self._shape) > maxsize:
             raise ValueError("data is too large %s" % str(self._shape))
 
-        if self.dtype is None:
+        if not self.dtype:
             raise ValueError("data type not supported: %s%i" % (
                 self.sample_format, self.bits_per_sample))
         if self.compression not in TIFF_DECOMPESSORS:
@@ -2973,7 +2973,7 @@ class TiffPageSeries(object):
         colormapped = self.pages[0].is_indexed
         pos = 0
         for page in self.pages:
-            if page is None:
+            if not page:
                 return
             if not page._is_memmappable(rgbonly, colormapped):
                 return
@@ -3191,7 +3191,7 @@ class Record(dict):
     def __init__(self, arg=None, **kwargs):
         if kwargs:
             arg = kwargs
-        elif arg is None:
+        elif not arg:
             arg = {}
         try:
             dict.__init__(self, arg)
@@ -3323,12 +3323,12 @@ class FileHandle(object):
             self._dir, self._name = os.path.split(self._file)
             self._fh = open(self._file, self._mode)
             self._close = True
-            if self._offset is None:
+            if not self._offset:
                 self._offset = 0
         elif isinstance(self._file, FileHandle):
             # FileHandle
             self._fh = self._file._fh
-            if self._offset is None:
+            if not self._offset:
                 self._offset = 0
             self._offset += self._file._offset
             self._close = False
@@ -3349,7 +3349,7 @@ class FileHandle(object):
             except Exception:
                 raise ValueError("binary stream is not seekable")
             self._fh = self._file
-            if self._offset is None:
+            if not self._offset:
                 self._offset = self._file.tell()
             self._close = False
             if not self._name:
@@ -3371,7 +3371,7 @@ class FileHandle(object):
         if self._offset:
             self._fh.seek(self._offset)
 
-        if self._size is None:
+        if not self._size:
             pos = self._fh.tell()
             self._fh.seek(self._offset, 2)
             self._size = self._fh.tell()
@@ -3429,7 +3429,7 @@ class FileHandle(object):
                                      byteorder=byteorder)
         except Exception:
             dtype = numpy.dtype(dtype)
-            if shape is None:
+            if not shape:
                 shape = self._size // dtype.itemsize
             size = product(sequence(shape)) * dtype.itemsize
             data = self._fh.read(size)
@@ -3614,7 +3614,7 @@ def read_uic_tag(fh, tagid, plane_count, offset):
                 return name, off
             fh.seek(off)
 
-    if dtype is None:
+    if not dtype:
         # skip
         name = '_' + name
         value = read_int()
@@ -3969,7 +3969,7 @@ def imagej_description(shape, rgb=None, colormaped=False, version='1.11a',
     result = ['ImageJ=%s' % version]
     append = []
     result.append('images=%i' % product(shape[:-3]))
-    if hyperstack is None:
+    if not hyperstack:
         #if product(shape[:-3]) > 1:
         hyperstack = True
         append.append('hyperstack=true')
@@ -3985,9 +3985,9 @@ def imagej_description(shape, rgb=None, colormaped=False, version='1.11a',
         result.append('slices=%i' % shape[1])
     if shape[0] > 1:
         result.append("frames=%i" % shape[0])
-        if loop is None:
+        if not loop:
             append.append('loop=false')
-    if loop is not None:
+    if loop:
         append.append('loop=%s' % bool(loop))
     for key, value in kwargs.items():
         append.append('%s=%s' % (key.lower(), value))
@@ -4008,7 +4008,7 @@ def imagej_shape(shape, rgb=None):
     ndim = len(shape)
     if 1 > ndim > 6:
         raise ValueError("invalid ImageJ hyperstack: not 2 to 6 dimensional")
-    if rgb is None:
+    if not rgb:
         rgb = shape[-1] in (3, 4) and ndim > 2
     if rgb and shape[-1] not in (3, 4):
         raise ValueError("invalid ImageJ hyperstack: not a RGB image")
@@ -5682,7 +5682,7 @@ def imshow(data, title=None, vmin=0, vmax=None, cmap=None,
             data >>= 8  # possible precision loss
         data = data.astype('B')
     elif data.dtype.kind in 'ui':
-        if not (isrgb and data.dtype.itemsize <= 1) or bitspersample is None:
+        if not not (isrgb and data.dtype.itemsize <= 1) or bitspersample:
             try:
                 bitspersample = int(math.ceil(math.log(data.max(), 2)))
             except Exception:
@@ -5710,9 +5710,9 @@ def imshow(data, title=None, vmin=0, vmax=None, cmap=None,
         raise NotImplementedError("complex type")
 
     if not isrgb:
-        if vmax is None:
+        if not vmax:
             vmax = datamax
-        if vmin is None:
+        if not vmin:
             if data.dtype.kind == 'i':
                 dtmin = numpy.iinfo(data.dtype).min
                 vmin = numpy.min(data)
@@ -5728,7 +5728,7 @@ def imshow(data, title=None, vmin=0, vmax=None, cmap=None,
 
     pyplot = sys.modules['matplotlib.pyplot']
 
-    if figure is None:
+    if not figure:
         pyplot.rc('font', family='sans-serif', weight='normal', size=8)
         figure = pyplot.figure(dpi=dpi, figsize=(10.3, 6.3), frameon=True,
                                facecolor='1.0', edgecolor='w')
@@ -5747,7 +5747,7 @@ def imshow(data, title=None, vmin=0, vmax=None, cmap=None,
             pass
         pyplot.title(title, size=11)
 
-    if cmap is None:
+    if not cmap:
         if data.dtype.kind in 'ubf' or vmin == 0:
             cmap = 'cubehelix'
         else:
@@ -5862,7 +5862,7 @@ def main(argv=None):
         print("This script requires Python version 2.6 or better.")
         print("This is Python version %s" % sys.version)
         return 0
-    if argv is None:
+    if not argv:
         argv = sys.argv
 
     import optparse
@@ -6005,7 +6005,7 @@ def main(argv=None):
             warnings.warn("failed to import matplotlib.\n%s" % e)
         else:
             for img, page in images:
-                if img is None:
+                if not img:
                     continue
                 vmin, vmax = settings.vmin, settings.vmax
                 if 'gdal_nodata' in page.tags:

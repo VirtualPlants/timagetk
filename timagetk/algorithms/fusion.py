@@ -58,7 +58,7 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
                        for vue in vues]
     >>> fus_img = fusion(list_images)
     """
-    if iterations is None:
+    if not iterations:
         iterations = 5
     else:
         iterations = int(abs(iterations))
@@ -67,7 +67,7 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
     conds_list_img = [0 if isinstance(sp_img, SpatialImage)
                       else 1 for sp_img in list_images]
     #--- check: list of BalTransformation trsf
-    if man_trsf_list is None:
+    if not man_trsf_list:
         conds_list_trsf = []
         man_trsf_list = [None]*(len(list_images)-1)
     else:
@@ -103,7 +103,7 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
                                                   init_result_transformation=man_trsf_list[ind-1],
                                                   param_str_2='-trsf-type rigid -py-ll 1{}'.format(" -time" if time else ""))
                 # - Update the `man_trsf_list` for the next iteration
-                if man_trsf_list[ind-1] is not None:
+                if man_trsf_list[ind-1]:
                     man_trsf_list[ind-1] = trsf_rig
                 print "...Affine registration..."
                 trsf_aff, res_aff = blockmatching(sp_img, init_ref,
@@ -153,7 +153,7 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
                                                   init_result_transformation=man_trsf_list[ind],
                                                   param_str_2='-trsf-type rigid -py-ll 1{}'.format(" -time" if time else ""))
                 # - Update the `man_trsf_list` for the next iteration
-                if man_trsf_list[ind] is not None:
+                if man_trsf_list[ind]:
                     man_trsf_list[ind] = trsf_rig
                 print "...Affine registration..."
                 trsf_aff, res_aff = blockmatching(sp_img, mean_ref_update,
