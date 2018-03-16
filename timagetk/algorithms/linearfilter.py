@@ -58,7 +58,7 @@ def linearfilter(image, param_str_1=LINEARFILTER_DEFAULT, param_str_2=None, dtyp
     except:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not dtype:
+    if dtype is None:
         dtype = image.dtype
     vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
     rvalue = libvtexec.API_linearFilter(vt_input.c_ptr, vt_res.c_ptr,

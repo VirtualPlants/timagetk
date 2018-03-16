@@ -69,7 +69,7 @@ def resample(image, voxelsize, option='gray'):
         param_str_2 = '-resize -interpolation nearest'
 
     # - Performs resampling:
-    out_img = apply_trsf(image, trsf=None, template_img=tmp_img,
+    out_img = apply_trsf(image, bal_transformation=None, template_img=tmp_img,
                          param_str_2=param_str_2)
 
     if 1 in out_img.get_shape():
@@ -134,7 +134,7 @@ def resample_isotropic(image, voxelsize, option='gray'):
 #     im_shape = input_im.shape
 #     print "  -- shape: {}".format(im_shape)
 #     # - `new_voxelsize` case:
-#     if new_voxelsize:
+#     if new_voxelsize is not None:
 #         # - Check only one resampling method has been selected:
 #         try:
 #             assert (new_shape is None) and (resampling_factor==1)
@@ -173,7 +173,7 @@ def resample_isotropic(image, voxelsize, option='gray'):
 #     # -- Create the corresponding identity transformation:
 #     identity_trsf = create_trsf(template_im, param_str_1='-identity')
 #     # -- Apply it on `input_im` to interpolate:
-#     interp_im = apply_trsf(input_im, trsf=identity_trsf,
+#     interp_im = apply_trsf(input_im, bal_transformation=identity_trsf,
 #                            template_img=template_im, dtype=im_dtype)
 #     return interp_im
 
@@ -285,7 +285,7 @@ def subsample(image, factor=[2, 2, 1], option='gray'):
     elif option == 'label':
         param_str_2 = '-resize -interpolation nearest'
 
-    out_img = apply_trsf(image, trsf=None,
+    out_img = apply_trsf(image, bal_transformation=None,
                          template_img=tmp_img, param_str_2=param_str_2)
     if 1 in out_img.get_shape():
         out_img = out_img.to_2D()

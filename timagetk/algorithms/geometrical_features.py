@@ -121,7 +121,7 @@ class GeometricalFeatures(object):
         """
         Region/Volume (2D/3D) shape iterators (approximation by a rectangle/cuboid)
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             start_time = time.time()
             label = self.get_labels()
             dim, shape, segmentation = self._dim, self._shape, self._segmentation
@@ -152,10 +152,10 @@ class GeometricalFeatures(object):
         """
         Region/Volume (2D/3D) point iterators
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             start_time = time.time()
             label = self.get_labels()
-            if not self.int_indexes:
+            if self.int_indexes is None:
                 self.lab_idx()
             index_list = self.int_indexes
             dim, segmentation = self._dim, self._segmentation
@@ -223,7 +223,7 @@ class GeometricalFeatures(object):
         -------
         >>> bounding_box_dict = self.compute_bounding_box()
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             dim, label = self._dim, self.int_labels
             if self.int_indexes is None or len(self.int_indexes)!=len(label):
                 self.lab_idx()
@@ -266,7 +266,7 @@ class GeometricalFeatures(object):
         -------
         >>> volume_dict = self.compute_volume()
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             dim, voxelsize, label = self._dim, self._voxelsize, self.int_labels
             if self.int_iterators is None or len(self.int_iterators)!=len(label):
                 self.lab_itrs()
@@ -310,7 +310,7 @@ class GeometricalFeatures(object):
         -------
         >>> centroid_dict = self.compute_centroid()
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             dim, voxelsize, label = self._dim, self._voxelsize, self.int_labels
             if self.int_iterators is None or len(self.int_iterators)!=len(label):
                 self.lab_itrs()
@@ -372,7 +372,7 @@ class GeometricalFeatures(object):
         -------
         >>> moment_dict = self.compute_moment(order, option)
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             dim, label = self._dim, self.int_labels
             if self.int_iterators is None or len(self.int_iterators)!=len(label):
                 self.lab_itrs()
@@ -461,7 +461,7 @@ class GeometricalFeatures(object):
         -------
         >>> cov_dict = self.compute_covariance_matrix()
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             dim, label, voxelsize = self._dim, self.int_labels, self._voxelsize
             if self.int_iterators is None or len(self.int_iterators)!=len(label):
                 self.lab_itrs()
@@ -571,7 +571,7 @@ class GeometricalFeatures(object):
         -------
         >>> neigh_dict = self.compute_local_rag_approx()
         """
-        if self.int_labels:
+        if self.int_labels is not None:
             start_time = time.time()
             matrix, dim, shape, label = self._segmentation, self._dim, self._shape, self.int_labels
 
