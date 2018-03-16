@@ -10,9 +10,9 @@
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-#--- Aug. 2016
+# --- Aug. 2016
 try:
     from timagetk.wrapping.clib import add_doc, return_value, libvtexec
     from timagetk.wrapping.vt_image import vt_image, new_vt_image
@@ -21,10 +21,11 @@ except ImportError:
     raise ImportError('Import Error')
 
 __all__ = ['CONNEXE_DEFAULT', 'connexe']
-CONNEXE_DEFAULT = '-low-threshold 1 -high-threshold 3 -labels -connectivity 26' #--- of course, stupid !
+CONNEXE_DEFAULT = '-low-threshold 1 -high-threshold 3 -labels -connectivity 26'  # --- of course, stupid !
 
 
-def connexe(image, seeds=None, param_str_1=CONNEXE_DEFAULT, param_str_2=None, dtype=None):
+def connexe(image, seeds=None, param_str_1=CONNEXE_DEFAULT, param_str_2=None,
+            dtype=None):
     """
     Connected components labeling.
 
@@ -54,27 +55,32 @@ def connexe(image, seeds=None, param_str_1=CONNEXE_DEFAULT, param_str_2=None, dt
     >>> regext_img = regionalext(input_image)
     >>> output_image = connexe(regext_img)
     """
-    if isinstance(image, SpatialImage):
-        if dtype is None:
-            dtype = image.dtype
-        if seeds is None:
-            pt_seeds = None
-        elif seeds is not None:
-            if isinstance(seeds, SpatialImage):
-                vt_seeds = vt_image(seeds)
-                pt_seeds = vt_seeds.c_ptr
-            else:
-                raise TypeError('Seeds image must be a SpatialImage')
-                return
-        vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
-        rvalue = libvtexec.API_connexe(vt_input.c_ptr, pt_seeds, vt_res.c_ptr,
-                                       param_str_1, param_str_2)
-        out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
-        vt_input.free(), vt_res.free()
-        if seeds is not None and isinstance(seeds, SpatialImage):
-            vt_seeds.free()
-        return out_sp_img
-    else:
+    try:
+        assert isinstance(image, SpatialImage)
+    except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
-        return
+
+    if dtype is None:
+        dtype = image.dtype
+    if seeds is None:
+        pt_seeds = None
+    else:
+        try:
+            assert isinstance(seeds, SpatialImage)
+        except AssertionError:
+            raise TypeError('Seeds image must be a SpatialImage')
+        else:
+            vt_seeds = vt_image(seeds)
+            pt_seeds = vt_seeds.c_ptr
+
+    vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
+    rvalue = libvtexec.API_connexe(vt_input.c_ptr, pt_seeds, vt_res.c_ptr,
+                                   param_str_1, param_str_2)
+    out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
+    vt_input.free(), vt_res.free()
+    if seeds and isinstance(seeds, SpatialImage):
+        vt_seeds.free()
+
+    return out_sp_img
+
 add_doc(connexe, libvtexec.API_Help_connexe)

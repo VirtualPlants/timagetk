@@ -132,9 +132,19 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
 
             self.trsf_unit = self._c_bal_trsf.transformation_unit
             self.mat = BalMatrix(c_bal_matrix=self._c_bal_trsf.mat) #---- BalMatrix instance
-            self.vx = BalImage(c_bal_image=self._c_bal_trsf.vx) #---- BalImage instance
-            self.vy = BalImage(c_bal_image=self._c_bal_trsf.vy) #---- BalImage instance
-            self.vz = BalImage(c_bal_image=self._c_bal_trsf.vz) #---- BalImage instance
+            # TODO: move this if/else behaviour to BalImage (avoid unecessary warnings raise when calling SpatialImage!
+            if not self._c_bal_trsf.vx:
+                self.vx = BalImage(c_bal_image=self._c_bal_trsf.vx) #---- BalImage instance
+            else:
+                self.vx = None
+            if not self._c_bal_trsf.vx:
+                self.vy = BalImage(c_bal_image=self._c_bal_trsf.vy) #---- BalImage instance
+            else:
+                self.vy = None
+            if not self._c_bal_trsf.vx:
+                self.vz = BalImage(c_bal_image=self._c_bal_trsf.vz) #---- BalImage instance
+            else:
+                self.vz = None
             self.trsf_type = self._c_bal_trsf.type
 
 

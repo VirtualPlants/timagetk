@@ -89,7 +89,7 @@ def fusion(list_images, iterations=None, man_trsf_list=None, mean_imgs_prefix=""
             template_img = SpatialImage(tmp_arr, voxelsize=[min_vox, min_vox, min_vox])
             del tmp_arr
         # -- Use first image in list to initialise reference template (ref. image for first round of blockmatching):
-        init_ref = apply_trsf(list_images[0], bal_transformation=None, template_img=template_img)
+        init_ref = apply_trsf(list_images[0], trsf=None, template_img=template_img)
 
         # -- FIRST iteration of 3-steps registrations: rigid, affine & vectorfield
         # All images in 'list_images' are registered on the first of the list
