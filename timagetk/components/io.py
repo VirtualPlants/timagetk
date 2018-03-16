@@ -65,6 +65,7 @@ def imread(img_file):
     # Get file ext:
     (filepath, filename) = os.path.split(img_file)
     (shortname, ext) = os.path.splitext(filename)
+    # Check for possible compression of the file:
     if (ext == '.gz') or (ext == '.zip'):
         zip_ext = ext
         (shortname, ext) = os.path.splitext(shortname)

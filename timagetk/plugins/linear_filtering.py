@@ -10,7 +10,7 @@
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
 #
 #       See accompanying file LICENSE.txt
-# ------------------------------------------------------------------------------
+#------------------------------------------------------------------------------
 
 """
 This module contains a generic implementation of several linear filtering algorithms.
@@ -27,10 +27,8 @@ except ImportError:
 __all__ = ['linear_filtering']
 
 DEFAULT_METHOD = 'gaussian_smoothing'
-POSS_METHODS = ['gaussian_smoothing', 'gradient', 'gradient_modulus', 'hessian',
-                'laplacian',
-                'gradient_hessian', 'gradient_laplacian',
-                'zero_crossings_hessian',
+POSS_METHODS = ['gaussian_smoothing', 'gradient', 'gradient_modulus', 'hessian', 'laplacian',
+                'gradient_hessian', 'gradient_laplacian', 'zero_crossings_hessian',
                 'zero_crossings_laplacian']
 
 
@@ -45,8 +43,7 @@ def _method_img_check(input_image):
     # - Check the isometry of the image:
     vx, vy, vz = input_image.get_voxelsize()
     if (vx != vy) or (vy != vz):
-        warnings.warn(
-            "The image is NOT isometric, this method operates on voxels!!")
+        warnings.warn("The image is NOT isometric, this method operates on voxels!!")
     return
 
 
@@ -87,7 +84,7 @@ def linear_filtering(input_image, method=None, **kwds):
     # - Check `input_image` type and isometry:
     _method_img_check(input_image)
     # - Set the 'DEFAULT_METHOD' if needed:
-    if not method:
+    if method is None:
         method = DEFAULT_METHOD
     # - Check the provided method is implemented:
     if method not in POSS_METHODS:
@@ -97,62 +94,48 @@ def linear_filtering(input_image, method=None, **kwds):
     try:
         from openalea.core.service.plugin import plugin_function
         func = plugin_function('openalea.image', method)
-        if func:
+        if func is not None:
             return func(input_image, **kwds)
     except:
-        if method == 'gaussian_smoothing':
+        if method=='gaussian_smoothing':
             std_dev_val = kwds.get('std_dev', None)
-            return linear_filtering_gaussian_smoothing(input_image,
-                                                       std_dev=std_dev_val)
-        if method == 'gradient':
+            return linear_filtering_gaussian_smoothing(input_image, std_dev=std_dev_val)
+        if method=='gradient':
             return linear_filtering_gradient(input_image)
-        if method == 'gradient_modulus':
+        if method=='gradient_modulus':
             return linear_filtering_gradient_modulus(input_image)
-        if method == 'hessian':
+        if method=='hessian':
             return linear_filtering_hessian(input_image)
-        if method == 'laplacian':
+        if method=='laplacian':
             return linear_filtering_laplacian(input_image)
-        if method == 'gradient_hessian':
+        if method=='gradient_hessian':
             return linear_filtering_gradient_hessian(input_image)
-        if method == 'gradient_laplacian':
+        if method=='gradient_laplacian':
             return linear_filtering_gradient_laplacian(input_image)
-        if method == 'zero_crossings_hessian':
+        if method=='zero_crossings_hessian':
             return linear_filtering_zero_crossings_hessian(input_image)
-        if method == 'zero_crossings_laplacian':
+        if method=='zero_crossings_laplacian':
             return linear_filtering_zero_crossings_laplacian(input_image)
 
 
 def linear_filtering_gaussian_smoothing(input_image, std_dev=None, **kwds):
     """
     Gaussian smoothing filter.
-    Please note that the same 'std_dev' is used in all direction regardless of
-    the image isometry or not!
 
     Parameters
     ----------
     :param *SpatialImage* input_image: input_image *SpatialImage*
-    :param float std_dev: optional, standard deviation. Default: std_dev=1.0
+    :param float std_dev: optinal, standard deviation. Default: std_dev=1.0
 
     Returns
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
     _method_img_check(input_image)
-    if not std_dev:
+    if std_dev is None:
         std_dev = 1.0
     else:
         std_dev = abs(float(std_dev))
-    # TODO: check that 'libvtexec.API_linearFilter' check the isometry and adjust 'std_dev' accordingly
-    # if not input_image.is_isometric():
-    #     print "Warning: non-isometric image!"
-    #     vxs = input_image.get_voxelsize()
-    #     maxi = max(vxs)
-    #     std_dev_x, std_dev_y, std_dev_z = [vxs_i * std_dev / maxi for vxs_i in
-    #                                        vxs]
-    #     params = '-smoothing -sigma {} {} {}'.format(std_dev_x, std_dev_y,
-    #                                                  std_dev_z)
-    # else:
-    #     params = '-smoothing -sigma %s' % std_dev
     params = '-smoothing -sigma %s' % std_dev
     return linearfilter(input_image, param_str_2=params)
 

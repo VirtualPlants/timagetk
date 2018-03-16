@@ -53,80 +53,65 @@ class TemporalMatching(object):
 
         :param list background_id_list: optional, list of input background identifiers
         """
-        # - Check list_images type:
-        try:
-            assert isinstance(segmentation_list, list)
-        except AssertionError:
-            raise TypeError(
-                "Parameter 'segmentation_list' should be of type 'list', but is: {}".format(
-                    type(segmentation_list)))
-        # - Check SpatialImage sequence:
-        conds_list_img = [isinstance(img, SpatialImage) for img in segmentation_list]
-        try:
-            assert sum(conds_list_img) == len(conds_list_img)
-        except AssertionError:
-            raise TypeError(
-                "Parameter 'segmentation_list' should be a list of SpatialImages!")
-        # - Check SpatialImage sequence length, this function is useless if lenght < 2!
-        try:
-            assert len(segmentation_list) >= 2
-        except AssertionError:
-            raise ValueError(
-                "Parameter 'segmentation_list' should have a minimum length of 2!")
+        conds_sp_img = [0 if isinstance(sp_img, SpatialImage) else 1
+                        for ind, sp_img in enumerate(segmentation_list)] # list of SpatialImage
+        conds_list = isinstance(segmentation_list, list) and len(segmentation_list)>=2
 
-        # - Create segmentation list and associated voxelsize list:
-        # TODO: WHY? we loose important info (origin, metadata, ...), especially when recreating the SpatialImage with 'get_segmentation_list'
-        self.number_of_sets = len(segmentation_list)
-        seg_arr_list = [np_array(segmentation_list[ind], dtype=segmentation_list[ind].dtype)
-                        for ind, val in enumerate(segmentation_list)] #--- numpy array instance
-        self.segmentation_list = seg_arr_list
-        self.voxelsize_list = [segmentation_list[ind].get_voxelsize() for ind, val in enumerate(segmentation_list)]
+        if conds_list and 1 not in conds_sp_img:
 
-        #--- background id list
-        if background_id_list:
-            if isinstance(background_id_list, list) and len(background_id_list)==len(segmentation_list):
-                self.back_id_list = background_id_list
+            self.number_of_sets = len(segmentation_list)
+            seg_arr_list = [np_array(segmentation_list[ind], dtype=segmentation_list[ind].dtype)
+                            for ind, val in enumerate(segmentation_list)] #--- numpy array instance
+            self.segmentation_list = seg_arr_list
+            self.voxelsize_list = [segmentation_list[ind].get_voxelsize() for ind, val in enumerate(segmentation_list)]
+
+            #--- background id list
+            if background_id_list is not None:
+                if isinstance(background_id_list, list) and len(background_id_list)==len(segmentation_list):
+                    self.back_id_list = background_id_list
+                else:
+                    print('background_id_list must be a list of background identifiers')
+                    return
             else:
-                print('background_id_list must be a list of background identifiers')
-                return
-        else:
-            mini_labs = [min(((np_unique(segmentation_list[ind])).tolist())) for ind, val in enumerate(segmentation_list)]
-            self.back_id_list = mini_labs
+                mini_labs = [min(((np_unique(segmentation_list[ind])).tolist())) for ind, val in enumerate(segmentation_list)]
+                self.back_id_list = mini_labs
 
-        #--- feature space list
-        if feature_space_list:
-            conds_feat_1 = isinstance(feature_space_list, list) and len(feature_space_list)==len(segmentation_list)
-            conds_feat_2 = [0 if isinstance(feature_space_dict, dict) else 1
-                            for ind, feature_space_dict in enumerate(feature_space_list)]
-            if conds_feat_1 and 1 not in conds_feat_2:
-                for ind, feature_space_dict in enumerate(feature_space_list):
-                    for key in feature_space_dict:
-                        if feature_space_dict[key]['Label'] == self.back_id_list[ind]:
-                            del feature_space_dict[key] # if present remove background features
-                    feature_space_list[ind] = feature_space_dict
+            #--- feature space list
+            if feature_space_list is not None:
+                conds_feat_1 = isinstance(feature_space_list, list) and len(feature_space_list)==len(segmentation_list)
+                conds_feat_2 = [0 if isinstance(feature_space_dict, dict) else 1
+                                for ind, feature_space_dict in enumerate(feature_space_list)]
+                if conds_feat_1 and 1 not in conds_feat_2:
+                    for ind, feature_space_dict in enumerate(feature_space_list):
+                        for key in feature_space_dict:
+                            if feature_space_dict[key]['Label'] == self.back_id_list[ind]:
+                                del feature_space_dict[key] # if present remove background features
+                        feature_space_list[ind] = feature_space_dict
+                    self.feature_space_list = feature_space_list
+                else:
+                    print('feature_space_list must be a list dictionaries')
+                    return
+            else:
+                feature_space_list = []
+                for ind, segmentation in enumerate(segmentation_list):
+                    obj = GeometricalFeatures(segmentation)
+                    labels = (np_unique(segmentation)).tolist()
+                    labels.remove(self.back_id_list[ind])
+                    obj.set_labels(labels)
+                    feature_space_dict = obj.compute_feature_space(background_id=self.back_id_list[ind])
+                    feature_space_list.append(feature_space_dict)
                 self.feature_space_list = feature_space_list
-            else:
-                print('feature_space_list must be a list dictionaries')
-                return
+
+            if self.feature_space_list is not None:
+                self.nodes_list = self.compute_nodes_list()
+
+            self.admissible_matching_list = None
+            self.single_cost_list, self.pairwise_cost_list, self.normalized_cost_list = None, None, None
+            self.min_cost, self.max_cost = None, None
+            self.source, self.sink, self.appear, self.disappear = None, None, None, None
         else:
-            feature_space_list = []
-            for ind, segmentation in enumerate(segmentation_list):
-                obj = GeometricalFeatures(segmentation)
-                labels = (np_unique(segmentation)).tolist()
-                labels.remove(self.back_id_list[ind])
-                obj.set_labels(labels)
-                feature_space_dict = obj.compute_feature_space(background_id=self.back_id_list[ind])
-                feature_space_list.append(feature_space_dict)
-            self.feature_space_list = feature_space_list
-
-        if self.feature_space_list:
-            self.nodes_list = self.compute_nodes_list()
-
-        # - Initialise object associated variables:
-        self.admissible_matching_list = None
-        self.single_cost_list, self.pairwise_cost_list, self.normalized_cost_list = None, None, None
-        self.min_cost, self.max_cost = None, None
-        self.source, self.sink, self.appear, self.disappear = None, None, None, None
+            print('segmentation_list must be a list of SpatialImage instances')
+            return
 
 
     def get_part_nodes(self):
@@ -162,28 +147,10 @@ class TemporalMatching(object):
         ----------
         :param list segmentation_list: list of input ``SpatialImage`` (segmentations)
         """
-        try:
-            assert isinstance(segmentation_list, list)
-        except AssertionError:
-            raise TypeError(
-                "Parameter 'segmentation_list' should be of type 'list', but is: {}".format(
-                    type(segmentation_list)))
-        # - Check SpatialImage sequence:
-        conds_list_img = [isinstance(img, SpatialImage) for img in segmentation_list]
-        try:
-            assert sum(conds_list_img) == len(conds_list_img)
-        except AssertionError:
-            raise TypeError(
-                "Parameter 'segmentation_list' should be a list of SpatialImages!")
-        # - Check SpatialImage sequence length, this function is useless if lenght < 2!
-        try:
-            assert len(segmentation_list) >= 2
-        except AssertionError:
-            raise ValueError(
-                "Parameter 'segmentation_list' should have a minimum length of 2!")
-
-        self.__init__(segmentation_list)
-        return "Updated self.segmentation list to:\n{}".format(self.segmentation_list)
+        conds_sp_img = [0 if isinstance(sp_img, SpatialImage) else 1
+                        for ind, sp_img in enumerate(segmentation_list)]
+        if isinstance(segmentation_list, list) and 1 not in conds_sp_img:
+            self.__init__(segmentation_list)
 
 
     def get_feature_space_list(self):
@@ -236,7 +203,7 @@ class TemporalMatching(object):
         ----------
         :return: list -- list of dictionaries
         """
-        if not self.admissible_matching_list:
+        if self.admissible_matching_list is None:
             self.compute_admissible_matching()
         return self.admissible_matching_list
 
@@ -262,7 +229,7 @@ class TemporalMatching(object):
         ----------
         :return: list -- list of dictionaries
         """
-        if not self.single_cost_list:
+        if self.single_cost_list is None:
             adm_match_list = self.get_admissible_matching_list()
             self.compute_single_cost(adm_match_list, criterion=criterion)
         return self.single_cost_list
@@ -289,7 +256,7 @@ class TemporalMatching(object):
         ----------
         :return: list -- list of dictionaries
         """
-        if not self.pairwise_cost_list:
+        if self.pairwise_cost_list is None:
             adm_match_list = self.get_admissible_matching_list()
             self.compute_pairwise_cost(adm_match_list, criterion=criterion)
         return self.pairwise_cost_list
@@ -316,7 +283,7 @@ class TemporalMatching(object):
         ----------
         :return: list -- list of dictionaries
         """
-        if not self.normalized_cost_list:
+        if self.normalized_cost_list is None:
             adm_match_list = self.get_admissible_matching_list()
             self.compute_normalized_cost(adm_match_list, criterion=criterion,
                                          min_cost=min_cost, max_cost=max_cost)
@@ -413,7 +380,7 @@ class TemporalMatching(object):
             if glob_index < len(feature_space_list)-1:
 
                 # inc_max management
-                if not inc_max:
+                if inc_max is None:
                     feat_0 = feature_space_list[glob_index]
                     bbox_size_list = [feat_0[key]['Bounding box size'] for key in feat_0]
                     x_list = [bbox_size_list[ind][0] for ind, val in enumerate(bbox_size_list)]
@@ -859,7 +826,7 @@ class TemporalMatching(object):
         try:
             import networkx as nx
         except ImportError:
-            raise ImportError('NetworkX import failed! Please install it.')
+            raise ImportError('Import Error')
             import sys
             sys.exit(0)
 
@@ -1198,7 +1165,7 @@ class TemporalMatching(object):
             import sys
             sys.exit(0)
 
-        if not tolerance:
+        if tolerance is None:
             tolerance = 10.0/100
 
         source, sink, appear, disappear = self.get_part_nodes()

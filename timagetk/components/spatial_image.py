@@ -25,36 +25,31 @@ import numpy as np
 __all__ = ['SpatialImage']
 EPS, DEC_VAL = 1e-9, 6
 
-# - Define possible values:
-POSS_TYPES = {0: np.uint8, 1: np.int8, 2: np.uint16, 3: np.int16,
-              4: np.uint32,
-              5: np.int32, 6: np.uint64, 7: np.int64, 8: np.float32,
-              9: np.float64,
-              10: np.float_, 11: np.complex64, 12: np.complex128,
-              13: np.complex_,
-              'uint8': np.uint8, 'uint16': np.uint16, 'ushort': np.uint16,
-              'uint32': np.uint32,
-              'uint64': np.uint64, 'uint': np.uint64,
-              'ulonglong': np.uint64, 'int8': np.int8,
-              'int16': np.int16, 'short': np.int16, 'int32': np.int32,
-              'int64': np.int64,
-              'int': np.int64, 'longlong': np.int64, 'float16': np.float16,
-              'float32': np.float32,
-              'single': np.float32, 'float64': np.float64,
-              'double': np.float64, 'float': np.float64,
-              'float128': np.float_, 'longdouble': np.float_,
-              'longfloat': np.float_,
-              'complex64': np.complex64, 'singlecomplex': np.complex64,
-              'complex128': np.complex128,
-              'cdouble': np.complex128, 'cfloat': np.complex128,
-              'complex': np.complex128,
-              'complex256': np.complex_, 'clongdouble': np.complex_,
-              'clongfloat': np.complex_,
-              'longcomplex': np.complex_}
-# - Define default values:
-DEF_TYPE = POSS_TYPES[0]
-DEF_VXS_2D, DEF_VXS_3D = [1.0, 1.0], [1.0, 1.0, 1.0]
-DEF_ORIG_2D, DEF_ORIG_3D = [0, 0], [0, 0, 0]
+poss_types = {0: np.uint8, 1: np.int8, 2: np.uint16, 3: np.int16,
+                   4: np.uint32,
+                   5: np.int32, 6: np.uint64, 7: np.int64, 8: np.float32,
+                   9: np.float64,
+                   10: np.float_, 11: np.complex64, 12: np.complex128,
+                   13: np.complex_,
+                   'uint8': np.uint8, 'uint16': np.uint16, 'ushort': np.uint16,
+                   'uint32': np.uint32,
+                   'uint64': np.uint64, 'uint': np.uint64,
+                   'ulonglong': np.uint64, 'int8': np.int8,
+                   'int16': np.int16, 'short': np.int16, 'int32': np.int32,
+                   'int64': np.int64,
+                   'int': np.int64, 'longlong': np.int64, 'float16': np.float16,
+                   'float32': np.float32,
+                   'single': np.float32, 'float64': np.float64,
+                   'double': np.float64, 'float': np.float64,
+                   'float128': np.float_, 'longdouble': np.float_,
+                   'longfloat': np.float_,
+                   'complex64': np.complex64, 'singlecomplex': np.complex64,
+                   'complex128': np.complex128,
+                   'cdouble': np.complex128, 'cfloat': np.complex128,
+                   'complex': np.complex128,
+                   'complex256': np.complex_, 'clongdouble': np.complex_,
+                   'clongfloat': np.complex_,
+                   'longcomplex': np.complex_}
 
 
 def around_list(input_list, dec_val=DEC_VAL):
@@ -96,77 +91,6 @@ def tuple_array_to_list(val):
         raise TypeError("Accepted type are tuple, list and np.array!")
     else:
         return val
-
-
-def basic_metadata(obj, metadata_dict=None):
-    """
-    Build the metadata dictionary for basics image array infos.
-    Can compare it to a existing one.
-
-    Parameters
-    ----------
-    obj : SpatialImage
-        a SpatialImage to use for metadata definition
-    metadata_dict : dict, optional
-        a metadata dictionary to compare to the object variables
-
-    Returns
-    -------
-    metadata_dict : dict
-        a verified metadata dictionary
-    """
-    if not metadata_dict:
-        metadata_dict = {}
-
-    # -- Check the most important object values against potentially
-    # predefined values in the metadata_dict:
-    try:
-        assert np.alltrue(metadata_dict['voxelsize'] == obj.voxelsize)
-    except KeyError:
-        metadata_dict['voxelsize'] = obj.voxelsize
-    except AssertionError:
-        raise ValueError(
-            "Metadata 'voxelsize' does not match the object voxelsize!")
-    try:
-        assert metadata_dict['shape'] == obj.shape
-    except KeyError:
-        metadata_dict['shape'] = obj.shape
-    except AssertionError:
-        metadata_dict['shape'] = obj.shape
-        print "WARNING: Metadata 'shape' did not match the object shape, it has been updated!"
-    try:
-        assert metadata_dict['dim'] == obj.ndim
-    except KeyError:
-        metadata_dict['dim'] = obj.ndim
-    except AssertionError:
-        raise ValueError("Metadata 'dim' does not match the object dim!")
-    try:
-        assert np.alltrue(metadata_dict['origin'] == obj.origin)
-    except KeyError:
-        metadata_dict['origin'] = obj.origin
-    except AssertionError:
-        raise ValueError(
-            "Metadata 'origin' does not match the object origin!")
-    try:
-        assert np.alltrue(metadata_dict['extent'] == obj.extent)
-    except KeyError:
-        metadata_dict['extent'] = obj.extent
-    except AssertionError:
-        raise ValueError(
-            "Metadata 'extent' does not match the object extent!")
-    try:
-        assert metadata_dict['type'] == str(obj.dtype)
-    except KeyError:
-        metadata_dict['type'] = str(obj.dtype)
-    except AssertionError:
-        raise ValueError("Metadata 'type' does not match the object type!")
-    # Next lines compute min, max and mean values of the array every time we
-    # call SpatialImage, even when reading the file from disk! This slow down
-    # the process!
-    # metadata_dict['min'] = obj.min()
-    # metadata_dict['max'] = obj.max()
-    # metadata_dict['mean'] = obj.mean()
-    return metadata_dict
 
 
 class SpatialImage(np.ndarray):
@@ -221,54 +145,42 @@ class SpatialImage(np.ndarray):
         try:
             assert len(input_array.shape) in [2, 3]
         except AssertionError:
-            print ValueError(
-                "Input array must have a dimensionality equal to 2 or 3")
+            print ValueError("Input array must have a dimensionality equal to 2 or 3")
             return None  # WEIRD behavior... seems required by some functions
             # Original behavior was to test if the dim was 2D or 3D but was not
             # doing anything otherwise (no else declared!).
 
-        # - Create the metadata dictionary:
-        if metadata_dict is None or metadata_dict == []:
-            metadata_dict = {}
-        else:
-            try:
-                assert isinstance(metadata_dict, dict)
-            except:
-                raise TypeError(
-                    "Parameter 'metadata_dict' should be a dictionary!")
-
+        # - Define default values:
+        def_type = poss_types[0]
+        def_vox_2D, def_vox_3D = [1.0, 1.0], [1.0, 1.0, 1.0]
+        def_orig_2D, def_orig_3D = [0, 0], [0, 0, 0]
         # - Check 'dtype':
         if dtype is None or dtype == []:
             if (input_array.dtype is not None):
                 dtype = input_array.dtype
-        elif dtype:
-            if (str(dtype) in POSS_TYPES or dtype in POSS_TYPES.values()):
-                for key in POSS_TYPES:
-                    if (str(dtype) == key or dtype == POSS_TYPES[key]):
-                        dtype = POSS_TYPES[key]
+        elif dtype is not None:
+            if (str(dtype) in poss_types or dtype in poss_types.values()):
+                for key in poss_types:
+                    if (str(dtype) == key or dtype == poss_types[key]):
+                        dtype = poss_types[key]
             else:
-                print('Available types :'), POSS_TYPES
+                print('Available types :'), poss_types
                 print('Setting type to unsigned integer')
-                dtype = DEF_TYPE
+                dtype = def_type
         # - Check & set 'flags' value, set 'dtype' value:
         if input_array.flags.f_contiguous:
             obj = np.asarray(input_array, dtype=dtype).view(cls)
         else:
             obj = np.asarray(input_array, dtype=dtype, order='F').view(cls)
-
-        # - Check & set 'origins' value:
+        # - Check 'origins' value:
         if (origin is not None) and (len(input_array.shape) == len(origin)):
             orig = origin
-            # - Update metadata in case voxelsize parameter is correctly
-            # specified (to avoid potential missmatch against metadata_dict)
-            metadata_dict['origin'] = orig
         else:
-            # TODO: should check against metadata
             print "Warning: incorrect origin specification,",
             if len(input_array.shape) == 2:
-                orig = DEF_ORIG_2D
+                orig = def_orig_2D
             else:
-                orig = DEF_ORIG_3D
+                orig = def_orig_3D
             print "set to default value:", orig
         obj.origin = orig
 
@@ -283,43 +195,46 @@ class SpatialImage(np.ndarray):
             assert len(input_array.shape) == len(voxelsize)
         except:
             print "Warning: incorrect voxelsize specification,",
-            # TODO: should check against metadata
             if len(input_array.shape) == 2:
-                vxs = DEF_VXS_2D
+                vxs = def_vox_2D
             else:
-                vxs = DEF_VXS_3D
+                vxs = def_vox_3D
             print "set to default value:", vxs
         else:
             vxs = around_list(voxelsize)
-            # - Update metadata in case voxelsize parameter is correctly
-            # specified (to avoid potential missmatch against metadata_dict)
-            metadata_dict['voxelsize'] = vxs
         obj.voxelsize = vxs
 
-        # - Check & set 'extent' value:
+        # - Set 'extent' value:
         ext = [obj.voxelsize[ind] * input_array.shape[ind] for ind in
                xrange(len(input_array.shape))]
         ext = around_list(ext)
-        metadata_dict['extent'] = ext
         obj.extent = ext
-
-        # -- Save the metadata:
-        obj.metadata = basic_metadata(obj, metadata_dict)
-
+        # - Create the metadata dictionary:
+        if metadata_dict is None or metadata_dict == []:
+            metadata_dict = {}
+        else:
+            try:
+                assert isinstance(metadata_dict, dict)
+            except:
+                raise TypeError("metadata_dict should be a dictionary!")
+        if isinstance(metadata_dict, dict):
+            metadata_dict['voxelsize'] = obj.voxelsize
+            metadata_dict['shape'] = obj.shape
+            metadata_dict['dim'] = obj.ndim
+            metadata_dict['origin'] = obj.origin
+            metadata_dict['extent'] = obj.extent
+            metadata_dict['type'] = str(obj.dtype)
+            metadata_dict['min'] = obj.min()
+            metadata_dict['max'] = obj.max()
+            metadata_dict['mean'] = obj.mean()
+        obj.metadata = metadata_dict
         # - Backward compatibility with 'openalea.image' `SpatiaImage`:
         obj.resolution = obj.voxelsize
         return obj
 
     def __array_finalize__(self, obj):
-        """
-        This is the mechanism that numpy provides to allow subclasses to handle
-        the various ways that new instances get created.
 
-        Parameters
-        ----------
-        obj : the object returned by the __new__ method.
-        """
-        if obj:
+        if obj is not None:
             self.voxelsize = getattr(obj, 'voxelsize', [])
             self.origin = getattr(obj, 'origin', [])
             self.extent = getattr(obj, 'extent', [])
@@ -332,20 +247,6 @@ class SpatialImage(np.ndarray):
 
     def __str__(self):
         return "SpatialImage instance, metadata: {}".format(self.get_metadata())
-
-    def is_isometric(self):
-        """
-        Test if the image is isometric, meaning the voxelsize value is the same
-        in every direction.
-
-        Returns
-        -------
-        is_iso : bool
-            True is isometric, else False.
-        """
-        vxs = self.get_voxelsize()
-        is_iso = np.alltrue([vxs_i == vxs[0] for vxs_i in vxs[1:]])
-        return is_iso
 
     def resolution(self):
         """
@@ -492,14 +393,7 @@ class SpatialImage(np.ndarray):
          }
         """
         met_dict = self.metadata
-        try:
-            assert met_dict.has_key('shape')
-        except AssertionError:
-            met_dict = basic_metadata(self, self.metadata)
-
-        try:
-            assert met_dict['shape'] == self.shape
-        except AssertionError:
+        if met_dict['shape'] != self.shape:
             old_shape = met_dict['shape']
             met_dict['shape'], met_dict['dim'], met_dict[
                 'type'] = self.shape, self.ndim, str(self.dtype)
@@ -530,7 +424,6 @@ class SpatialImage(np.ndarray):
                 met_dict['voxelsize'], met_dict['extent'], met_dict[
                     'origin'] = vox, ext, orig
                 self.voxelsize, self.extent, self.origin = vox, ext, orig
-
         self.metadata = met_dict
         return self.metadata
 
@@ -552,12 +445,7 @@ class SpatialImage(np.ndarray):
         >>> print image_min
         1
         """
-        try:
-            return self._min
-        except AttributeError:
-            self._min = self.min()
-            self.metadata.update({'min': self._min})
-            return self._min
+        return self.min()
 
     def get_max(self):
         """
@@ -577,12 +465,7 @@ class SpatialImage(np.ndarray):
         >>> print image_max
         1
         """
-        try:
-            return self._max
-        except AttributeError:
-            self._max = self.max()
-            self.metadata.update({'max': self._max})
-            return self._max
+        return self.max()
 
     def get_mean(self):
         """
@@ -602,12 +485,7 @@ class SpatialImage(np.ndarray):
         >>> print image_mean
         1
         """
-        try:
-            return self._mean
-        except AttributeError:
-            self._mean = self.mean()
-            self.metadata.update({'mean': self._mean})
-            return self._mean
+        return self.mean()
 
     def get_origin(self):
         """
@@ -722,7 +600,7 @@ class SpatialImage(np.ndarray):
 
         if img_dim < 2 or img_dim > 3:
             raise ValueError(
-                "SpatialImage can be 2D or 3D, check dimensionality!")
+            "SpatialImage can be 2D or 3D, check dimensionality!")
 
         if not conds_ind:
             err = "Given 'indices' are not within the image shape!"
@@ -733,8 +611,7 @@ class SpatialImage(np.ndarray):
         else:
             pass
 
-        bbox = (slice(indices[i], indices[i + 1]) for i in
-                range(0, 2 * img_dim, 2))
+        bbox = (slice(indices[i], indices[i + 1]) for i in range(0, 2 * img_dim, 2))
         tmp_arr, tmp_vox = self.get_array(), self.get_voxelsize()
         reg_val = tmp_arr[bbox]
         if img_dim == 3 & 1 in reg_val.shape:  # 3D --> 2D
@@ -970,14 +847,14 @@ class SpatialImage(np.ndarray):
                     conds_shape = (((max(indices[0], indices[1]) - min(
                         indices[0], indices[1])) == val.shape[0])
                                    and ((max(indices[2], indices[3]) - min(
-                                indices[2], indices[3])) == val.shape[1]))
+                        indices[2], indices[3])) == val.shape[1]))
                 elif img_dim == 3:
                     conds_shape = (((max(indices[0], indices[1]) - min(
                         indices[0], indices[1])) == val.shape[0])
                                    and ((max(indices[2], indices[3]) - min(
-                                indices[2], indices[3])) == val.shape[1])
+                        indices[2], indices[3])) == val.shape[1])
                                    and ((max(indices[4], indices[5]) - min(
-                                indices[4], indices[4])) == val.shape[2]))
+                        indices[4], indices[4])) == val.shape[2]))
                 if conds_shape:
                     if img_dim == 2:
                         tmp_arr[
@@ -1029,10 +906,10 @@ class SpatialImage(np.ndarray):
         >>> image_type = np.uint16
         >>> out_sp_image = image.set_type(image_type)
         """
-        if (val in POSS_TYPES.keys() or val in POSS_TYPES.values()):
-            for key in POSS_TYPES:
-                if (val == key or val == POSS_TYPES[key]):
-                    new_type = POSS_TYPES[key]
+        if (val in poss_types.keys() or val in poss_types.values()):
+            for key in poss_types:
+                if (val == key or val == poss_types[key]):
+                    new_type = poss_types[key]
 
             met_dict = self.get_metadata()
             self = self.astype(new_type)

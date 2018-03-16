@@ -94,7 +94,7 @@ def registration(floating_img, reference_img, method=None, **kwds):
         raise TypeError('Reference image must be a SpatialImage instance.')
 
     # - Use the default `method`:
-    if not method:
+    if method is None:
         method = DEFAULT_METHOD
 
     # - If provided 'init_trsf' will be used to initialize blockmatching
@@ -138,7 +138,7 @@ def registration(floating_img, reference_img, method=None, **kwds):
             raise NotImplementedError(method)
     else:
         func = plugin_function('openalea.image', method)
-        if func:
+        if func is not None:
             return func(floating_img, reference_img, init_trsf, left_trsf,
                         **kwds)
         else:

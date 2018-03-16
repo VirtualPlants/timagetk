@@ -127,7 +127,7 @@ def labels_post_processing(input_image, method, **kwds):
         assert kwds.get('try_plugin', True)
         from openalea.core.service.plugin import plugin_function
         func = plugin_function('openalea.image', method)
-        if func:
+        if func is not None:
             return func(input_image, **kwds)
     except:
         print "Plugin functionnality not available !"

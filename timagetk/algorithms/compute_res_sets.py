@@ -42,7 +42,7 @@ def compute_res_sets(sp_img, nodes_list, bounding_box_dict=None):
     >>> glob_set = compute_res_sets(sp_img, nodes_list, bounding_box_dict)
     """
     if isinstance(sp_img, SpatialImage) and isinstance(nodes_list, list):
-        if not bounding_box_dict:
+        if bounding_box_dict is None:
             obj = GeometricalFeatures(sp_img, label=nodes_list)
             bounding_box_dict = obj.compute_bounding_box()
 
