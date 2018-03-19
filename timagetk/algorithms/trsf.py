@@ -142,7 +142,7 @@ def apply_trsf(image, trsf=None, template_img=None,
     if image.get_dim() == 2:  # 2D management
         image = image.to_3D()
 
-    if template_img is not None:
+    if template_img is None:
         kwds = spatial_image_to_bal_image_fields(image)
     else:
         if isinstance(template_img, SpatialImage):
