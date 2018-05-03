@@ -94,7 +94,6 @@ def registration(floating_img, reference_img, method=None, **kwds):
     except:
         raise TypeError('Reference image must be a SpatialImage instance.')
 
-    # - Use the default `method`:
     if method is None:
         method = DEFAULT_METHOD
     try:
