@@ -96,7 +96,7 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
                                                                     POSS_METHODS))
 
     try:
-        assert kwds.get('try_plugin', True)
+        assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         control_val = kwds.get('control', None)

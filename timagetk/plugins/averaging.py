@@ -58,7 +58,7 @@ def averaging(list_images, method=None, **kwds):
     >>> rob_mean_image = averaging(list_images, method='robust_mean_averaging')
     >>> mean_image = averaging(list_images, method='mean_averaging')
     """
-    if not method:
+    if method is None:
         method = DEFAULT_METHOD
 
     try:
@@ -69,7 +69,7 @@ def averaging(list_images, method=None, **kwds):
                                                                     POSS_METHODS))
 
     try:
-        assert kwds.get('try_plugin', True)
+        assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except ImportError:
         if method == 'mean_averaging':

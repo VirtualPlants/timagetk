@@ -294,8 +294,8 @@ def bal_image_to_spatial_image(c_or_bal_image, **kwds):
         #--- SR 21/03
         #arr = np.array(_np_array.reshape(x, y, z, v, order="F"))
         arr = np.array(_np_array.reshape(x, y, z, v, order="F"), dtype=_nptype)
-    # return SpatialImage(arr, voxelsize=resolution, dtype=arr.dtype)
-    return SpatialImage(arr, voxelsize=resolution, dtype=arr.dtype)
+
+    return SpatialImage(arr, voxelsize=resolution, origin=[0]*arr.ndim, dtype=arr.dtype)
 
 
 class BalImage(object):

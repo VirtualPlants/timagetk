@@ -46,6 +46,10 @@ def resample(image, voxelsize, option='gray'):
     """
     dim = image.get_dim()
     try:
+        assert image.get_voxelsize() != []
+    except AssertionError:
+        raise ValueError("Input image has an EMPTY voxelsize attribute!")
+    try:
         assert len(voxelsize) == dim
     except AssertionError:
         raise ValueError("Parameter 'voxelsize' length ({}) does not match the dimension of the image ({}).".format(len(voxelsize), dim))
@@ -99,7 +103,7 @@ def resample_isotropic(image, voxelsize, option='gray'):
     if option not in poss_opt:
         raise ValueError("Possible options are: {}".format(poss_opt))
     if not (isinstance(image, SpatialImage) and image.get_dim() == 3):
-        raise TypeError("'image' must be a SpatialImage instance")
+        raise TypeError("Input 'image' must be a 3D SpatialImage instance")
 
     if not isinstance(voxelsize, float):
         voxelsize = float(voxelsize)
@@ -192,18 +196,28 @@ def isometric_resampling(input_im, method='min', option='gray', dry_run=False):
 
     """
     POSS_METHODS = ['min', 'max']
+    voxelsize = input_im.get_voxelsize()
+    try:
+        assert voxelsize != []
+    except AssertionError:
+        raise ValueError("Input image has an EMPTY voxelsize attribute!")
+
     if method not in POSS_METHODS and not isinstance(method, float):
         raise ValueError(
             "Possible values for 'methods' are a float, 'min' or 'max'.")
     if method == 'min':
-        vxs = np.min(input_im.voxelsize)
+        vxs = np.min(voxelsize)
     elif method == 'max':
-        vxs = np.max(input_im.voxelsize)
+        vxs = np.max(voxelsize)
     else:
         vxs = method
 
+    if np.allclose(voxelsize, [vxs]*input_im.get_dim()):
+        print "Image is already isometric!"
+        return input_im
+
     if dry_run:
-        vxs = np.repeat(vxs, len(input_im.voxelsize)).tolist()
+        vxs = np.repeat(vxs, len(voxelsize)).tolist()
         extent = input_im.get_extent()
         dim = input_im.get_dim()
         size = [int(round(extent[ind] / vxs[ind])) for ind in range(dim)]

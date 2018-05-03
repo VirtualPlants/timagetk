@@ -124,7 +124,7 @@ def labels_post_processing(input_image, method, **kwds):
         raise NotImplementedError(method)
     # - Try 'plugin function' or use direct wrapping:
     try:
-        assert kwds.get('try_plugin', True)
+        assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
         func = plugin_function('openalea.image', method)
         if func is not None:

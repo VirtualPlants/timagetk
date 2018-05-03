@@ -62,7 +62,7 @@ def h_transform(input_image, method=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not method:
+    if method is None:
         method = DEFAULT_METHOD
 
     try:
@@ -72,7 +72,7 @@ def h_transform(input_image, method=None, **kwds):
             "Unknown method '{}', available methods are: {}".format(method,
                                                                     POSS_METHODS))
     try:
-        assert kwds.get('try_plugin', True)
+        assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         h_val = kwds.get('h', None)
@@ -102,17 +102,17 @@ def h_transform_min(input_image, h=None, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        if h is None:
-            h = 1
-        else:
-            h = abs(int(h))
-        params = '-minima -h %s' % h
-        return regionalext(input_image, param_str_2=params)
-    else:
+    try:
+        assert isinstance(input_image, SpatialImage)
+    except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
-        return
+
+    if h is None:
+        h = 1
+    else:
+        h = abs(int(h))
+    params = '-minima -h %s' % h
+    return regionalext(input_image, param_str_2=params)
 
 
 def h_transform_max(input_image, h=None, **kwds):
@@ -129,14 +129,14 @@ def h_transform_max(input_image, h=None, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        if h is None:
-            h = 1
-        else:
-            h = abs(int(h))
-        params = '-maxima -h %s' % h
-        return regionalext(input_image, param_str_2=params)
-    else:
+    try:
+        assert isinstance(input_image, SpatialImage)
+    except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
-        return
+
+    if h is None:
+        h = 1
+    else:
+        h = abs(int(h))
+    params = '-maxima -h %s' % h
+    return regionalext(input_image, param_str_2=params)

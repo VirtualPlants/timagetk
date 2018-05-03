@@ -23,10 +23,15 @@ from __future__ import division
 import numpy as np
 
 __all__ = ['SpatialImage']
-EPS, DEC_VAL = 1e-9, 6
 
-# - Define possible values:
-POSS_TYPES = {0: np.uint8, 1: np.int8, 2: np.uint16, 3: np.int16,
+# - Define default values:
+EPS = 1e-9
+DEC_VAL = 6
+DEF_VXS_2D, DEF_VXS_3D = [1.0, 1.0], [1.0, 1.0, 1.0]
+DEF_ORIG_2D, DEF_ORIG_3D = [0, 0], [0, 0, 0]
+
+# - Define possible values for 'dtype':
+DICT_TYPES = {0: np.uint8, 1: np.int8, 2: np.uint16, 3: np.int16,
               4: np.uint32,
               5: np.int32, 6: np.uint64, 7: np.int64, 8: np.float32,
               9: np.float64,
@@ -51,10 +56,8 @@ POSS_TYPES = {0: np.uint8, 1: np.int8, 2: np.uint16, 3: np.int16,
               'complex256': np.complex_, 'clongdouble': np.complex_,
               'clongfloat': np.complex_,
               'longcomplex': np.complex_}
-# - Define default values:
-DEF_TYPE = POSS_TYPES[0]
-DEF_VXS_2D, DEF_VXS_3D = [1.0, 1.0], [1.0, 1.0, 1.0]
-DEF_ORIG_2D, DEF_ORIG_3D = [0, 0], [0, 0, 0]
+POSS_TYPES = sorted([k for k in DICT_TYPES.keys() if isinstance(k, str)])
+DEF_TYPE = DICT_TYPES[0]
 
 
 def around_list(input_list, dec_val=DEC_VAL):
@@ -202,6 +205,10 @@ class SpatialImage(np.ndarray):
         -------
         :return: ``SpatialImage`` instance -- image and metadata
 
+        Notes
+        -----
+        To use 'input_array' type (from numpy), leave 'dtype' to None.
+
         Example
         -------
         >>> import numpy as np
@@ -237,20 +244,26 @@ class SpatialImage(np.ndarray):
                 raise TypeError(
                     "Parameter 'metadata_dict' should be a dictionary!")
 
-        # - Check 'dtype':
-        if dtype is None or dtype == []:
-            if (input_array.dtype is not None):
-                dtype = input_array.dtype
-        elif dtype is not None:
-            if (str(dtype) in POSS_TYPES or dtype in POSS_TYPES.values()):
-                for key in POSS_TYPES:
-                    if (str(dtype) == key or dtype == POSS_TYPES[key]):
-                        dtype = POSS_TYPES[key]
+        # - Check or set the type of data from 'dtype':
+        if dtype is not None:
+            try:
+                assert dtype in POSS_TYPES
+            except AssertionError:
+                raise ValueError("Unknown 'dtype' value '{}', available types are: {}".format(dtype, POSS_TYPES))
             else:
-                print('Available types :'), POSS_TYPES
-                print('Setting type to unsigned integer')
+                if isinstance(dtype, np.dtype):
+                    dtype = str(dtype)
+                dtype = DICT_TYPES[dtype]
+        else:
+            # Convert instance 'np.dtype' into a string:
+            if input_array.dtype is not None:
+                dtype = input_array.dtype
+            else:
+                print "Warning: undefined 'dtype',"
+                print "set to default value:", DEF_TYPE
                 dtype = DEF_TYPE
-        # - Check & set 'flags' value, set 'dtype' value:
+
+        # - Check input array 'flags' attribute, use 'dtype' value:
         if input_array.flags.f_contiguous:
             obj = np.asarray(input_array, dtype=dtype).view(cls)
         else:
@@ -1029,10 +1042,10 @@ class SpatialImage(np.ndarray):
         >>> image_type = np.uint16
         >>> out_sp_image = image.set_type(image_type)
         """
-        if (val in POSS_TYPES.keys() or val in POSS_TYPES.values()):
-            for key in POSS_TYPES:
-                if (val == key or val == POSS_TYPES[key]):
-                    new_type = POSS_TYPES[key]
+        if (val in DICT_TYPES.keys() or val in DICT_TYPES.values()):
+            for key in DICT_TYPES:
+                if (val == key or val == DICT_TYPES[key]):
+                    new_type = DICT_TYPES[key]
 
             met_dict = self.get_metadata()
             self = self.astype(new_type)

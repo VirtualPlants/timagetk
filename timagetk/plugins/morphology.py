@@ -75,7 +75,7 @@ def morphology(input_image, method=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not method:
+    if method is None:
         method = DEFAULT_METHOD
 
     try:

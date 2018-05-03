@@ -80,6 +80,8 @@ def read_tiff_image(tiff_file):
             tmp_arr = np.transpose(tif.asarray(), (2,1,0))
         elif len(tif.asarray().shape)>3 and 1 in tif.asarray().shape:
             tmp_arr = np.transpose(np.squeeze(tif.asarray()), (2,1,0))
+        else:
+            raise ValueError("Could not understand tiff_file array structure, only grayscale image are supported!")
 
         metadata_dict['shape'], metadata_dict['dim'] = tmp_arr.shape, len(tmp_arr.shape)
         int_tags = ['x_resolution', 'y_resolution', 'image_width', 'image_length', 'image_description', 'location']

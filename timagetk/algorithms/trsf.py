@@ -12,6 +12,7 @@
 #       See accompanying file LICENSE.txt
 # ------------------------------------------------------------------------------
 
+import gzip
 # --- Aug. 2016
 from ctypes import POINTER
 import numpy as np
@@ -19,16 +20,22 @@ import numpy as np
 from ctypes import POINTER
 
 import numpy as np
+import cPickle as pickle
 
 try:
+    from ctypes import pointer
     from timagetk.wrapping.clib import libblockmatching, add_doc
     from timagetk.wrapping.balImage import BAL_IMAGE
     from timagetk.wrapping.balTrsf import BAL_TRSF
-    from timagetk.wrapping.bal_image import BalImage, init_c_bal_image, allocate_c_bal_image, spatial_image_to_bal_image_fields
-    from timagetk.wrapping.bal_matrix import init_c_bal_matrix, allocate_c_bal_matrix
+    from timagetk.wrapping.bal_image import BalImage
+    from timagetk.wrapping.bal_image import init_c_bal_image
+    from timagetk.wrapping.bal_image import allocate_c_bal_image
+    from timagetk.wrapping.bal_image import spatial_image_to_bal_image_fields
+    from timagetk.wrapping.bal_matrix import BalMatrix
+    from timagetk.wrapping.bal_matrix import init_c_bal_matrix
+    from timagetk.wrapping.bal_matrix import allocate_c_bal_matrix
     from timagetk.wrapping.bal_trsf import BalTransformation
     from timagetk.components.spatial_image import SpatialImage
-    from ctypes import pointer
 except ImportError:
     raise ImportError('Import Error')
 
@@ -133,7 +140,7 @@ def apply_trsf(image, trsf=None, template_img=None,
         assert isinstance(image, SpatialImage)
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage!')
-    if trsf:
+    if trsf is not None:
         try:
             assert isinstance(trsf, BalTransformation)
         except AssertionError:
@@ -182,7 +189,7 @@ def apply_trsf(image, trsf=None, template_img=None,
     init_c_bal_image(c_img_res, **kwds)
     allocate_c_bal_image(c_img_res, np.ndarray(kwds['shape'], kwds['np_type']))
     bal_img_res = BalImage(c_bal_image=c_img_res)
-    bal_image = BalImage(image)
+    bal_image = BalImage(spatial_image=image)
     libblockmatching.API_applyTrsf(bal_image.c_ptr, bal_img_res.c_ptr,
                                    trsf.c_ptr if trsf else None,
                                    param_str_1, param_str_2)
@@ -399,3 +406,80 @@ add_doc(inv_trsf, libblockmatching.API_Help_invTrsf)
 add_doc(apply_trsf, libblockmatching.API_Help_applyTrsf)
 add_doc(compose_trsf, libblockmatching.API_Help_composeTrsf)
 add_doc(create_trsf, libblockmatching.API_Help_createTrsf)
+
+
+def save_trsf(trsf, filename, zip=False):
+    """
+    Write a BalTransformation 'trsf' under given 'filename'.
+
+    Parameters
+    ----------
+    trsf : BalTransformation
+        BalTransformation object to save
+    filename : str
+        name of the file
+    """
+    if trsf.isVectorField():
+        if zip and not filename.endswith(".gz"):
+            file = gzip.open(filename + ".gz", 'w')
+        elif filename.endswith(".gz"):
+            file = gzip.open(filename, 'w')
+        else:
+            file = open(filename, 'w')
+
+        vx = trsf.vx.to_spatial_image()
+        vy = trsf.vy.to_spatial_image()
+        vz = trsf.vz.to_spatial_image()
+        vectorfield = {'vx': vx, 'vy': vy, 'vz': vz,
+                       'bal_image_fields': spatial_image_to_bal_image_fields(
+                           vx)}
+        pickle.dump(vectorfield, file)
+        file.close()
+    else:
+        trsf.write(filename)
+
+    return "Done saving transformation file '{}'".format(filename)
+
+
+def read_trsf(filename):
+    """
+    Read a transformation file
+
+    Parameters
+    ----------
+    filename : str
+        name of the file
+
+    Returns
+    -------
+    tsrf : BalTransformation
+        loaded BalTransformation object
+    """
+    c_bal_trsf = BAL_TRSF()
+    trsf = BalTransformation()
+    try:
+        if filename.endswith(".gz"):
+            file = gzip.open(filename, 'r')
+        else:
+            file = open(filename, 'r')
+        obj = pickle.load(file)
+        file.close()
+        vx, vy, vz = obj['vx'], obj['vy'], obj['vz']
+        metadata = obj['bal_image_fields']
+        vx = SpatialImage(vx, voxelsize=metadata['resolution'],
+                          origin=[0, 0, 0], dtype=metadata['np_type'])
+        vy = SpatialImage(vy, voxelsize=metadata['resolution'],
+                          origin=[0, 0, 0], dtype=metadata['np_type'])
+        vz = SpatialImage(vz, voxelsize=metadata['resolution'],
+                          origin=[0, 0, 0], dtype=metadata['np_type'])
+    except:
+        trsf.read(filename)
+    else:
+        trsf.mat = BalMatrix(c_bal_matrix=c_bal_trsf.mat)
+        trsf.vx = BalImage(spatial_image=vx)
+        trsf.vy = BalImage(spatial_image=vy)
+        trsf.vz = BalImage(spatial_image=vz)
+        trsf.trsf_unit = c_bal_trsf.transformation_unit
+        trsf.trsf_type = c_bal_trsf.type
+
+    return trsf

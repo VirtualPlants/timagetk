@@ -85,7 +85,7 @@ def consecutive_registration(list_images, method=None, **kwds):
         raise ValueError(
             "Parameter 'list_images' should have a minimum length of 3!")
 
-    if not method:
+    if method is None:
         method = DEFAULT_METHOD
 
     try:
@@ -96,7 +96,7 @@ def consecutive_registration(list_images, method=None, **kwds):
                                                                     POSS_METHODS))
 
     try:
-        assert kwds.get('try_plugin', True)
+        assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         if method == 'consecutive_rigid_registration':
