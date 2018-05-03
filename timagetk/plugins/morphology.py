@@ -69,7 +69,6 @@ def morphology(input_image, method=None, **kwds):
     >>> dilation_image = morphology(input_image, radius=2, iterations=2, method='dilation')
     >>> oc_asf_image = morphology(input_image, max_radius=3, method='oc_alternate_sequential_filter')
     """
-
     try:
         assert isinstance(input_image, SpatialImage)
     except AssertionError:
@@ -77,59 +76,67 @@ def morphology(input_image, method=None, **kwds):
 
     if method is None:
         method = DEFAULT_METHOD
-
     try:
         assert method in POSS_METHODS
     except AssertionError:
-        print('Available methods :'), POSS_METHODS
-        raise NotImplementedError(method)
-
+        raise NotImplementedError(
+            "Unknown method '{}', available methods are: {}".format(method,
+                                                                    POSS_METHODS))
     try:
+        assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
-        func = plugin_function('openalea.image', method)
-        if func:
-            return func(input_image, **kwds)
-    except:
-        radius_val = kwds.get('radius', None)
-        it_val = kwds.get('iterations', None)
-        max_radius_val = kwds.get('max_radius', None)
+    except AssertionError or ImportError:
+        radius_val = kwds.pop('radius', None)
+        it_val = kwds.pop('iterations', None)
+        max_radius_val = kwds.pop('max_radius', None)
         if method == 'erosion':
             return morphology_erosion(input_image, radius=radius_val,
-                                      iterations=it_val)
+                                      iterations=it_val, **kwds)
         if method == 'dilation':
             return morphology_dilation(input_image, radius=radius_val,
-                                       iterations=it_val)
+                                       iterations=it_val, **kwds)
         if method == 'opening':
             return morphology_opening(input_image, radius=radius_val,
-                                      iterations=it_val)
+                                      iterations=it_val, **kwds)
         if method == 'closing':
             return morphology_closing(input_image, radius=radius_val,
-                                      iterations=it_val)
+                                      iterations=it_val, **kwds)
         if method == 'morpho_gradient':
             return morphology_gradient(input_image, radius=radius_val,
-                                       iterations=it_val)
+                                       iterations=it_val, **kwds)
         if method == 'contrast':
             return morphology_contrast(input_image, radius=radius_val,
-                                       iterations=it_val)
+                                       iterations=it_val, **kwds)
         if method == 'hat_transform':
             return morphology_hat_transform(input_image, radius=radius_val,
-                                            iterations=it_val)
+                                            iterations=it_val, **kwds)
         if method == 'inverse_hat_transform':
             return morphology_inverse_hat_transform(input_image,
                                                     radius=radius_val,
-                                                    iterations=it_val)
+                                                    iterations=it_val, **kwds)
         if method == 'oc_alternate_sequential_filter':
             return morphology_oc_alternate_sequential_filter(input_image,
-                                                             max_radius=max_radius_val)
+                                                             max_radius=max_radius_val,
+                                                             **kwds)
         if method == 'co_alternate_sequential_filter':
             return morphology_co_alternate_sequential_filter(input_image,
-                                                             max_radius=max_radius_val)
+                                                             max_radius=max_radius_val,
+                                                             **kwds)
         if method == 'coc_alternate_sequential_filter':
             return morphology_coc_alternate_sequential_filter(input_image,
-                                                              max_radius=max_radius_val)
+                                                              max_radius=max_radius_val,
+                                                              **kwds)
         if method == 'oco_alternate_sequential_filter':
             return morphology_oco_alternate_sequential_filter(input_image,
-                                                              max_radius=max_radius_val)
+                                                              max_radius=max_radius_val,
+                                                              **kwds)
+    else:
+        func = plugin_function('openalea.image', method)
+        if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
+            return func(input_image, **kwds)
+        else:
+            raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
 def morphology_erosion(input_image, radius=None, iterations=None, **kwds):
@@ -140,7 +147,7 @@ def morphology_erosion(input_image, radius=None, iterations=None, **kwds):
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -174,7 +181,7 @@ def morphology_dilation(input_image, radius=None, iterations=None, **kwds):
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -207,7 +214,7 @@ def morphology_opening(input_image, radius=None, iterations=None, **kwds):
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -241,7 +248,7 @@ def morphology_closing(input_image, radius=None, iterations=None, **kwds):
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -275,7 +282,7 @@ def morphology_hat_transform(input_image, radius=None, iterations=None, **kwds):
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -310,7 +317,7 @@ def morphology_inverse_hat_transform(input_image, radius=None, iterations=None,
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -344,7 +351,7 @@ def morphology_gradient(input_image, radius=None, iterations=None, **kwds):
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -378,7 +385,7 @@ def morphology_contrast(input_image, radius=None, iterations=None, **kwds):
     ----------
     :param *SpatialImage* input_image: input *SpatialImage*
 
-    :param int radius: optinal, radius. Default: radius=1
+    :param int radius: optional, radius. Default: radius=1
 
     :param int iterations: optional, number of iterations. Default: iterations=1
 
@@ -417,7 +424,7 @@ def morphology_oc_alternate_sequential_filter(input_image, max_radius=None,
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     try:
         assert isinstance(input_image, SpatialImage)
@@ -454,7 +461,7 @@ def morphology_co_alternate_sequential_filter(input_image, max_radius=None,
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     try:
         assert isinstance(input_image, SpatialImage)
@@ -491,7 +498,7 @@ def morphology_coc_alternate_sequential_filter(input_image, max_radius=None,
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     try:
         assert isinstance(input_image, SpatialImage)
@@ -530,7 +537,7 @@ def morphology_oco_alternate_sequential_filter(input_image, max_radius=None,
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     try:
         assert isinstance(input_image, SpatialImage)

@@ -28,7 +28,7 @@ POSS_METHODS = ['h_transform_min', 'h_transform_max']
 DEFAULT_METHOD = POSS_METHODS[0]
 
 
-def h_transform(input_image, method=None, **kwds):
+def h_transform(input_image, method=None, h=None, **kwds):
     """
     h_transform plugin. Available methods are :
 
@@ -64,7 +64,6 @@ def h_transform(input_image, method=None, **kwds):
 
     if method is None:
         method = DEFAULT_METHOD
-
     try:
         assert method in POSS_METHODS
     except AssertionError:
@@ -75,14 +74,14 @@ def h_transform(input_image, method=None, **kwds):
         assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
-        h_val = kwds.get('h', None)
         if method == 'h_transform_min':
-            return h_transform_min(input_image, h=h_val)
+            return h_transform_min(input_image, h=h, **kwds)
         else:
-            return h_transform_max(input_image, h=h_val)
+            return h_transform_max(input_image, h=h, **kwds)
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(input_image, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")

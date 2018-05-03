@@ -51,7 +51,7 @@ def read_tiff_image(tiff_file):
 
     Returns
     ----------
-    out_sp_img : type SpatialImage, image and associated informations
+    out_sp_img : type SpatialImage, image and associated information
 
     Example
     -------

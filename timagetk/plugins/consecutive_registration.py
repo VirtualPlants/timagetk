@@ -87,7 +87,6 @@ def consecutive_registration(list_images, method=None, **kwds):
 
     if method is None:
         method = DEFAULT_METHOD
-
     try:
         assert method in POSS_METHODS
     except AssertionError:
@@ -115,6 +114,7 @@ def consecutive_registration(list_images, method=None, **kwds):
     else:
         func = plugin_function('openalea.image', method)
         if func:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(list_images, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
@@ -247,4 +247,3 @@ def consecutive_registration_deformable(list_images):
     list_res_img.append(list_images[-1])  # add last reference image
 
     return list_res_trsf, list_res_img
-

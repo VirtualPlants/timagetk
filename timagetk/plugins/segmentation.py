@@ -87,7 +87,6 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
 
     if method is None:
         method = DEFAULT_METHOD
-
     try:
         assert method in POSS_METHODS
     except AssertionError:
@@ -99,12 +98,13 @@ def segmentation(input_image, seeds_image, method=None, **kwds):
         assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
-        control_val = kwds.get('control', None)
+        control_val = kwds.pop('control', None)
         return seeded_watershed(input_image, seeds_image, control=control_val,
                                 **kwds)
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(input_image, seeds_image, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
@@ -127,15 +127,16 @@ def seeded_watershed(input_image, seeds_image, control=None, **kwds):
     ----------
     :return: ``SpatialImage`` instance -- image and metadata
     """
-    if control:
-        if control not in POSS_CONTROLS:
-            raise NotImplementedError(
-                "Unknown control '{}', available control methods: {}".format(
-                    control, POSS_CONTROLS))
-        else:
-            param_str_2 = '-labelchoice ' + str(control)
-    else:
-        param_str_2 = '-labelchoice ' + DEFAULT_CONTROL
+    if control is None:
+        control = DEFAULT_CONTROL
 
+    try:
+        assert control in POSS_CONTROLS
+    except AssertionError:
+        raise NotImplementedError(
+            "Unknown control '{}', available control methods are: {}".format(control,
+                                                                     POSS_CONTROLS))
+
+    param_str_2 = '-labelchoice ' + str(control)
     param_str_2 += get_param_str_2(**kwds)
     return watershed(input_image, seeds_image, param_str_2=param_str_2)

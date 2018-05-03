@@ -60,7 +60,6 @@ def averaging(list_images, method=None, **kwds):
     """
     if method is None:
         method = DEFAULT_METHOD
-
     try:
         assert method in POSS_METHODS
     except AssertionError:
@@ -71,7 +70,7 @@ def averaging(list_images, method=None, **kwds):
     try:
         assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
-    except ImportError:
+    except AssertionError or ImportError:
         if method == 'mean_averaging':
             return mean_averaging(list_images, **kwds)
         elif method == 'robust_mean_averaging':
@@ -85,6 +84,7 @@ def averaging(list_images, method=None, **kwds):
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(list_images, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
@@ -100,7 +100,7 @@ def mean_averaging(list_images, **kwds):
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     sp_img = mean_images(list_images, param_str_2='-mean')
     return sp_img
@@ -116,7 +116,7 @@ def robust_mean_averaging(list_images, **kwds):
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     sp_img = mean_images(list_images, param_str_2='-robust-mean')
     return sp_img
@@ -132,7 +132,7 @@ def median_averaging(list_images, **kwds):
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     sp_img = mean_images(list_images, param_str_2='-median')
     return sp_img
@@ -148,7 +148,7 @@ def min_averaging(list_images, **kwds):
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     sp_img = mean_images(list_images, param_str_2='-minimum')
     return sp_img
@@ -164,7 +164,7 @@ def max_averaging(list_images, **kwds):
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     sp_img = mean_images(list_images, param_str_2='-maximum')
     return sp_img

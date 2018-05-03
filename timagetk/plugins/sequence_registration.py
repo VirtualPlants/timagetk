@@ -86,7 +86,6 @@ def sequence_registration(list_images, method=None, **kwds):
 
     if method is None:
         method = DEFAULT_METHOD
-
     try:
         assert method in POSS_METHODS
     except AssertionError:
@@ -114,6 +113,7 @@ def sequence_registration(list_images, method=None, **kwds):
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(list_images, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")

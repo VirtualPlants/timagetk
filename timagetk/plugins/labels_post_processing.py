@@ -10,7 +10,7 @@
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 This module contain a generic implementation of labels post processing algorithms.
@@ -26,7 +26,9 @@ except ImportError:
 
 __all__ = ['labels_post_processing']
 
-POSS_METHODS = ['labels_erosion', 'labels_dilation', 'labels_opening', 'labels_closing']
+POSS_METHODS = ['labels_erosion', 'labels_dilation', 'labels_opening',
+                'labels_closing']
+DEFAULT_METHOD = POSS_METHODS[0]
 
 
 def _method_img_check(input_image):
@@ -34,13 +36,15 @@ def _method_img_check(input_image):
     Used to check `input_image` type and isometry.
     """
     # - Check the `input_image` is indeed a `SpatialImage`
-    conds = isinstance(input_image, SpatialImage)
-    if not conds:
-        raise TypeError('Input image must be a `SpatialImage` object.')
+    try:
+        assert isinstance(input_image, SpatialImage)
+    except AssertionError:
+        raise TypeError('Input image must be a SpatialImage')
     # - Check the isometry of the image:
     vx, vy, vz = input_image.get_voxelsize()
     if (vx != vy) or (vy != vz):
-        warnings.warn("The image is NOT isometric, this method operates on voxels!!")
+        warnings.warn(
+            "The image is NOT isometric, this method operates on voxels!!")
     return
 
 
@@ -58,7 +62,7 @@ def get_param_str_2(**kwds):
         str_param += ' -verbose'
     if kwds.get('parallel', True):
         str_param += ' -parallel'
-        str_param += ' -parallel-type '+kwds.get('parallel_type', 'thread')
+        str_param += ' -parallel-type ' + kwds.get('parallel_type', 'thread')
     if kwds.get('time', True):
         str_param += ' -time'
     return str_param
@@ -117,28 +121,35 @@ def labels_post_processing(input_image, method, **kwds):
     # - Check `input_image` type and isometry:
     _method_img_check(input_image)
     # - Check the provided method is implemented:
+    if method is None:
+        method = DEFAULT_METHOD
     try:
         assert method in POSS_METHODS
-    except:
-        print('Available methods :'), POSS_METHODS
-        raise NotImplementedError(method)
+    except AssertionError:
+        raise NotImplementedError(
+            "Unknown method '{}', available methods are: {}".format(method,
+                                                                    POSS_METHODS))
     # - Try 'plugin function' or use direct wrapping:
     try:
         assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
+    except AssertionError or ImportError:
+        print "Plugin functionnality not available !"
+        if method == 'labels_erosion':
+            return labels_erosion(input_image, **kwds)
+        if method == 'labels_dilation':
+            return labels_dilation(input_image, **kwds)
+        if method == 'labels_opening':
+            return labels_opening(input_image, **kwds)
+        if method == 'labels_closing':
+            return labels_closing(input_image, **kwds)
+    else:
         func = plugin_function('openalea.image', method)
         if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(input_image, **kwds)
-    except:
-        print "Plugin functionnality not available !"
-        if method=='labels_erosion':
-            return labels_erosion(input_image, **kwds)
-        if method=='labels_dilation':
-            return labels_dilation(input_image, **kwds)
-        if method=='labels_opening':
-            return labels_opening(input_image, **kwds)
-        if method=='labels_closing':
-            return labels_closing(input_image, **kwds)
+        else:
+            raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
 def labels_erosion(input_image, **kwds):
@@ -162,7 +173,7 @@ def labels_erosion(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-erosion'
-    params +=  get_param_str_2(**kwds)
+    params += get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
@@ -187,7 +198,7 @@ def labels_dilation(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-dilation'
-    params +=  get_param_str_2(**kwds)
+    params += get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
@@ -212,7 +223,7 @@ def labels_opening(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-opening'
-    params +=  get_param_str_2(**kwds)
+    params += get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)
 
 
@@ -237,5 +248,5 @@ def labels_closing(input_image, **kwds):
     """
     _method_img_check(input_image)
     params = '-closing'
-    params +=  get_param_str_2(**kwds)
+    params += get_param_str_2(**kwds)
     return cell_filter(input_image, param_str_2=params)

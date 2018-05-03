@@ -10,7 +10,7 @@
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 This module contains a generic implementation of several registration algorithms.
@@ -25,7 +25,10 @@ except ImportError:
 
 __all__ = ['registration']
 
-DEFAULT_METHOD = 'rigid_registration'
+POSS_METHODS = ['rigid_registration', 'affine_registration',
+                'deformable_registration']
+DEFAULT_METHOD = POSS_METHODS[0]
+
 
 def registration(floating_img, reference_img, method=None, **kwds):
     """
@@ -81,8 +84,6 @@ def registration(floating_img, reference_img, method=None, **kwds):
     >>> trsf_aff, res_aff = registration(floating_image, reference_image, method='affine_registration')
     >>> trsf_def, res_def = registration(floating_image, reference_image, method='deformable_registration')
     """
-    POSS_METHODS = ['rigid_registration', 'affine_registration',
-                    'deformable_registration']
     # - Assert we have two SpatialImage:
     try:
         assert isinstance(floating_img, SpatialImage)
@@ -93,14 +94,17 @@ def registration(floating_img, reference_img, method=None, **kwds):
     except:
         raise TypeError('Reference image must be a SpatialImage instance.')
 
-    # - Use the default `method`:
     if method is None:
         method = DEFAULT_METHOD
-
+    try:
+        assert method in POSS_METHODS
+    except AssertionError:
+        raise NotImplementedError(
+            "Unknown method '{}', available methods are: {}".format(method,
+                                                                    POSS_METHODS))
     # - If provided 'init_trsf' will be used to initialize blockmatching
     # registration and the returned trsf will contain this trsf
     init_trsf = kwds.pop('init_trsf', None)
-
     # - If provided 'left_trsf' will be used to initialize blockmatching
     # registration but returned trsf will NOT contain this trsf
     left_trsf = kwds.pop('left_trsf', None)
@@ -122,23 +126,21 @@ def registration(floating_img, reference_img, method=None, **kwds):
                                                      reference_img, init_trsf,
                                                      left_trsf, **kwds)
             return trsf_out, res_image
-        elif method == 'affine_registration':
+        if method == 'affine_registration':
             trsf_out, res_image = affine_registration(floating_img,
                                                       reference_img, init_trsf,
                                                       left_trsf, **kwds)
             return trsf_out, res_image
-        elif method == 'deformable_registration':
+        if method == 'deformable_registration':
             trsf_out, res_image = deformable_registration(floating_img,
                                                           reference_img,
                                                           init_trsf, left_trsf,
                                                           **kwds)
             return trsf_out, res_image
-        else:
-            print 'Available methods :', POSS_METHODS
-            raise NotImplementedError(method)
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(floating_img, reference_img, init_trsf, left_trsf,
                         **kwds)
         else:
@@ -151,9 +153,11 @@ def get_param_str_2(**kwds):
     """
     str_param = ""
     # - By default 'pyramid_lowest_level' is equal to 1:
-    str_param += ' -pyramid-lowest-level %d' % (kwds.get('pyramid_lowest_level', 1))
+    str_param += ' -pyramid-lowest-level %d' % (
+        kwds.get('pyramid_lowest_level', 1))
     # - By default 'pyramid_highest_level' is equal to 3:
-    str_param += ' -pyramid-highest-level %d' % (kwds.get('pyramid_highest_level', 3))
+    str_param += ' -pyramid-highest-level %d' % (
+        kwds.get('pyramid_highest_level', 3))
     # TODO: make shorter version of param names available ? ie. py_ll & py_hl ?
 
     # - Providing 'param' will result in printing blockmatching parameters
@@ -168,7 +172,7 @@ def get_param_str_2(**kwds):
     # - Providing 'parallel' will result in using parallelization capabilities
     if kwds.get('parallel', True):
         str_param += ' -parallel'
-        str_param += ' -parallel-type '+\
+        str_param += ' -parallel-type ' + \
                      kwds.get('parallel_type', 'thread')
     # - Providing 'time' will result in printing CPU & User elapsed time
     if kwds.get('time', True):
@@ -243,7 +247,7 @@ def rigid_registration(floating_img, reference_img, init_trsf=None,
 
 
 def affine_registration(floating_img, reference_img, init_trsf=None,
-                       left_trsf=None, **kwds):
+                        left_trsf=None, **kwds):
     """
     Performs AFFINE registration of `floating_img` on `reference_img` by calling
     `blockmatching` with adequate parameters.
@@ -307,16 +311,18 @@ def affine_registration(floating_img, reference_img, init_trsf=None,
             try:
                 assert init_trsf.isLinear()
             except:
-                raise TypeError("Provided 'init_trsf' is not a linear deformation!")
+                raise TypeError(
+                    "Provided 'init_trsf' is not a linear deformation!")
         if left_trsf:
             try:
                 assert left_trsf.isLinear()
             except:
-                raise TypeError("Provided 'left_trsf' is not a linear deformation!")
+                raise TypeError(
+                    "Provided 'left_trsf' is not a linear deformation!")
 
     param_str_2 += ' -trsf-type affine'
     # using 'left_transformation' returns an affine trsf matrix without the 'rigid deformation part!
-    #~ trsf_aff, res_aff = blockmatching(floating_img, reference_img, left_transformation=trsf_rig, param_str_2=param_str_2)
+    # ~ trsf_aff, res_aff = blockmatching(floating_img, reference_img, left_transformation=trsf_rig, param_str_2=param_str_2)
     trsf_aff, res_aff = blockmatching(floating_img, reference_img,
                                       init_result_transformation=init_trsf,
                                       left_transformation=left_trsf,

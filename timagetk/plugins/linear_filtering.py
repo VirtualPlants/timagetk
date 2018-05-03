@@ -39,9 +39,11 @@ def _method_img_check(input_image):
     Used to check `input_image` type and isometry.
     """
     # - Check the `input_image` is indeed a `SpatialImage`
-    conds = isinstance(input_image, SpatialImage)
-    if not conds:
-        raise TypeError('Input image must be a `SpatialImage` object.')
+    try:
+        assert isinstance(input_image, SpatialImage)
+    except AssertionError:
+        raise TypeError('Input image must be a SpatialImage')
+
     # - Check the isometry of the image:
     vx, vy, vz = input_image.get_voxelsize()
     if (vx != vy) or (vy != vz):
@@ -86,24 +88,24 @@ def linear_filtering(input_image, method=None, **kwds):
     """
     # - Check `input_image` type and isometry:
     _method_img_check(input_image)
-    # - Set the 'DEFAULT_METHOD' if needed:
+
     if method is None:
         method = DEFAULT_METHOD
-    # - Check the provided method is implemented:
-    if method not in POSS_METHODS:
-        print('Available methods :'), POSS_METHODS
-        raise NotImplementedError(method)
+    try:
+        assert method in POSS_METHODS
+    except AssertionError:
+        raise NotImplementedError(
+            "Unknown method '{}', available methods are: {}".format(method,
+                                                                    POSS_METHODS))
 
     try:
+        assert kwds.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
-        func = plugin_function('openalea.image', method)
-        if func is not None:
-            return func(input_image, **kwds)
-    except:
+    except AssertionError or ImportError:
         if method == 'gaussian_smoothing':
-            std_dev_val = kwds.get('std_dev', None)
+            std_dev_val = kwds.pop('std_dev', None)
             return linear_filtering_gaussian_smoothing(input_image,
-                                                       std_dev=std_dev_val)
+                                                       std_dev=std_dev_val, **kwds)
         if method == 'gradient':
             return linear_filtering_gradient(input_image)
         if method == 'gradient_modulus':
@@ -120,6 +122,13 @@ def linear_filtering(input_image, method=None, **kwds):
             return linear_filtering_zero_crossings_hessian(input_image)
         if method == 'zero_crossings_laplacian':
             return linear_filtering_zero_crossings_laplacian(input_image)
+    else:
+        func = plugin_function('openalea.image', method)
+        if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
+            return func(input_image, **kwds)
+        else:
+            raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
 def linear_filtering_gaussian_smoothing(input_image, std_dev=None, **kwds):
@@ -142,7 +151,7 @@ def linear_filtering_gaussian_smoothing(input_image, std_dev=None, **kwds):
         std_dev = 1.0
     else:
         std_dev = abs(float(std_dev))
-    # TODO: check that 'libvtexec.API_linearFilter' check the isometry and adjust 'std_dev' accordingly
+    # TODO: make sure that 'libvtexec.API_linearFilter' check the isometry and adjust 'std_dev' accordingly
     # if not input_image.is_isometric():
     #     print "Warning: non-isometric image!"
     #     vxs = input_image.get_voxelsize()

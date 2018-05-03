@@ -62,7 +62,6 @@ def region_labeling(input_image, method=None, **kwds):
 
     if method is None:
         method = DEFAULT_METHOD
-
     try:
         assert method in POSS_METHODS
     except AssertionError:
@@ -75,14 +74,16 @@ def region_labeling(input_image, method=None, **kwds):
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         if method == 'connected_components':
-            low_threshold_val = kwds.get('low_threshold', None)
-            high_threshold_val = kwds.get('high_threshold', None)
+            low_threshold_val = kwds.pop('low_threshold', None)
+            high_threshold_val = kwds.pop('high_threshold', None)
             return connected_components(input_image,
                                         low_threshold=low_threshold_val,
-                                        high_threshold=high_threshold_val)
+                                        high_threshold=high_threshold_val,
+                                        **kwds)
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(input_image, **kwds)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
@@ -103,7 +104,7 @@ def connected_components(input_image, low_threshold=None, high_threshold=None,
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    :return: *SpatialImage* instance -- image and associated information
     """
     try:
         assert isinstance(input_image, SpatialImage)
@@ -120,5 +121,5 @@ def connected_components(input_image, low_threshold=None, high_threshold=None,
         high_threshold = abs(int(high_threshold))
 
     params = '-low-threshold %d -high-threshold %d -label-output' % (
-    low_threshold, high_threshold)
+        low_threshold, high_threshold)
     return connexe(input_image, param_str_2=params, dtype=np.uint16)
