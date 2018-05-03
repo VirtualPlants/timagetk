@@ -107,12 +107,10 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
                 self._c_bal_trsf.type = trsf_type
         else:
             if isinstance(c_bal_trsf, BAL_TRSF):
-                print "Got instance BAL_TRSF"
                 libblockmatching.BAL_AllocTransformation(self.c_ptr, c_bal_trsf.type,
                                                          pointer(c_bal_trsf.vx))
                 libblockmatching.BAL_CopyTransformation(pointer(c_bal_trsf), self.c_ptr)
             elif isinstance(c_bal_trsf, BalTransformation):
-                print "Got instance BalTransformation"
                 libblockmatching.BAL_AllocTransformation(self.c_ptr, c_bal_trsf._c_bal_trsf.type,
                                                          c_bal_trsf.vx.c_ptr)
                 libblockmatching.BAL_CopyTransformation(pointer(c_bal_trsf._c_bal_trsf), self.c_ptr)
