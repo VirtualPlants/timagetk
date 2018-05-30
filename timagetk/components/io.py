@@ -62,7 +62,7 @@ def imread(img_file):
     except:
         raise IOError("This file does not exists: {}".format(img_file))
 
-    # Get file ext:
+    # Get file path, name, root_name and extension:
     (filepath, filename) = os.path.split(img_file)
     (shortname, ext) = os.path.splitext(filename)
     # Check for possible compression of the file:
@@ -96,6 +96,33 @@ def imread(img_file):
         sp_img = read_mha_image(img_file)
     else:
         pass
+
+    try:
+        md_filename = sp_img.metadata['filename']
+    except KeyError:
+        sp_img.metadata['filepath'] = filepath
+        sp_img.metadata['filename'] = filename
+    else:
+        (md_filepath, md_filename) = os.path.split(md_filename)
+        # -- Check the given filepath and the one found in metadata (if any)
+        if md_filepath == '':
+            md_filepath = filepath
+        elif md_filepath != filepath:
+            print "WARNING: file path from 'filename' metadata differ from given path to reader.",
+            print "Updated!"
+            md_filepath = filepath
+        else:
+            pass
+        sp_img.metadata['filepath'] = md_filepath
+        # -- Check the given filename and the one found in metadata (if any)
+        if md_filename == '':
+            md_filename = filename
+        elif md_filename != filename:
+            print "WARNING: file name from 'filename' metadata differ from given name to reader.",
+            print "Updated!"
+        else:
+            pass
+        sp_img.metadata['filename'] = md_filename
 
     return sp_img
 
