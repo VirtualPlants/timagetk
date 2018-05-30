@@ -130,7 +130,7 @@ class VT_Image(object):
         """
         if not isinstance(sp_img, SpatialImage):
             print('Warning : sp_img is not a SpatialImage instance')
-            ndim = len(sp_img.shape)
+            ndim = sp_img.ndim
             sp_img = SpatialImage(sp_img, voxelsize=[1.] * ndim,
                                   origin=[0.] * ndim)
 
