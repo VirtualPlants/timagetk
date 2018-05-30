@@ -132,10 +132,10 @@ def read_inr_image(inr_file):
             elif mat.shape[2] == 1:
                 mat = np.squeeze(mat, axis=(2,))
                 img_vox = [vox_x, vox_y]
-    #            elif (vdim!=1):
-    #                mat = mat.reshape((vdim,shape_x,shape_y,shape_z), order="F" )
-    #                mat = mat.transpose(1,2,3,0)
-    # TODO: Create filename & filepath metadata and give it to metadata_dict parameter of 'SpatialImage'
+#            elif (vdim!=1):
+#                mat = mat.reshape((vdim,shape_x,shape_y,shape_z), order="F" )
+#                mat = mat.transpose(1,2,3,0)
+
     out_sp_img = SpatialImage(input_array=mat, voxelsize=img_vox,
                               origin=[0, 0, 0], metadata_dict=prop)
     f.close()
