@@ -74,16 +74,16 @@ def read_tiff_image(tiff_file):
 
     with TiffFile(tiff_file) as tif:
         vox, metadata_dict = [], {}
-        if len(tif.asarray().shape)==2:
+        if tif.asarray().ndim==2:
             tmp_arr = tif.asarray()
-        elif len(tif.asarray().shape)==3:
+        elif tif.asarray().ndim==3:
             tmp_arr = np.transpose(tif.asarray(), (2,1,0))
-        elif len(tif.asarray().shape)>3 and 1 in tif.asarray().shape:
+        elif tif.asarray().ndim>3 and 1 in tif.asarray().shape:
             tmp_arr = np.transpose(np.squeeze(tif.asarray()), (2,1,0))
         else:
             raise ValueError("Could not understand tiff_file array structure, only grayscale image are supported!")
 
-        metadata_dict['shape'], metadata_dict['dim'] = tmp_arr.shape, len(tmp_arr.shape)
+        metadata_dict['shape'], metadata_dict['dim'] = tmp_arr.shape, tmp_arr.ndim
         int_tags = ['x_resolution', 'y_resolution', 'image_width', 'image_length', 'image_description', 'location']
         for page in tif:
             for tag in page.tags.values():

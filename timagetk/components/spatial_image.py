@@ -226,7 +226,7 @@ class SpatialImage(np.ndarray):
         except AssertionError:
             raise TypeError("Input array is not a numpy array!")
         try:
-            assert len(input_array.shape) in [2, 3]
+            assert input_array.ndim in [2, 3]
         except AssertionError:
             print ValueError(
                 "Input array must have a dimensionality equal to 2 or 3")
@@ -270,7 +270,7 @@ class SpatialImage(np.ndarray):
             obj = np.asarray(input_array, dtype=dtype, order='F').view(cls)
 
         # - Check & set 'origins' value:
-        if (origin is not None) and (len(input_array.shape) == len(origin)):
+        if (origin is not None) and (input_array.ndim == len(origin)):
             orig = origin
             # - Update metadata in case voxelsize parameter is correctly
             # specified (to avoid potential missmatch against metadata_dict)
@@ -278,7 +278,7 @@ class SpatialImage(np.ndarray):
         else:
             # TODO: should check against metadata
             print "Warning: incorrect origin specification,",
-            if len(input_array.shape) == 2:
+            if input_array.ndim == 2:
                 orig = DEF_ORIG_2D
             else:
                 orig = DEF_ORIG_3D
@@ -293,11 +293,11 @@ class SpatialImage(np.ndarray):
         if not isinstance(voxelsize, list):
             voxelsize = None
         try:
-            assert len(input_array.shape) == len(voxelsize)
+            assert input_array.ndim == len(voxelsize)
         except:
             print "Warning: incorrect voxelsize specification,",
             # TODO: should check against metadata
-            if len(input_array.shape) == 2:
+            if input_array.ndim == 2:
                 vxs = DEF_VXS_2D
             else:
                 vxs = DEF_VXS_3D
@@ -311,7 +311,7 @@ class SpatialImage(np.ndarray):
 
         # - Check & set 'extent' value:
         ext = [obj.voxelsize[ind] * input_array.shape[ind] for ind in
-               xrange(len(input_array.shape))]
+               xrange(input_array.ndim)]
         ext = around_list(ext)
         metadata_dict['extent'] = ext
         obj.extent = ext
