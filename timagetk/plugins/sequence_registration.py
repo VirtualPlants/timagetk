@@ -77,7 +77,7 @@ def sequence_registration(list_images, method=None, **kwds):
     except AssertionError:
         raise TypeError(
             "Parameter 'list_images' should be a list of SpatialImages!")
-    # - Check SpatialImage sequence length, this function is useless if lenght < 3!
+    # - Check SpatialImage sequence length, this function is useless if length < 3!
     try:
         assert len(list_images) >= 3
     except AssertionError:

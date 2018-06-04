@@ -68,7 +68,7 @@ class TemporalMatching(object):
         except AssertionError:
             raise TypeError(
                 "Input 'segmentation_list' must be a list of SpatialImages!")
-        # - Check SpatialImage sequence length, this function is useless if lenght < 2!
+        # - Check SpatialImage sequence length, this function is useless if length < 2!
         try:
             assert len(segmentation_list) >= 2
         except AssertionError:
@@ -194,7 +194,7 @@ class TemporalMatching(object):
         except AssertionError:
             raise TypeError(
                 "Parameter 'segmentation_list' should be a list of SpatialImages!")
-        # - Check SpatialImage sequence length, this function is useless if lenght < 2!
+        # - Check SpatialImage sequence length, this function is useless if length < 2!
         try:
             assert len(segmentation_list) >= 2
         except AssertionError:
