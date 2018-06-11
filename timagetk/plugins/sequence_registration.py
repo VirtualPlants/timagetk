@@ -137,30 +137,40 @@ def sequence_registration_rigid(list_images):
     list_res_img : list(SpatialImage)
         list of images after rigid registration
     """
+    n_imgs = len(list_images)
     # --- pairwise registration
     pairwise_trsf = []
     for ind, sp_img in enumerate(list_images):
         if ind < len(list_images) - 1:
             # --- rigid registration
+            print "\nPerforming rigid registration of t{} on t{}:".format(ind,
+                                                                          ind + 1)
             trsf_rig, res_rig = blockmatching(list_images[ind],
                                               list_images[ind + 1],
                                               param_str_2='-trsf-type rigid')
             pairwise_trsf.append(trsf_rig)  # --- case rigid registration
+            print "Done.\n"
     # --- composition of transformations
     list_compo_trsf, list_res_img = [], []
     for ind, trsf in enumerate(pairwise_trsf):
         if ind < len(pairwise_trsf) - 1:
-            comp_trsf = compose_trsf(
-                pairwise_trsf[ind:])  # matrix multiplication
+            print "Composition of rigid transformations to get trsf_{}/{}".format(ind, n_imgs-1)
+            # matrix multiplication
+            comp_trsf = compose_trsf(pairwise_trsf[ind:],
+                                     template_img=list_images[-1])
             list_compo_trsf.append(comp_trsf)
         elif ind == len(pairwise_trsf) - 1:
+            # 't_ref-1'/'t_ref' transformation does not need composition!
             list_compo_trsf.append(pairwise_trsf[-1])
+        print "Done.\n"
     # --- displacements compensation (whole sequence)
     for ind, trsf in enumerate(list_compo_trsf):
+        print "Applying t{}/{} composed transformation to t{}...".format(ind, n_imgs, ind)
         tmp_img = apply_trsf(list_images[ind], trsf,
-                             template_img=list_images[
-                                 -1])  # global reference : list_images[-1]
+                             template_img=list_images[-1])
         list_res_img.append(tmp_img)
+        print "Done.\n"
+
     list_res_img.append(list_images[-1])  # add global reference image
 
     return list_compo_trsf, list_res_img
@@ -183,37 +193,53 @@ def sequence_registration_affine(list_images):
     list_res_img : list(SpatialImage)
         list of images after affine registration
     """
+    n_imgs = len(list_images)
     # --- pairwise registration
     pairwise_trsf = []
     for ind, sp_img in enumerate(list_images):
         if ind < len(list_images) - 1:
             # --- rigid registration
+            print "\nPerforming rigid registration of t{} on t{}:".format(ind,
+                                                                          ind + 1)
             trsf_rig, res_rig = blockmatching(list_images[ind],
                                               list_images[ind + 1],
                                               param_str_2='-trsf-type rigid -py-ll 1')
+            print "Done.\n"
             # --- affine registration, initialisation by a rigid transformation
+            print "Performing affine registration of t{} on t{}:".format(ind,
+                                                                         ind + 1)
             trsf_aff, res_aff = blockmatching(list_images[ind],
                                               list_images[ind + 1],
                                               left_transformation=trsf_rig,
                                               param_str_2='-trsf-type affine')
-            res_trsf = compose_trsf(
-                [trsf_rig, trsf_aff])  # --- composition of transformations
+            print "Done.\n"
+            print "Composition of rigid and affine registrations..."
+            res_trsf = compose_trsf([trsf_rig, trsf_aff])
             pairwise_trsf.append(res_trsf)  # --- case affine registration
             trsf_rig.free()  # --- add
+            print "Done.\n"
     # --- composition of transformations
     list_compo_trsf, list_res_img = [], []
     for ind, trsf in enumerate(pairwise_trsf):
         if ind < len(pairwise_trsf) - 1:
-            tmp_trsf = compose_trsf(
-                pairwise_trsf[ind:])  # matrix multiplication
+            print "Composition of affine transformations to get trsf_{}/{}".format(ind, n_imgs-1)
+            # matrix multiplication
+            tmp_trsf = compose_trsf(pairwise_trsf[ind:],
+                                    template_img=list_images[-1])
             list_compo_trsf.append(tmp_trsf)
+            print "Done.\n"
         elif ind == pairwise_trsf.index(pairwise_trsf[-1]):
+            # 't_ref-1'/'t_ref' transformation does not need composition!
+
             list_compo_trsf.append(pairwise_trsf[-1])
     # --- displacements compensation (whole sequence)
     for ind, trsf in enumerate(list_compo_trsf):
+        print "Applying t{}/{} composed transformation to t{}...".format(ind, n_imgs, ind)
         tmp_img = apply_trsf(list_images[ind], trsf,
                              template_img=list_images[-1])
         list_res_img.append(tmp_img)
+        print "Done.\n"
+
     list_res_img.append(list_images[-1])  # add reference image
 
     return list_compo_trsf, list_res_img
@@ -236,6 +262,7 @@ def sequence_registration_deformable(list_images):
     list_res_img : list(SpatialImage)
         list of images after deformable registration
     """
+    n_imgs = len(list_images)
     # - Pairwise registration: 't_n' on 't_n+1'
     pairwise_trsf = []
     for ind, sp_img in enumerate(list_images[:-1]):
@@ -253,9 +280,8 @@ def sequence_registration_deformable(list_images):
                                         left_transformation=trsf_rig,
                                         param_str_2='-trsf-type vectorfield')
         print "Done.\n"
-        print "Composition of rigid and deformable registration..."
-        res_trsf = compose_trsf([trsf_rig, trsf_vf], template_img=list_images[
-            -1])  # --- composition of transformations
+        print "Composition of rigid and deformable registrations..."
+        res_trsf = compose_trsf([trsf_rig, trsf_vf], template_img=list_images[-1])
         pairwise_trsf.append(res_trsf)
         trsf_rig.free()
         print "Done.\n"
@@ -264,19 +290,23 @@ def sequence_registration_deformable(list_images):
     list_compo_trsf, list_res_img = [], []
     for ind, trsf in enumerate(pairwise_trsf):
         if ind < len(pairwise_trsf) - 1:
+            print "Composition of deformable transformations to get trsf_{}/{}".format(ind, n_imgs-1)
+            # matrix multiplication
             tmp_trsf = compose_trsf(pairwise_trsf[ind:],
-                                    template_img=list_images[
-                                        -1])  # matrix multiplication
+                                    template_img=list_images[-1])
             list_compo_trsf.append(tmp_trsf)
+            print "Done.\n"
         else:
             # 't_ref-1'/'t_ref' transformation does not need composition!
             list_compo_trsf.append(pairwise_trsf[-1])
 
     # - Apply list of transformation to list of images, except 't_ref' (whole sequence registration on last time-point)
     for ind, trsf in enumerate(list_compo_trsf):
+        print "Applying t{}/{} composed transformation to t{}...".format(ind, n_imgs, ind)
         tmp_img = apply_trsf(list_images[ind], trsf,
                              template_img=list_images[-1])
         list_res_img.append(tmp_img)
+        print "Done.\n"
 
     list_res_img.append(list_images[-1])  # add reference image 't_ref'
 
