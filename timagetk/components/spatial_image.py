@@ -1160,13 +1160,13 @@ class SpatialImage(np.ndarray):
         """
         Print the availables bits type dictionary.
         """
-        return DEF_TYPE
+        return DICT_TYPES
 
     def is_available_types(self, dtype):
         """
         Print the availables bits type dictionary.
         """
-        return dtype in DEF_TYPE.keys()
+        return dtype in DICT_TYPES.keys()
 
     def bits_convert(self, dtype):
         """
@@ -1185,7 +1185,7 @@ class SpatialImage(np.ndarray):
         vxs = self.get_voxelsize()
         ori = self.get_origin()
         md = self.get_metadata()
-        return SpatialImage(self.get_array().astype(DEF_TYPE[dtype]),
+        return SpatialImage(self.get_array().astype(DICT_TYPES[dtype]),
                             voxelsize=vxs, origin=ori, metadata_dict=md)
 
     def revert_axis(self, axis='z'):
