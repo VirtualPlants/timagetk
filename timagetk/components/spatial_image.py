@@ -154,10 +154,10 @@ def basic_metadata(obj, metadata_dict=None):
     except KeyError:
         metadata_dict['shape'] = obj.shape
     except AssertionError:
-        print "WARNING: Metadata 'shape' () do not match the array shape ()".format(
+        print "WARNING: Metadata 'shape' ({}) do not match the array shape ({}),".format(
             metadata_dict['shape'], obj.shape),
         metadata_dict['shape'] = obj.shape
-        print ", it has been updated!"
+        print "it has been updated!"
 
     try:
         assert metadata_dict['dim'] == obj.ndim
@@ -187,10 +187,10 @@ def basic_metadata(obj, metadata_dict=None):
     except KeyError:
         metadata_dict['type'] = str(obj.dtype)
     except AssertionError:
-        print "WARNING: Metadata 'type' () do not match the array dtype ()".format(
+        print "WARNING: Metadata 'type' ({}) do not match the array dtype ({}),".format(
             metadata_dict['type'], obj.dtype),
         metadata_dict['dtype'] = str(obj.dtype)
-        print ", it has been updated!"
+        print "it has been updated!"
 
     # Next lines compute min, max and mean values of the array every time we
     # call SpatialImage, even when reading the file from disk! This slow down
