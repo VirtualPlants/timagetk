@@ -1168,14 +1168,15 @@ class SpatialImage(np.ndarray):
         """
         return dtype in DICT_TYPES.keys()
 
-    def bits_convert(self, dtype):
+    def to_8bits(self, unsigned=True):
         """
-        Convert the array to a diferent bit depth.
+        Convert the array to a different bit depth.
 
         Parameters
         ----------
-        dtype : int|str
-            in both case should be a key in dictionary of availables types
+        unsigned : bool, optional
+            if True (default), return as unsigned integer 'uint8', else signed
+            integer 'int8'
 
         Returns
         -------
@@ -1185,8 +1186,23 @@ class SpatialImage(np.ndarray):
         vxs = self.get_voxelsize()
         ori = self.get_origin()
         md = self.get_metadata()
-        return SpatialImage(self.get_array().astype(DICT_TYPES[dtype]),
-                            voxelsize=vxs, origin=ori, metadata_dict=md)
+        if unsigned:
+            dtype = 'uint8'
+        else:
+            dtype = 'int8'
+
+        arr = self.get_array()
+        if arr.dtype == "uint16" or arr.dtype == "int16":
+            factor = 2**(16 - 8) - 1
+        elif arr.dtype == "uint32" or arr.dtype == "int32":
+            factor = 2**(32 - 8) - 1
+        elif arr.dtype == "uint64" or arr.dtype == "int64":
+            factor = 2**(64 - 8) - 1
+        else:
+            raise NotImplementedError('Could not find implementation to do just that!')
+
+        arr = np.divide(arr, factor).astype(DICT_TYPES[dtype])
+        return SpatialImage(arr, voxelsize=vxs, origin=ori, metadata_dict=md)
 
     def revert_axis(self, axis='z'):
         """
