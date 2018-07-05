@@ -14,6 +14,7 @@
 import platform
 from ctypes import cdll, c_void_p, c_char_p, POINTER
 from ctypes.util import find_library
+
 try:
     from timagetk.wrapping.balTrsf import BAL_TRSF
 except ImportError:

@@ -28,6 +28,23 @@ __all__ = ['bal_trsf_c_ptr',
            'BalTransformation'
            ]
 
+TRSF_TYPE_DICT = {
+    0: "UNDEF_TRANSFORMATION",
+    1: "TRANSLATION_2D",
+    2: "TRANSLATION_3D",
+    3: "TRANSLATION_SCALING_2D",
+    4: "TRANSLATION_SCALING_3D",
+    5: "RIGID_2D",
+    6: "RIGID_3D",
+    7: "SIMILITUDE_2D",
+    8: "SIMILITUDE_3D",
+    9: "AFFINE_2D",
+    10: "AFFINE_3D",
+    11: "VECTORFIELD_2D",
+    12: "VECTORFIELD_3D",
+    13: "SPLINE"
+}
+
 
 def bal_trsf_c_ptr(c_or_bal_trsf):
     """
@@ -120,7 +137,7 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
         # Set object attributes:
         self.trsf_unit = self._c_bal_trsf.transformation_unit
         self.mat = BalMatrix(c_bal_matrix=self._c_bal_trsf.mat) #---- BalMatrix instance
-        # TODO: move this if/else behaviour to BalImage (avoid unecessary warnings raise when calling SpatialImage!
+        # TODO: move this if/else behaviour to BalImage (avoid unecessary warnings raise when calling SpatialImage)!
         if self._c_bal_trsf.vx is not None:
             self.vx = BalImage(c_bal_image=self._c_bal_trsf.vx) #---- BalImage instance
             self.vy = BalImage(c_bal_image=self._c_bal_trsf.vy) #---- BalImage instance
@@ -167,7 +184,37 @@ class BalTransformation(object, enumTypeTransfo, enumUnitTransfo):
         libblockmatching.BAL_PrintTransformation(c_stdout, self.c_ptr, name)
 
     def isLinear(self):
+        """
+        Test if the transformation matrix is of type 'Linear'.
+        Linear transformation matrix are obtained from those types:
+          - TRANSLATION_2D, TRANSLATION_3D;
+          - TRANSLATION_SCALING_2D, TRANSLATION_SCALING_3D;
+          - RIGID_2D, RIGID_3D;
+          - SIMILITUDE_2D, SIMILITUDE_3D;
+          - AFFINE_2D, AFFINE_3D.
+
+        Returns
+        -------
+        isLinear: bool
+            True if of type 'Linear', else False
+        """
         return libblockmatching.BAL_IsTransformationLinear(self.c_ptr) != 0
 
     def isVectorField(self):
+        """
+        Test if the transformation matrix is of type 'VectorField'.
+        Non-linear transformation matrix are obtained from those types:
+          - VECTORFIELD_2D, VECTORFIELD_3D;
+
+        Returns
+        -------
+        isVectorField: bool
+            True if of type 'VectorField', else False
+        """
         return libblockmatching.BAL_IsTransformationVectorField(self.c_ptr) != 0
+
+    def get_type(self):
+        """
+        Returns the type of transformation matrix as a string.
+        """
+        return TRSF_TYPE_DICT[self.trsf_type]

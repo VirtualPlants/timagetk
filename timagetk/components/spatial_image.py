@@ -154,7 +154,7 @@ def basic_metadata(obj, metadata_dict=None):
     except KeyError:
         metadata_dict['shape'] = obj.shape
     except AssertionError:
-        print "WARNING: Metadata 'shape' ({}) do not match the array shape ({}),".format(
+        print "WARNING: Metadata 'shape' {} do not match the array shape {},".format(
             metadata_dict['shape'], obj.shape),
         metadata_dict['shape'] = obj.shape
         print "it has been updated!"

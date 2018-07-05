@@ -334,6 +334,7 @@ def mean_trsfs(list_trsf):
     -------
     >>> trsf_out = mean_trsf([trsf_1, trsf_2, trsf_3])
     """
+    # TODO: why only limited to 'VectorField' ?
     try:
         assert isinstance(list_trsf, list)
     except AssertionError:
@@ -350,12 +351,13 @@ def mean_trsfs(list_trsf):
     except AssertionError:
         raise TypeError(
             "All input trsf must be BalTransformation instances.")
+
+    trsf_types = [trsf.trsf_type == 12 for trsf in list_trsf]
     try:
-        trsf_types = [trsf.trsf_type == 12 for trsf in list_trsf]
         assert np.alltrue(trsf_types)
     except AssertionError:
         raise NotImplementedError(
-            "All input trsf must be vectorfield (12), got: {}.".format(
+            "All input trsf must be VectorField (12), got: {}.".format(
                 trsf_types))
 
     sp_img_vx = [trsf.vx.to_spatial_image() for trsf in list_trsf]
