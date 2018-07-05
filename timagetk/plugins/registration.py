@@ -230,12 +230,12 @@ def rigid_registration(floating_img, reference_img, init_trsf=None,
     # - Make sure the provided initialisation trsf matrix is linear:
     if init_trsf:
         try:
-            assert init_trsf.isLinear()
+            assert init_trsf.is_linear()
         except:
             raise TypeError("Provided 'init_trsf' is not a linear deformation!")
     if left_trsf:
         try:
-            assert left_trsf.isLinear()
+            assert left_trsf.is_linear()
         except:
             raise TypeError("Provided 'left_trsf' is not a linear deformation!")
 
@@ -309,13 +309,13 @@ def affine_registration(floating_img, reference_img, init_trsf=None,
         # - Make sure the provided initialisation trsf matrix is linear:
         if init_trsf:
             try:
-                assert init_trsf.isLinear()
+                assert init_trsf.is_linear()
             except:
                 raise TypeError(
                     "Provided 'init_trsf' is not a linear deformation!")
         if left_trsf:
             try:
-                assert left_trsf.isLinear()
+                assert left_trsf.is_linear()
             except:
                 raise TypeError(
                     "Provided 'left_trsf' is not a linear deformation!")

@@ -420,7 +420,7 @@ def save_trsf(trsf, filename, zip=False):
     filename : str
         name of the file
     """
-    if trsf.isVectorField():
+    if trsf.is_vectorfield():
         if zip and not filename.endswith(".gz"):
             file = gzip.open(filename + ".gz", 'w')
         elif filename.endswith(".gz"):
