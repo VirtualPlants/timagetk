@@ -1117,11 +1117,29 @@ class SpatialImage(np.ndarray):
         self.metadata = img_met
         return "Set voxelsize to '{}'".format(self.voxelsize)
 
+    def is2D(self):
+        """
+        Returns True if the SpatialImage is 2D, else False.
+        """
+        return self.get_dim() == 2
+
+    def is3D(self):
+        """
+        Returns True if the SpatialImage is 3D, else False.
+        """
+        return self.get_dim() == 3
+
     def to_2D(self):
         """
-        3D to 2D
+        Convert, if possible, a 3D SpatiamImage with one "flat" dimension (ie.
+        with only one slice in this dimension) to a 2D SpatialImage.
+
+        Returns
+        -------
+        SpatialImage
+            the 2D SpatialImage
         """
-        if (self.get_dim() == 3) and (1 in self.get_shape()):
+        if self.is3D() and 1 in self.get_shape():
             voxelsize, shape, array = self.get_voxelsize(), self.get_shape(), self.get_array()
             ori, md = self.get_origin(), self.get_metadata()
             if shape[0] == 1:
@@ -1137,14 +1155,20 @@ class SpatialImage(np.ndarray):
                                       origin=ori, metadata_dict=md)
             return out_sp_img
         else:
-            print('sp_img can not be reshaped')
+            print('3D SpatialImage can not be reshaped to 2D')
             return
 
     def to_3D(self):
         """
-        2D to 3D
+        Convert, a 2D SpatiamImage into a 3D SpatialImage with one "flat"
+        dimension (ie. with only one slice in this dimension).
+
+        Returns
+        -------
+        SpatialImage
+            the 3D SpatialImage
         """
-        if (self.get_dim() == 2):
+        if self.is2D():
             voxelsize, shape, array = self.get_voxelsize(), self.get_shape(), self.get_array()
             ori, md = self.get_origin(), self.get_metadata()
             new_arr = np.reshape(array, (shape[0], shape[1], 1))
@@ -1153,7 +1177,7 @@ class SpatialImage(np.ndarray):
                                       origin=ori, metadata_dict=md)
             return out_sp_img
         else:
-            print('sp_img is not a 2D SpatialImage')
+            print('SpatialImage is not 2D')
             return
 
     def get_available_types(self):
