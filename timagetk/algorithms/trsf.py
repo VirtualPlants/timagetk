@@ -13,15 +13,10 @@
 # ------------------------------------------------------------------------------
 
 import gzip
-# --- Aug. 2016
-from ctypes import POINTER
-import numpy as np
-# --- Aug. 2016
-from ctypes import POINTER
-
 import numpy as np
 import cPickle as pickle
 
+from ctypes import POINTER
 try:
     from ctypes import pointer
     from timagetk.wrapping.clib import libblockmatching, add_doc
@@ -233,7 +228,7 @@ def compose_trsf(list_trsf, template_img=None,
         print('Specify a template image for output image geometry')
         raise NotImplementedError
     elif 12 in trsf_types and template_img is not None:
-        if template_img.get_dim()==2:
+        if template_img.get_dim() == 2:
             template_img = template_img.to_3D()
         x, y, z = template_img.get_shape()
         str_dims = ' -template-dim {} {} {}'.format(x, y, z)
@@ -298,6 +293,7 @@ def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT,
         bal_image = BalImage(template_img)
     else:
         template_img = None
+        bal_image = None
         # raise NotImplementedError
 
     if trsf_type is None:
@@ -309,6 +305,7 @@ def create_trsf(template_img=None, param_str_1=CREATE_TRSF_DEFAULT,
     mat_out = trsf_out.mat
     init_c_bal_matrix(mat_out.c_struct, l=4, c=4)
     allocate_c_bal_matrix(mat_out.c_struct, np.zeros((4, 4), dtype=np.float64))
+
     if template_img is None:
         libblockmatching.API_createTrsf(trsf_out.c_ptr, None, param_str_1,
                                         param_str_2)
@@ -367,7 +364,7 @@ def mean_trsfs(list_trsf):
     mean_sp_img_vx = sum_sp_img_vx / len(sp_img_vx)
     mean_sp_img_vx = SpatialImage(mean_sp_img_vx, origin=[0, 0, 0],
                                   voxelsize=sp_img_vx[0].voxelsize)
-    BalImage_vx = BalImage(mean_sp_img_vx)
+    bal_image_vx = BalImage(mean_sp_img_vx)
 
     sp_img_vy = [trsf.vy.to_spatial_image() for trsf in list_trsf]
     sum_sp_img_vy = np.zeros_like(sp_img_vy[0])
@@ -376,7 +373,7 @@ def mean_trsfs(list_trsf):
     mean_sp_img_vy = sum_sp_img_vy / len(sp_img_vy)
     mean_sp_img_vy = SpatialImage(mean_sp_img_vy, origin=[0, 0, 0],
                                   voxelsize=sp_img_vy[0].voxelsize)
-    BalImage_vy = BalImage(mean_sp_img_vy)
+    bal_image_vy = BalImage(mean_sp_img_vy)
 
     sp_img_vz = [trsf.vz.to_spatial_image() for trsf in list_trsf]
     sum_sp_img_vz = np.zeros_like(sp_img_vz[0])
@@ -385,20 +382,20 @@ def mean_trsfs(list_trsf):
     mean_sp_img_vz = sum_sp_img_vz / len(sp_img_vz)
     mean_sp_img_vz = SpatialImage(mean_sp_img_vz, origin=[0, 0, 0],
                                   voxelsize=sp_img_vz[0].voxelsize)
-    BalImage_vz = BalImage(mean_sp_img_vz)
+    bal_image_vz = BalImage(mean_sp_img_vz)
 
-    out_BAL_TRSF = BAL_TRSF()  # --- BALTRSF instance
-    out_BAL_TRSF_ptr = pointer(out_BAL_TRSF)
-    libblockmatching.BAL_AllocTransformation(out_BAL_TRSF_ptr,
+    out_bal_trsf = BAL_TRSF()  # --- BALTRSF instance
+    out_bal_trsf_ptr = pointer(out_bal_trsf)
+    libblockmatching.BAL_AllocTransformation(out_bal_trsf_ptr,
                                              list_trsf[0].trsf_type,
                                              pointer(list_trsf[0].vx.c_struct))
-    out_BAL_TRSF.transformation_unit = list_trsf[0].trsf_unit
-    out_BAL_TRSF.mat = list_trsf[0].mat.c_struct  # --- BAL_MATRIX instance
-    out_BAL_TRSF.vx = BalImage_vx.c_struct  # --- BALIMAGE instance
-    out_BAL_TRSF.vy = BalImage_vy.c_struct  # --- BALIMAGE instance
-    out_BAL_TRSF.vz = BalImage_vz.c_struct  # --- BALIMAGE instance
+    out_bal_trsf.transformation_unit = list_trsf[0].trsf_unit
+    out_bal_trsf.mat = list_trsf[0].mat.c_struct  # --- BAL_MATRIX instance
+    out_bal_trsf.vx = bal_image_vx.c_struct  # --- BALIMAGE instance
+    out_bal_trsf.vy = bal_image_vy.c_struct  # --- BALIMAGE instance
+    out_bal_trsf.vz = bal_image_vz.c_struct  # --- BALIMAGE instance
     trsf_out = BalTransformation(trsf_type=list_trsf[0].trsf_type,
-                                 c_bal_trsf=out_BAL_TRSF)
+                                 c_bal_trsf=out_bal_trsf)
     for ind, trsf in enumerate(list_trsf):
         trsf.free()
     return trsf_out
@@ -409,7 +406,7 @@ add_doc(compose_trsf, libblockmatching.API_Help_composeTrsf)
 add_doc(create_trsf, libblockmatching.API_Help_createTrsf)
 
 
-def save_trsf(trsf, filename, zip=False):
+def save_trsf(trsf, filename, compress=False):
     """
     Write a BalTransformation 'trsf' under given 'filename'.
 
@@ -419,14 +416,16 @@ def save_trsf(trsf, filename, zip=False):
         BalTransformation object to save
     filename : str
         name of the file
+    compress : bool, optional
+        if True (default False) the saved transformation matrix is compressed
     """
     if trsf.is_vectorfield():
-        if zip and not filename.endswith(".gz"):
-            file = gzip.open(filename + ".gz", 'w')
+        if compress and not filename.endswith(".gz"):
+            f = gzip.open(filename + ".gz", 'w')
         elif filename.endswith(".gz"):
-            file = gzip.open(filename, 'w')
+            f = gzip.open(filename, 'w')
         else:
-            file = open(filename, 'w')
+            f = open(filename, 'w')
 
         vx = trsf.vx.to_spatial_image()
         vy = trsf.vy.to_spatial_image()
@@ -434,8 +433,8 @@ def save_trsf(trsf, filename, zip=False):
         vectorfield = {'vx': vx, 'vy': vy, 'vz': vz,
                        'bal_image_fields': spatial_image_to_bal_image_fields(
                            vx)}
-        pickle.dump(vectorfield, file)
-        file.close()
+        pickle.dump(vectorfield, f)
+        f.close()
     else:
         trsf.write(filename)
 
@@ -444,7 +443,7 @@ def save_trsf(trsf, filename, zip=False):
 
 def read_trsf(filename):
     """
-    Read a transformation file
+    Read a transformation file.
 
     Parameters
     ----------
@@ -460,11 +459,11 @@ def read_trsf(filename):
     trsf = BalTransformation()
     try:
         if filename.endswith(".gz"):
-            file = gzip.open(filename, 'r')
+            f = gzip.open(filename, 'r')
         else:
-            file = open(filename, 'r')
-        obj = pickle.load(file)
-        file.close()
+            f = open(filename, 'r')
+        obj = pickle.load(f)
+        f.close()
         vx, vy, vz = obj['vx'], obj['vy'], obj['vz']
         metadata = obj['bal_image_fields']
         vx = SpatialImage(vx, voxelsize=metadata['resolution'],
