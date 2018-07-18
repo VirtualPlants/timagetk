@@ -75,7 +75,7 @@ class TestBlockmatching(unittest.TestCase):
             floating_img = imread(data_path('time_0_cut.inr'))
             reference_img = imread(data_path('time_1_cut.inr'))
             rigid_trsf = data_path("rigid_0_1.trsf")
-            deformable_trsf = data_path("deformable_0_1.trsf")
+            deformable_trsf = data_path("deformable_trsf.trsf")
             init_result_transformation = BalTransformation()
             init_result_transformation.read(rigid_trsf)
             param_str_2 = '-trsf-type vectorfield'
@@ -94,7 +94,7 @@ class TestBlockmatching(unittest.TestCase):
             #--- deformable registration
             floating_img = imread(data_path('time_0_cut.inr'))
             reference_img = imread(data_path('time_1_cut.inr'))
-            deformable_trsf = data_path("deformable_0_1.trsf")
+            deformable_trsf = data_path("deformable_trsf.trsf")
             trsf_inp = BalTransformation()
             trsf_inp.read(deformable_trsf)
             trsf_out, res = registration(floating_img, reference_img, method='deformable_registration')
