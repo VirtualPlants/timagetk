@@ -913,7 +913,7 @@ class SpatialImage(np.ndarray):
             self.origin = tmp_dict['origin']
             self.voxelsize = around_list(tmp_dict['voxelsize'])
             self.extent = around_list(tmp_dict['extent'])
-            self.min = tmp_dict['min']
+            self.min = tmp_dict'min']
             self.max = tmp_dict['max']
             self.mean = tmp_dict['mean']
 

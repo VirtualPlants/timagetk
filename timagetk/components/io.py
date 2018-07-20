@@ -183,7 +183,7 @@ def imsave(img_file, sp_img):
         except ImportError:
             raise ImportError('Unable to import .tiff functionalities')
         write_tiff_image(img_file, sp_img)
-    elif extension == '.mha' or extension == '.mha.gz':
+    elif ext == '.mha' or ext == '.mha.gz':
         try:
             from timagetk.components.mha_image import write_mha_image
         except ImportError:
