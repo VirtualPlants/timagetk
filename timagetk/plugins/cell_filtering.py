@@ -13,19 +13,20 @@
 # ------------------------------------------------------------------------------
 
 """
-This module contain a generic implementation of several grayscale morphology algorithms.
+This module contain a generic implementation of several cell filtering algorithms.
 """
 
 try:
-    from timagetk.algorithms import morpho
+    from timagetk.algorithms import cell_filter
     from timagetk.components import SpatialImage
 except ImportError:
     raise ImportError('Import Error')
 
-__all__ = ['morphology']
+__all__ = ['cell_filtering']
 
 POSS_METHODS = ['erosion', 'dilation', 'opening', 'closing', 'morpho_gradient',
-                'contrast', 'hat_transform', 'inverse_hat_transform',
+                'contrast',
+                'hat_transform', 'inverse_hat_transform',
                 'oc_alternate_sequential_filter',
                 'co_alternate_sequential_filter',
                 'coc_alternate_sequential_filter',
@@ -33,9 +34,9 @@ POSS_METHODS = ['erosion', 'dilation', 'opening', 'closing', 'morpho_gradient',
 DEFAULT_METHOD = POSS_METHODS[0]
 
 
-def morphology(input_image, method=None, **kwds):
+def cell_filtering(input_image, method=None, **kwds):
     """
-    Grayscale morphology plugin. Available methods are :
+    Grayscale cell_filtering plugin. Available methods are :
 
     * erosion
     * dilation
@@ -63,11 +64,11 @@ def morphology(input_image, method=None, **kwds):
     Example
     ----------
     >>> from timagetk.util import data, data_path
-    >>> from timagetk.plugins import morphology
+    >>> from timagetk.plugins import cell_filtering
     >>> image_path = data_path('time_0_cut.inr')
     >>> input_image = data(image_path)
-    >>> dilation_image = morphology(input_image, radius=2, iterations=2, method='dilation')
-    >>> oc_asf_image = morphology(input_image, max_radius=3, method='oc_alternate_sequential_filter')
+    >>> dilation_image = cell_filtering(input_image, radius=2, iterations=2, method='dilation')
+    >>> oc_asf_image = cell_filtering(input_image, max_radius=3, method='oc_alternate_sequential_filter')
     """
     try:
         assert isinstance(input_image, SpatialImage)
@@ -90,46 +91,47 @@ def morphology(input_image, method=None, **kwds):
         it_val = kwds.pop('iterations', None)
         max_radius_val = kwds.pop('max_radius', None)
         if method == 'erosion':
-            return morphology_erosion(input_image, radius=radius_val,
-                                      iterations=it_val, **kwds)
-        if method == 'dilation':
-            return morphology_dilation(input_image, radius=radius_val,
-                                       iterations=it_val, **kwds)
-        if method == 'opening':
-            return morphology_opening(input_image, radius=radius_val,
-                                      iterations=it_val, **kwds)
-        if method == 'closing':
-            return morphology_closing(input_image, radius=radius_val,
-                                      iterations=it_val, **kwds)
-        if method == 'morpho_gradient':
-            return morphology_gradient(input_image, radius=radius_val,
-                                       iterations=it_val, **kwds)
-        if method == 'contrast':
-            return morphology_contrast(input_image, radius=radius_val,
-                                       iterations=it_val, **kwds)
-        if method == 'hat_transform':
-            return morphology_hat_transform(input_image, radius=radius_val,
-                                            iterations=it_val, **kwds)
-        if method == 'inverse_hat_transform':
-            return morphology_inverse_hat_transform(input_image,
-                                                    radius=radius_val,
-                                                    iterations=it_val, **kwds)
-        if method == 'oc_alternate_sequential_filter':
-            return morphology_oc_alternate_sequential_filter(input_image,
-                                                             max_radius=max_radius_val,
-                                                             **kwds)
-        if method == 'co_alternate_sequential_filter':
-            return morphology_co_alternate_sequential_filter(input_image,
-                                                             max_radius=max_radius_val,
-                                                             **kwds)
-        if method == 'coc_alternate_sequential_filter':
-            return morphology_coc_alternate_sequential_filter(input_image,
-                                                              max_radius=max_radius_val,
-                                                              **kwds)
-        if method == 'oco_alternate_sequential_filter':
-            return morphology_oco_alternate_sequential_filter(input_image,
-                                                              max_radius=max_radius_val,
-                                                              **kwds)
+            return cell_filtering_erosion(input_image, radius=radius_val,
+                                          iterations=it_val, **kwds)
+        elif method == 'dilation':
+            return cell_filtering_dilation(input_image, radius=radius_val,
+                                           iterations=it_val, **kwds)
+        elif method == 'opening':
+            return cell_filtering_opening(input_image, radius=radius_val,
+                                          iterations=it_val, **kwds)
+        elif method == 'closing':
+            return cell_filtering_closing(input_image, radius=radius_val,
+                                          iterations=it_val, **kwds)
+        elif method == 'morpho_gradient':
+            return cell_filtering_gradient(input_image, radius=radius_val,
+                                           iterations=it_val, **kwds)
+        elif method == 'contrast':
+            return cell_filtering_contrast(input_image, radius=radius_val,
+                                           iterations=it_val, **kwds)
+        elif method == 'hat_transform':
+            return cell_filtering_hat_transform(input_image, radius=radius_val,
+                                                iterations=it_val, **kwds)
+        elif method == 'inverse_hat_transform':
+            return cell_filtering_inverse_hat_transform(input_image,
+                                                        radius=radius_val,
+                                                        iterations=it_val,
+                                                        **kwds)
+        elif method == 'oc_alternate_sequential_filter':
+            return cell_filtering_oc_alternate_sequential_filter(input_image,
+                                                                 max_radius=max_radius_val,
+                                                                 **kwds)
+        elif method == 'co_alternate_sequential_filter':
+            return cell_filtering_co_alternate_sequential_filter(input_image,
+                                                                 max_radius=max_radius_val,
+                                                                 **kwds)
+        elif method == 'coc_alternate_sequential_filter':
+            return cell_filtering_coc_alternate_sequential_filter(input_image,
+                                                                  max_radius=max_radius_val,
+                                                                  **kwds)
+        elif method == 'oco_alternate_sequential_filter':
+            return cell_filtering_oco_alternate_sequential_filter(input_image,
+                                                                  max_radius=max_radius_val,
+                                                                  **kwds)
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
@@ -139,7 +141,33 @@ def morphology(input_image, method=None, **kwds):
             raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
-def morphology_erosion(input_image, radius=None, iterations=None, **kwds):
+def _check_radius_iterations(radius, iterations):
+    """
+    Performs 'radius' and 'iterations' transformation or set to default value.
+
+    Parameters
+    ----------
+    radius : int|None
+        value of the radius to use when creating the structuring element
+    iterations : int|None
+         number of iterations to performs
+
+    Returns
+    -------
+    radius, iterations
+    """
+    if radius is None:
+        radius = 1
+    else:
+        radius = abs(int(radius))
+    if iterations is None:
+        iterations = 1
+    else:
+        iterations = abs(int(iterations))
+    return radius, iterations
+
+
+def cell_filtering_erosion(input_image, radius=None, iterations=None, **kwds):
     """
     Erosion
 
@@ -160,20 +188,13 @@ def morphology_erosion(input_image, radius=None, iterations=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-operation erosion -iterations %d -radius %d -v' % (
         iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_dilation(input_image, radius=None, iterations=None, **kwds):
+def cell_filtering_dilation(input_image, radius=None, iterations=None, **kwds):
     """
     Dilation
 
@@ -194,19 +215,12 @@ def morphology_dilation(input_image, radius=None, iterations=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-dilation -iterations %d -radius %d' % (iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_opening(input_image, radius=None, iterations=None, **kwds):
+def cell_filtering_opening(input_image, radius=None, iterations=None, **kwds):
     """
     Opening
 
@@ -227,20 +241,13 @@ def morphology_opening(input_image, radius=None, iterations=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-operation opening -iterations %d -radius %d' % (
         iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_closing(input_image, radius=None, iterations=None, **kwds):
+def cell_filtering_closing(input_image, radius=None, iterations=None, **kwds):
     """
     Closing
 
@@ -261,20 +268,14 @@ def morphology_closing(input_image, radius=None, iterations=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-operation closing -iterations %d -radius %d' % (
         iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_hat_transform(input_image, radius=None, iterations=None, **kwds):
+def cell_filtering_hat_transform(input_image, radius=None, iterations=None,
+                                 **kwds):
     """
     Hat transform
 
@@ -295,21 +296,14 @@ def morphology_hat_transform(input_image, radius=None, iterations=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-operation closinghat -iterations %d -radius %d' % (
         iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_inverse_hat_transform(input_image, radius=None, iterations=None,
-                                     **kwds):
+def cell_filtering_inverse_hat_transform(input_image, radius=None,
+                                         iterations=None, **kwds):
     """
     Inverse hat transform
 
@@ -330,20 +324,13 @@ def morphology_inverse_hat_transform(input_image, radius=None, iterations=None,
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-operation openinghat -iterations %d -radius %d' % (
         iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_gradient(input_image, radius=None, iterations=None, **kwds):
+def cell_filtering_gradient(input_image, radius=None, iterations=None, **kwds):
     """
     Morphological gradient
 
@@ -364,20 +351,13 @@ def morphology_gradient(input_image, radius=None, iterations=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = abs(int(radius))
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = abs(int(iterations))
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-operation gradient -iterations %d -radius %d' % (
         iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_contrast(input_image, radius=None, iterations=None, **kwds):
+def cell_filtering_contrast(input_image, radius=None, iterations=None, **kwds):
     """
     Contrast enhancement
 
@@ -398,21 +378,14 @@ def morphology_contrast(input_image, radius=None, iterations=None, **kwds):
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not radius:
-        radius = 1
-    else:
-        radius = int(radius)
-    if not iterations:
-        iterations = 1
-    else:
-        iterations = int(iterations)
+    radius, iterations = _check_radius_iterations(radius, iterations)
     params = '-operation contrast -iterations %d -radius %d' % (
         iterations, radius)
-    return morpho(input_image, param_str_2=params)
+    return cell_filter(input_image, param_str_2=params)
 
 
-def morphology_oc_alternate_sequential_filter(input_image, max_radius=None,
-                                              **kwds):
+def cell_filtering_oc_alternate_sequential_filter(input_image, max_radius=None,
+                                                  **kwds):
     """
     Opening Closing alternate sequential filter
 
@@ -431,10 +404,10 @@ def morphology_oc_alternate_sequential_filter(input_image, max_radius=None,
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not max_radius:
+    if max_radius is None:
         max_radius = 1
-        output_img = morphology_oc_alternate_sequential_filter(input_image,
-                                                               max_radius)
+        output_img = cell_filtering_oc_alternate_sequential_filter(input_image,
+                                                                   max_radius)
         return output_img
     else:
         max_radius = abs(int(max_radius))
@@ -442,14 +415,14 @@ def morphology_oc_alternate_sequential_filter(input_image, max_radius=None,
         output_img = input_image
         for size in sizes:
             param_str_2 = "-operation closing -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
             param_str_2 = "-operation opening -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
         return output_img
 
 
-def morphology_co_alternate_sequential_filter(input_image, max_radius=None,
-                                              **kwds):
+def cell_filtering_co_alternate_sequential_filter(input_image, max_radius=None,
+                                                  **kwds):
     """
     Closing Opening alternate sequential filter
 
@@ -468,10 +441,10 @@ def morphology_co_alternate_sequential_filter(input_image, max_radius=None,
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not max_radius:
+    if max_radius is None:
         max_radius = 1
-        output_img = morphology_co_alternate_sequential_filter(input_image,
-                                                               max_radius)
+        output_img = cell_filtering_co_alternate_sequential_filter(input_image,
+                                                                   max_radius)
         return output_img
     else:
         max_radius = abs(int(max_radius))
@@ -479,14 +452,14 @@ def morphology_co_alternate_sequential_filter(input_image, max_radius=None,
         output_img = input_image
         for size in sizes:
             param_str_2 = "-operation opening -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
             param_str_2 = "-operation closing -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
         return output_img
 
 
-def morphology_coc_alternate_sequential_filter(input_image, max_radius=None,
-                                               **kwds):
+def cell_filtering_coc_alternate_sequential_filter(input_image, max_radius=None,
+                                                   **kwds):
     """
     Closing Opening Closing alternate sequential filter
 
@@ -505,10 +478,10 @@ def morphology_coc_alternate_sequential_filter(input_image, max_radius=None,
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not max_radius:
+    if max_radius is None:
         max_radius = 1
-        output_img = morphology_coc_alternate_sequential_filter(input_image,
-                                                                max_radius)
+        output_img = cell_filtering_coc_alternate_sequential_filter(input_image,
+                                                                    max_radius)
         return output_img
     else:
         max_radius = abs(int(max_radius))
@@ -516,16 +489,16 @@ def morphology_coc_alternate_sequential_filter(input_image, max_radius=None,
         output_img = input_image
         for size in sizes:
             param_str_2 = "-operation closing -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
             param_str_2 = "-operation opening -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
             param_str_2 = "-operation closing -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
         return output_img
 
 
-def morphology_oco_alternate_sequential_filter(input_image, max_radius=None,
-                                               **kwds):
+def cell_filtering_oco_alternate_sequential_filter(input_image, max_radius=None,
+                                                   **kwds):
     """
     Opening Closing Opening alternate sequential filter
 
@@ -544,10 +517,10 @@ def morphology_oco_alternate_sequential_filter(input_image, max_radius=None,
     except AssertionError:
         raise TypeError('Input image must be a SpatialImage')
 
-    if not max_radius:
+    if max_radius is None:
         max_radius = 1
-        output_img = morphology_oco_alternate_sequential_filter(input_image,
-                                                                max_radius)
+        output_img = cell_filtering_oco_alternate_sequential_filter(input_image,
+                                                                    max_radius)
         return output_img
     else:
         max_radius = abs(int(max_radius))
@@ -555,9 +528,9 @@ def morphology_oco_alternate_sequential_filter(input_image, max_radius=None,
         output_img = input_image
         for size in sizes:
             param_str_2 = "-operation opening -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
             param_str_2 = "-operation closing -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
             param_str_2 = "-operation opening -R " + str(size)
-            output_img = morpho(output_img, param_str_2=param_str_2)
+            output_img = cell_filter(output_img, param_str_2=param_str_2)
         return output_img

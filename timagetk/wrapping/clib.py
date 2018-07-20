@@ -14,6 +14,7 @@
 import platform
 from ctypes import cdll, c_void_p, c_char_p, POINTER
 from ctypes.util import find_library
+
 try:
     from timagetk.wrapping.balTrsf import BAL_TRSF
 except ImportError:
@@ -33,7 +34,6 @@ if (platform.system() == 'Linux'):
         import sys
         print('Error: unable to load shared libraries')
         sys.exit(-1)
-
 elif (platform.system() == 'Darwin'):
     try:
         libbasic = cdll.LoadLibrary('libbasic.dylib')
@@ -47,7 +47,6 @@ elif (platform.system() == 'Darwin'):
         import sys
         print('Error: unable to load shared libraries')
         sys.exit(-1)
-
 else:
     supp_platforms = ['Linux', 'Darwin']
     print('Supported platforms: '), supp_platforms

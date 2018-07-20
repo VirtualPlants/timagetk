@@ -65,16 +65,25 @@ class _typeStructuringElement(Structure):
                 ]
 
 
-def structuring_element():
+def default_structuring_element():
     """
     Default structuring element.
+    This is a cube (26-connectivity) of radius 1.
     """
-    iterations = 1
-    connectivity = 26
+    return structuring_element(1, 1, 26)
+
+
+def structuring_element(radius, iterations, connectivity=26):
+    """
+    Create a structuring element to use with `cell_filter` or `morpho`.
+    Connectivity is among the 4-, 6-, 8-, 18-, 26-neighborhoods.
+    4 and 8 are 2-D elements, the others being 3-D (default = 26).
+
+    Note: not sure why there is an `iterations` parameter... given to Morpheme functions?
+    """
+    assert connectivity in [4, 6, 8, 10, 18, 26]
     _list = pointer(_typeMorphoToolsPoint(0, 0, 0, 0))
     user_se = _typeMorphoToolsList(0, _list)
-    # radius = 0
-    radius = 1
     return _typeStructuringElement(iterations, connectivity, user_se, radius)
 
 
@@ -103,20 +112,21 @@ def morpho(image, struct_elt=None, param_str_1=MORPHO_DEFAULT, param_str_2=None,
     -------
     >>> output_image = morpho(input_image)
     """
-    if isinstance(image, SpatialImage):
-        if dtype is None:
-            dtype = image.dtype
-        if struct_elt is None:
-            struct_elt = structuring_element()
-        vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
-        rvalue = libvtexec.API_morpho(vt_input.c_ptr, vt_res.c_ptr, pointer(struct_elt),
-                                      param_str_1, param_str_2)
-        out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
-        vt_input.free(), vt_res.free()
-        return out_sp_img
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    try:
+        assert isinstance(image, SpatialImage)
+    except AssertionError:
+        raise TypeError("Input image must be a SpatialImage")
+
+    if dtype is None:
+        dtype = image.dtype
+    if struct_elt is not None:
+        struct_elt = pointer(struct_elt)
+    vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
+    rvalue = libvtexec.API_morpho(vt_input.c_ptr, vt_res.c_ptr, struct_elt,
+                                  param_str_1, param_str_2)
+    out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
+    vt_input.free(), vt_res.free()
+    return out_sp_img
 
 
 def cell_filter(image, struct_elt=None, param_str_1=CELL_FILTER_DEFAULT, param_str_2=None, dtype=None):
@@ -144,20 +154,22 @@ def cell_filter(image, struct_elt=None, param_str_1=CELL_FILTER_DEFAULT, param_s
     -------
     >>> output_image = cell_filter(input_image)
     """
-    if isinstance(image, SpatialImage):
-        if dtype is None:
-            dtype = image.dtype
-        if struct_elt is None:
-            struct_elt = structuring_element()
-        vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
-        rvalue = libvp.API_cellfilter(vt_input.c_ptr, vt_res.c_ptr, pointer(struct_elt),
-                                      param_str_1, param_str_2)
-        out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
-        vt_input.free(), vt_res.free()
-        return out_sp_img
-    else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+    try:
+        assert isinstance(image, SpatialImage)
+    except AssertionError:
+        raise TypeError("Input image must be a SpatialImage")
+
+    if dtype is None:
+        dtype = image.dtype
+    if struct_elt is not None:
+        struct_elt = pointer(struct_elt)
+    vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
+    rvalue = libvp.API_cellfilter(vt_input.c_ptr, vt_res.c_ptr, struct_elt,
+                                  param_str_1, param_str_2)
+    out_sp_img = return_value(vt_res.get_spatial_image(), rvalue)
+    vt_input.free(), vt_res.free()
+    return out_sp_img
+
 
 add_doc(morpho, libvtexec.API_Help_morpho)
 add_doc(cell_filter, libvp.API_Help_cellfilter)

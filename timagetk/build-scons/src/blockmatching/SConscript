@@ -49,16 +49,16 @@ LIBPATH = [libpath_folder])
 
 exepath_folder = env_bm['build'] + separator + 'bin'
 exe_list = ['applyTrsf.c',
-		'applyTrsfToPoints.c',
-		'blockmatching.c',
-		'composeTrsf.c',
-    		'copyTrsf.c',
-    		'createGrid.c',
-    		'createTrsf.c',
-		'cropImage.c',
-    		'invTrsf.c',
-    		'pointTrsf.c',
-    		'printTrsf.c']
+        'applyTrsfToPoints.c',
+        'blockmatching.c',
+        'composeTrsf.c',
+            'copyTrsf.c',
+            'createGrid.c',
+            'createTrsf.c',
+        'cropImage.c',
+            'invTrsf.c',
+            'pointTrsf.c',
+            'printTrsf.c']
 
 for source in exe_list:
     if isinstance(source, (list, tuple)):
