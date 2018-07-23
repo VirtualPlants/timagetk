@@ -7,6 +7,7 @@
 #       File author(s):
 #           Guillaume Baty <guillaume.baty@inria.fr>
 #           Sophie Ribes <sophie.ribes@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
 #------------------------------------------------------------------------------
@@ -17,8 +18,8 @@ import numpy as np
 try:
     from timagetk.components import imread, imsave
     from timagetk.util import data_path
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 
 class TestIO(unittest.TestCase):

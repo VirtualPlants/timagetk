@@ -17,8 +17,8 @@ from ctypes.util import find_library
 
 try:
     from timagetk.wrapping.balTrsf import BAL_TRSF
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 
 if (platform.system() == 'Linux'):

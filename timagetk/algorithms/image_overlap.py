@@ -14,8 +14,8 @@ try:
     from timagetk.components import SpatialImage
     from timagetk.algorithms import sets_metrics
     from timagetk.algorithms import imgtosets
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['image_overlap']
 

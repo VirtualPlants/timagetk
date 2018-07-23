@@ -19,8 +19,8 @@ try:
     from timagetk.wrapping.bal_image import BalImage
     from timagetk.wrapping.bal_matrix import BalMatrix
     from timagetk.wrapping.bal_stddef import enumTypeTransfo, enumUnitTransfo
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['bal_trsf_c_ptr',
            'bal_trsf_c_struct',

@@ -8,6 +8,7 @@
 #           Guillaume Baty <guillaume.baty@inria.fr>
 #           Sophie Ribes <sophie.ribes@inria.fr>
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
 # ------------------------------------------------------------------------------
@@ -15,97 +16,99 @@
 """
 This module contains a generic implementation of several linear filtering algorithms.
 """
-
-import warnings
-
 try:
+    from timagetk.util import _input_img_check
+    from timagetk.util import _method_check
+    from timagetk.util import _general_kwargs
+    from timagetk.util import _parallel_kwargs
     from timagetk.algorithms import linearfilter
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
-__all__ = ['linear_filtering']
+__all__ = ['linear_filtering', 'list_linear_methods']
 
-DEFAULT_METHOD = 'gaussian_smoothing'
 POSS_METHODS = ['gaussian_smoothing', 'gradient', 'gradient_modulus', 'hessian',
-                'laplacian',
-                'gradient_hessian', 'gradient_laplacian',
-                'zero_crossings_hessian',
-                'zero_crossings_laplacian']
+                'laplacian', 'gradient_hessian', 'gradient_laplacian',
+                'zero_crossings_hessian', 'zero_crossings_laplacian']
+DEFAULT_METHOD = 0  # index of the default method in POSS_METHODS
 
 
-def _method_img_check(input_image):
+def list_linear_methods():
     """
-    Used to check `input_image` type and isometry.
+    List the available 'methods' to call with `linear_filtering`.
+
+    Returns
+    -------
+    str: the list of available methods.
     """
-    # - Check the `input_image` is indeed a `SpatialImage`
-    try:
-        assert isinstance(input_image, SpatialImage)
-    except AssertionError:
-        raise TypeError('Input image must be a SpatialImage')
-
-    # - Check the isometry of the image:
-    vx, vy, vz = input_image.get_voxelsize()
-    if (vx != vy) or (vy != vz):
-        warnings.warn(
-            "The image is NOT isometric, this method operates on voxels!!")
-    return
+    return POSS_METHODS
 
 
-def linear_filtering(input_image, method=None, **kwds):
+def linear_filtering(input_image, method=None, **kwargs):
     """
-    Linear filtering plugin. Available methods are :
+    Linear filtering plugin
+    Available methods are:
 
-    * gaussian_smoothing
-    * gradient
-    * gradient_modulus
-    * hessian
-    * laplacian
-    * gradient_hessian
-    * gradient_laplacian
-    * zero_crossings_hessian
-    * zero_crossings_laplacian
+      * gaussian_smoothing
+      * gradient
+      * gradient_modulus
+      * hessian
+      * laplacian
+      * gradient_hessian
+      * gradient_laplacian
+      * zero_crossings_hessian
+      * zero_crossings_laplacian
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input *SpatialImage*
+    input_image: SpatialImage
+        input SpatialImage to filter
+    method: str, optional
+        used method, default is 'gaussian_smoothing'
 
-    :param str method: used method (example: 'gaussian_smoothing')
+    **kwargs
+    ------
+    std_dev: float, optional
+        the standard deviation to apply for Gaussian smoothing, in
+    real: bool, optional
+        define if the standard deviation ('std_dev') to apply is in real or
+        voxel units, default is False
 
     Returns
-    ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    -------
+    SpatialImage: image and metadata
 
-    Example
-    ----------
-    >>> from timagetk.util import data, data_path
+    Notes
+    -----
+    Only 'gaussian_smoothing' get the keyword arguments.
+
+    Examples
+    --------
+    >>> from timagetk.util import data_path
+    >>> from timagetk.components import imread
     >>> from timagetk.plugins import linear_filtering
     >>> image_path = data_path('time_0_cut.inr')
-    >>> input_image = data(image_path)
+    >>> input_image = imread(image_path)
     >>> gauss_image = linear_filtering(input_image, std_dev=2.0, method='gaussian_smoothing')
     >>> grad_mod_image = linear_filtering(input_image, method='gradient_modulus')
     >>> lap_image = linear_filtering(input_image, method='laplacian')
     """
-    # - Check `input_image` type and isometry:
-    _method_img_check(input_image)
-
-    if method is None:
-        method = DEFAULT_METHOD
-    try:
-        assert method in POSS_METHODS
-    except AssertionError:
-        raise NotImplementedError(
-            "Unknown method '{}', available methods are: {}".format(method,
-                                                                    POSS_METHODS))
+    # - Assert the 'input_image' is a SpatialImage instance:
+    _input_img_check(input_image)
+    # - Set method if None and check it is a valid method:
+    method = _method_check(method, POSS_METHODS, DEFAULT_METHOD)
 
     try:
-        assert kwds.get('try_plugin', False)
+        assert kwargs.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         if method == 'gaussian_smoothing':
-            std_dev_val = kwds.pop('std_dev', None)
+            std_dev_val = kwargs.pop('std_dev', 1.0)
+            real_units = kwargs.pop('real', False)
             return linear_filtering_gaussian_smoothing(input_image,
-                                                       std_dev=std_dev_val, **kwds)
+                                                       std_dev=std_dev_val,
+                                                       real=real_units)
         if method == 'gradient':
             return linear_filtering_gradient(input_image)
         if method == 'gradient_modulus':
@@ -126,43 +129,60 @@ def linear_filtering(input_image, method=None, **kwds):
         func = plugin_function('openalea.image', method)
         if func is not None:
             print "WARNING: using 'plugin' functionality from 'openalea.core'!"
-            return func(input_image, **kwds)
+            return func(input_image, **kwargs)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
-def linear_filtering_gaussian_smoothing(input_image, std_dev=None, **kwds):
+def linear_filtering_gaussian_smoothing(input_image, std_dev=1.0, real=False):
     """
     Gaussian smoothing filter.
-    Please note that the same 'std_dev' is used in all direction regardless of
-    the image isometry or not!
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input_image *SpatialImage*
-    :param float std_dev: optional, standard deviation. Default: std_dev=1.0
+    input_image: SpatialImage
+        input_image SpatialImage to smooth using Gaussian filtering
+    std_dev: float|list, optional
+        standard deviation to use, by default std_dev=1.0, can be specified for
+        each dimension by a list (eg. [2.0, 2.0, 1.0] apply twice the smoothing
+        in X and Y direction than in Z)
+    real: bool, optional
+        if False (default) the standard deviation is in voxel unit, else in real
+        units
 
     Returns
-    ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    -------
+    SpatialImage: image and metadata
+
+    Notes
+    -----
+    If 'real' is False and 'std_dev', the same 'std_dev' value is used in all direction
+    regardless of the image voxelsize!
+    Use 'real=True' to adapt to a non-isometric image.
     """
-    _method_img_check(input_image)
-    if std_dev is None:
-        std_dev = 1.0
+
+    _input_img_check(input_image, real)
+    # - Initiate 'param_str_2' for `linearfilter`:
+    if real:
+        params = '-smoothing -real-sigma '
     else:
-        std_dev = abs(float(std_dev))
-    # TODO: make sure that 'libvtexec.API_linearFilter' check the isometry and adjust 'std_dev' accordingly
-    # if not input_image.is_isometric():
-    #     print "Warning: non-isometric image!"
-    #     vxs = input_image.get_voxelsize()
-    #     maxi = max(vxs)
-    #     std_dev_x, std_dev_y, std_dev_z = [vxs_i * std_dev / maxi for vxs_i in
-    #                                        vxs]
-    #     params = '-smoothing -sigma {} {} {}'.format(std_dev_x, std_dev_y,
-    #                                                  std_dev_z)
-    # else:
-    #     params = '-smoothing -sigma %s' % std_dev
-    params = '-smoothing -sigma %s' % std_dev
+        params = '-smoothing -sigma '
+
+    # - Standard deviation value should be a positive float:
+    if isinstance(std_dev, list):
+        try:
+            assert len(std_dev) == input_image.ndim
+        except AssertionError:
+            msg = "When using a list of 'std_dev', it should be of the same lenght than the image dimension!"
+            msg += "\n"
+            msg += "Got {} 'std_dev' values".format(len(std_dev))
+            msg += "for an image of dimension {}.".format(input_image.ndim)
+            raise ValueError(msg)
+        else:
+            params += ' '.join([str(abs(float(s))) for s in std_dev])
+    else:
+        params += str(abs(float(std_dev)))
+
     return linearfilter(input_image, param_str_2=params)
 
 
@@ -176,9 +196,10 @@ def linear_filtering_gradient_modulus(input_image):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
-    _method_img_check(input_image)
+    _input_img_check(input_image)
     params = '-gradient-modulus'
     return linearfilter(input_image, param_str_2=params)
 
@@ -193,9 +214,10 @@ def linear_filtering_gradient(input_image):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
-    _method_img_check(input_image)
+    _input_img_check(input_image)
     params = '-gradient'
     return linearfilter(input_image, param_str_2=params)
 
@@ -210,9 +232,10 @@ def linear_filtering_hessian(input_image):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
-    _method_img_check(input_image)
+    _input_img_check(input_image)
     params = '-hessian'
     return linearfilter(input_image, param_str_2=params)
 
@@ -227,14 +250,15 @@ def linear_filtering_laplacian(input_image):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
-    _method_img_check(input_image)
+    _input_img_check(input_image)
     params = '-laplacian'
     return linearfilter(input_image, param_str_2=params)
 
 
-def linear_filtering_zero_crossings_hessian(input_image, **kwds):
+def linear_filtering_zero_crossings_hessian(input_image, **kwargs):
     """
     Zero crossings hessian filter.
 
@@ -244,13 +268,14 @@ def linear_filtering_zero_crossings_hessian(input_image, **kwds):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
     params = '-zero-crossings-hessian'
     return linearfilter(input_image, param_str_2=params)
 
 
-def linear_filtering_zero_crossings_laplacian(input_image, **kwds):
+def linear_filtering_zero_crossings_laplacian(input_image, **kwargs):
     """
     Zero crossings laplacian filter.
 
@@ -260,14 +285,15 @@ def linear_filtering_zero_crossings_laplacian(input_image, **kwds):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
-    _method_img_check(input_image)
+    _input_img_check(input_image)
     params = '-zero-crossings-laplacian'
     return linearfilter(input_image, param_str_2=params)
 
 
-def linear_filtering_gradient_hessian(input_image, **kwds):
+def linear_filtering_gradient_hessian(input_image, **kwargs):
     """
     Gradient modulus onto zero-crossings of hessian image.
 
@@ -277,14 +303,15 @@ def linear_filtering_gradient_hessian(input_image, **kwds):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
-    _method_img_check(input_image)
+    _input_img_check(input_image)
     params = '-gradient-hessian'
     return linearfilter(input_image, param_str_2=params)
 
 
-def linear_filtering_gradient_laplacian(input_image, **kwds):
+def linear_filtering_gradient_laplacian(input_image, **kwargs):
     """
     Gradient modulus onto zero-crossings of laplacian image.
 
@@ -294,8 +321,9 @@ def linear_filtering_gradient_laplacian(input_image, **kwds):
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
     """
-    _method_img_check(input_image)
+    _input_img_check(input_image)
     params = '-gradient-laplacian'
     return linearfilter(input_image, param_str_2=params)

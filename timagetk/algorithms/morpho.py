@@ -10,22 +10,29 @@
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
-#--- Aug. 2016
+import warnings
+# --- Aug. 2016
 from ctypes import pointer, c_int, Structure, POINTER
+
 try:
+    from timagetk.util import _input_img_check
+    from timagetk.util import _general_kwargs
+    from timagetk.util import _parallel_kwargs
+    from timagetk.util import _method_check
+    from timagetk.util import clean_warning
     from timagetk.wrapping.clib import libvtexec, libvp, add_doc, return_value
     from timagetk.wrapping.vt_image import vt_image, new_vt_image
     from timagetk.components.spatial_image import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['MORPHO_DEFAULT', 'morpho', 'CELL_FILTER_DEFAULT', 'cell_filter']
 
-MORPHO_DEFAULT = '-dilation'
-CELL_FILTER_DEFAULT = '-dilation'
-# TODO : move and check morpho structures
+# Using '-sphere' is equivalent to '-connectivity 18'
+MORPHO_DEFAULT = '-dilation -sphere -radius 1 -iterations 1'
+CELL_FILTER_DEFAULT = '-dilation -sphere -radius 1 -iterations 1'
 
 
 class _typeMorphoToolsPoint(Structure):
@@ -82,12 +89,16 @@ def structuring_element(radius, iterations, connectivity=26):
     Note: not sure why there is an `iterations` parameter... given to Morpheme functions?
     """
     assert connectivity in [4, 6, 8, 10, 18, 26]
+    print "here"
     _list = pointer(_typeMorphoToolsPoint(0, 0, 0, 0))
+    print "here1"
     user_se = _typeMorphoToolsList(0, _list)
+    print "here2"
     return _typeStructuringElement(iterations, connectivity, user_se, radius)
 
 
-def morpho(image, struct_elt=None, param_str_1=MORPHO_DEFAULT, param_str_2=None, dtype=None):
+def morpho(image, struct_elt=None, param_str_1=MORPHO_DEFAULT, param_str_2=None,
+           dtype=None):
     """
     Mathematical morphology algorithms on grayscale images.
 
@@ -108,19 +119,34 @@ def morpho(image, struct_elt=None, param_str_1=MORPHO_DEFAULT, param_str_2=None,
     ----------
     :return: ``SpatialImage`` instance -- output image and metadata
 
+    Notes
+    -----
+    '-connectivity' parameter override '-sphere' parameter
+
     Example
     -------
     >>> output_image = morpho(input_image)
     """
-    try:
-        assert isinstance(image, SpatialImage)
-    except AssertionError:
-        raise TypeError("Input image must be a SpatialImage")
+    # - Assert 'image' is a SpatialImage instance:
+    _input_img_check(image)
 
     if dtype is None:
         dtype = image.dtype
     if struct_elt is not None:
         struct_elt = pointer(struct_elt)
+    # Core Dumped !
+    # else:
+    #     print "Initializing default structuring element..."
+    #     struct_elt = default_structuring_element()
+
+    # Raise a 'SyntaxWarning' when using both 'sphere' and 'connectivity' params
+    all_params = param_str_1 + param_str_2
+    if all_params.find('sphere') != -1 and all_params.find(
+            'connectivity') != -1:
+        msg = "Function `morpho`, overriding 'sphere' parameter by given 'connectivity'!"
+        warnings.formatwarning = clean_warning
+        warnings.warn(msg, SyntaxWarning)
+
     vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
     rvalue = libvtexec.API_morpho(vt_input.c_ptr, vt_res.c_ptr, struct_elt,
                                   param_str_1, param_str_2)
@@ -129,7 +155,8 @@ def morpho(image, struct_elt=None, param_str_1=MORPHO_DEFAULT, param_str_2=None,
     return out_sp_img
 
 
-def cell_filter(image, struct_elt=None, param_str_1=CELL_FILTER_DEFAULT, param_str_2=None, dtype=None):
+def cell_filter(image, struct_elt=None, param_str_1=CELL_FILTER_DEFAULT,
+                param_str_2=None, dtype=None):
     """
     Mathematical morphology algorithms on segmented images.
 
@@ -154,15 +181,22 @@ def cell_filter(image, struct_elt=None, param_str_1=CELL_FILTER_DEFAULT, param_s
     -------
     >>> output_image = cell_filter(input_image)
     """
-    try:
-        assert isinstance(image, SpatialImage)
-    except AssertionError:
-        raise TypeError("Input image must be a SpatialImage")
+    # - Assert 'image' is a SpatialImage instance:
+    _input_img_check(image)
 
     if dtype is None:
         dtype = image.dtype
     if struct_elt is not None:
         struct_elt = pointer(struct_elt)
+
+    # Raise a 'SyntaxWarning' when using both 'sphere' and 'connectivity' params
+    all_params = param_str_1 + param_str_2
+    if all_params.find('sphere') != -1 and all_params.find(
+            'connectivity') != -1:
+        msg = "Function `morpho`, overriding 'sphere' parameter by given 'connectivity'!\n"
+        warnings.formatwarning = clean_warning
+        warnings.warn(msg, SyntaxWarning)
+
     vt_input, vt_res = vt_image(image), new_vt_image(image, dtype=dtype)
     rvalue = libvp.API_cellfilter(vt_input.c_ptr, vt_res.c_ptr, struct_elt,
                                   param_str_1, param_str_2)

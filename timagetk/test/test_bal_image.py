@@ -7,23 +7,25 @@
 #       File author(s):
 #           Guillaume Baty <guillaume.baty@inria.fr>
 #           Sophie Ribes <sophie.ribes@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 import unittest
 import numpy as np
+
 try:
     from timagetk.components import SpatialImage, imread
     from timagetk.util import data_path
     from timagetk.wrapping.bal_image import BalImage, spatial_image_to_bal_image
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 image = imread(data_path('filtering_src.inr'))
 
-class TestBalImage(unittest.TestCase):
 
+class TestBalImage(unittest.TestCase):
 
     def check_image(self, sp_image_ref, bal_image):
         """
@@ -37,7 +39,6 @@ class TestBalImage(unittest.TestCase):
         np.testing.assert_almost_equal(ix, nx, decimal=6)
         np.testing.assert_almost_equal(iy, ny, decimal=6)
         np.testing.assert_almost_equal(iz, nz, decimal=6)
-
 
     def test_equality(self):
         shape, dtype = (2, 3, 4), np.uint16
@@ -66,12 +67,10 @@ class TestBalImage(unittest.TestCase):
         assert bal_image_5.to_spatial_image().dtype == np.uint8
         assert bal_ref != bal_image_5
 
-
     def test_build_from_spatial_image(self):
         bal_image = BalImage(image)
         bal_image.c_display()
         self.check_image(image, bal_image)
-
 
     def test_build_from_c_bal_image(self):
         c_bal_image = spatial_image_to_bal_image(image)
@@ -79,10 +78,9 @@ class TestBalImage(unittest.TestCase):
         bal_image.c_display()
         self.check_image(image, bal_image)
 
-
     def test_build_from_empty(self):
         shape = (2, 3, 4)
         bal_image = BalImage(shape=shape)
         bal_image.c_display()
-        ref = SpatialImage(np.zeros((shape),dtype=np.uint8))
+        ref = SpatialImage(np.zeros((shape), dtype=np.uint8))
         self.check_image(ref, bal_image)

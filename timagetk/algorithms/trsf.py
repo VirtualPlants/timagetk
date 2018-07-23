@@ -31,8 +31,8 @@ try:
     from timagetk.wrapping.bal_matrix import allocate_c_bal_matrix
     from timagetk.wrapping.bal_trsf import BalTransformation
     from timagetk.components.spatial_image import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = [
     'INV_TRSF_DEFAULT', 'inv_trsf',
@@ -145,7 +145,7 @@ def apply_trsf(image, trsf=None, template_img=None,
         image = image.to_3D()
 
     if template_img is None:
-        kwds = spatial_image_to_bal_image_fields(image)
+        kwargs = spatial_image_to_bal_image_fields(image)
     else:
         if isinstance(template_img, SpatialImage):
             if template_img.get_dim() == 2:
@@ -175,14 +175,14 @@ def apply_trsf(image, trsf=None, template_img=None,
                 "Input `template_img` must be a SpatialImage or a list instance!")
         val_dim = ' -template-dim {} {} {}'.format(x, y, z)
         param_str_1 += val_dim + val_vox
-        kwds = spatial_image_to_bal_image_fields(template_img)
+        kwargs = spatial_image_to_bal_image_fields(template_img)
 
     if dtype:
-        kwds['np_type'] = dtype
+        kwargs['np_type'] = dtype
 
     c_img_res = BAL_IMAGE()
-    init_c_bal_image(c_img_res, **kwds)
-    allocate_c_bal_image(c_img_res, np.ndarray(kwds['shape'], kwds['np_type']))
+    init_c_bal_image(c_img_res, **kwargs)
+    allocate_c_bal_image(c_img_res, np.ndarray(kwargs['shape'], kwargs['np_type']))
     bal_img_res = BalImage(c_bal_image=c_img_res)
     bal_image = BalImage(spatial_image=image)
     libblockmatching.API_applyTrsf(bal_image.c_ptr, bal_img_res.c_ptr,

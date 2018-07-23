@@ -22,8 +22,8 @@ try:
     from timagetk.wrapping.bal_image import allocate_c_bal_image, spatial_image_to_bal_image_fields
     from timagetk.wrapping.bal_trsf import BalTransformation
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['BLOCKMATCHING_DEFAULT', 'blockmatching']
 BLOCKMATCHING_DEFAULT = '-trsf-type rigid'
@@ -99,13 +99,13 @@ def blockmatching(floating_image, reference_image,
     bal_floating_image = BalImage(floating_image)
     bal_reference_image = BalImage(reference_image)
     # - Get keyword arguments to initialise result image:
-    kwds = spatial_image_to_bal_image_fields(reference_image)
+    kwargs = spatial_image_to_bal_image_fields(reference_image)
     if dtype:
-        kwds['np_type'] = dtype
+        kwargs['np_type'] = dtype
     # - Initialise result image:
     c_img_res = BAL_IMAGE()
-    init_c_bal_image(c_img_res, **kwds)
-    allocate_c_bal_image(c_img_res, np.ndarray(kwds['shape'], kwds['np_type']))
+    init_c_bal_image(c_img_res, **kwargs)
+    allocate_c_bal_image(c_img_res, np.ndarray(kwargs['shape'], kwargs['np_type']))
     img_res = BalImage(c_bal_image=c_img_res)
 
     # --- old API FRED, see plugins

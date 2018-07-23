@@ -21,8 +21,8 @@ try:
     from timagetk.wrapping.type_conversion import vt_type_to_c_type
     from timagetk.wrapping.vtImage import _VT_IMAGE, MY_CPU
     from timagetk.wrapping.vt_typedefs import vt_4vsize, vt_fpt, vt_ipt
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['vt_image', 'new_vt_image', 'VT_Image']
 

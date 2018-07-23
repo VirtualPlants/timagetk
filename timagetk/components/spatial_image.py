@@ -6,6 +6,8 @@
 #       File author(s):
 #           Sophie Ribes <sophie.ribes@inria.fr>
 #           Jerome Chopard <jerome.chopard@inria.fr>
+#           Gregoire Malandain <gregoire.malandain@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
 # -----------------------------------------------------------------------------
@@ -76,25 +78,6 @@ def tuple_to_list(input_tuple):
         return output_list
     else:
         return []
-
-def dimensionality_test(dim, list2test):
-    """ Quick testing of dimensionality with print in case of error."""
-    d = len(list2test)
-    try:
-        assert d == dim
-    except:
-        raise ValueError("Provided values dimensionality ({}) is not of the same than the array ({})!".format(d, dim))
-
-def tuple_array_to_list(val):
-    """ Returns a list if a tuple or array is provided, else raise Error message."""
-    if isinstance(val, np.ndarray):
-        val = val.tolist()
-    elif isinstance(val, tuple):
-        val = list(val)
-    if not isinstance(val, list):
-        raise TypeError("Accepted type are tuple, list and np.array!")
-    else:
-        return val
 
 
 def dimensionality_test(dim, list2test):
@@ -232,7 +215,8 @@ class SpatialImage(np.ndarray):
 0
         Returns
         -------
-        :return: ``SpatialImage`` instance -- image and metadata
+        SpatialImage
+         transformed image with its metadata
 
         Notes
         -----
@@ -913,9 +897,18 @@ class SpatialImage(np.ndarray):
             self.origin = tmp_dict['origin']
             self.voxelsize = around_list(tmp_dict['voxelsize'])
             self.extent = around_list(tmp_dict['extent'])
-            self.min = tmp_dict['min']
-            self.max = tmp_dict['max']
-            self.mean = tmp_dict['mean']
+            try:
+                self.min = tmp_dict['min']
+            except KeyError:
+                self.min = self.get_min()
+            try:
+                self.max = tmp_dict['max']
+            except KeyError:
+                self.max = self.get_max()
+            try:
+                self.mean = tmp_dict['mean']
+            except KeyError:
+                self.mean = self.get_mean()
 
     def set_origin(self, img_origin):
         """
@@ -1217,13 +1210,14 @@ class SpatialImage(np.ndarray):
 
         arr = self.get_array()
         if arr.dtype == "uint16" or arr.dtype == "int16":
-            factor = 2**(16 - 8) - 1
+            factor = 2 ** (16 - 8) - 1
         elif arr.dtype == "uint32" or arr.dtype == "int32":
-            factor = 2**(32 - 8) - 1
+            factor = 2 ** (32 - 8) - 1
         elif arr.dtype == "uint64" or arr.dtype == "int64":
-            factor = 2**(64 - 8) - 1
+            factor = 2 ** (64 - 8) - 1
         else:
-            raise NotImplementedError('Could not find implementation to do just that!')
+            raise NotImplementedError(
+                'Could not find implementation to do just that!')
 
         arr = np.divide(arr, factor).astype(DICT_TYPES[dtype])
         return SpatialImage(arr, voxelsize=vxs, origin=ori, metadata_dict=md)

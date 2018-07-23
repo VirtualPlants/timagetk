@@ -17,8 +17,8 @@ try:
     from timagetk.wrapping.clib import add_doc, return_value, libvtexec
     from timagetk.wrapping.vt_image import vt_image, new_vt_image
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['CONNEXE_DEFAULT', 'connexe']
 CONNEXE_DEFAULT = '-low-threshold 1 -high-threshold 3 -labels -connectivity 26'  # --- of course, stupid !

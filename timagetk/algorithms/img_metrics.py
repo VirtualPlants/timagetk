@@ -14,8 +14,8 @@ from math import log10
 np_square, np_array, np_reshape, np_sum = np.square, np.array, np.reshape, np.sum
 try:
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['mean_squared_error','psnr']
 

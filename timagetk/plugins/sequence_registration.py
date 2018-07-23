@@ -8,6 +8,7 @@
 #           Guillaume Baty <guillaume.baty@inria.fr>
 #           Sophie Ribes <sophie.ribes@inria.fr>
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
 # ------------------------------------------------------------------------------
@@ -17,51 +18,51 @@ This module contains a generic implementation of several sequence registration a
 """
 
 try:
+    from timagetk.util import _method_check
     from timagetk.algorithms import blockmatching
     from timagetk.algorithms import compose_trsf, apply_trsf
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['sequence_registration']
 
 POSS_METHODS = ['sequence_rigid_registration', 'sequence_affine_registration',
                 'sequence_deformable_registration']
-DEFAULT_METHOD = POSS_METHODS[0]
+DEFAULT_METHOD = 0  # index of the default method in POSS_METHODS
 
 
-def sequence_registration(list_images, method=None, **kwds):
+def sequence_registration(list_images, method=None, **kwargs):
     """
-    Sequence registration plugin. Available methods are :
-
-    * sequence_rigid_registration
-    * sequence_affine_registration
-    * sequence_deformable_registration
+    Sequence registration plugin
+    Available methods are:
+      * sequence_rigid_registration
+      * sequence_affine_registration
+      * sequence_deformable_registration
 
     Parameters
     ----------
-    :param list list_images: list of *SpatialImage*
-
-    :param str method: used method (example: 'sequence_registration_rigid')
+    input_image : SpatialImage
+         input image to transform
+    method: str, optional
+        used method, by default 'sequence_registration_rigid'
 
     Returns
-    ----------
-    :return: list_compo_trsf -- list of *BalTransformation* transformation
-
-    :return: list_res_img -- list of *SpatialImage*
+    -------
+    list_compo_trsf : list(BalTransformation)
+        list of BalTransformation, ie. transformation matrix or vectorfields
+    list_res_img : list(SpatialImage)
+        list of sequentially registered SpatialImage
 
     Example
-    ----------
+    -------
     >>> from timagetk.util import data_path
     >>> from timagetk.components import imread
     >>> from timagetk.plugins import sequence_registration
     >>> times = [0, 1, 2]
-    >>> list_images = [imread(data_path('time_' + str(time) + '.inr'))
-                        for time in times]
-    >>> list_compo_trsf, list_res_img = sequence_registration(list_images,
-                                                              method='sequence_rigid_registration')
-    >>> list_compo_trsf, list_res_img = sequence_registration(list_images,
-                                                              method='sequence_affine_registration')
+    >>> list_images = [imread(data_path('time_' + str(time) + '.inr')) for time in times]
+    >>> list_compo_trsf, list_res_img = sequence_registration(list_images, method='sequence_rigid_registration')
+    >>> list_compo_trsf, list_res_img = sequence_registration(list_images, method='sequence_affine_registration')
     """
     # - Check list_images type:
     try:
@@ -84,17 +85,11 @@ def sequence_registration(list_images, method=None, **kwds):
         raise ValueError(
             "Parameter 'list_images' should have a minimum length of 3!")
 
-    if method is None:
-        method = DEFAULT_METHOD
-    try:
-        assert method in POSS_METHODS
-    except AssertionError:
-        raise NotImplementedError(
-            "Unknown method '{}', available methods are: {}".format(method,
-                                                                    POSS_METHODS))
+    # - Set method if None and check it is a valid method:
+    method = _method_check(method, POSS_METHODS, DEFAULT_METHOD)
 
     try:
-        assert kwds.get('try_plugin', False)
+        assert kwargs.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         if method == 'sequence_rigid_registration':
@@ -114,10 +109,9 @@ def sequence_registration(list_images, method=None, **kwds):
         func = plugin_function('openalea.image', method)
         if func is not None:
             print "WARNING: using 'plugin' functionality from 'openalea.core'!"
-            return func(list_images, **kwds)
+            return func(list_images, **kwargs)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
-
 
 
 def sequence_registration_rigid(list_images):
@@ -154,7 +148,8 @@ def sequence_registration_rigid(list_images):
     list_compo_trsf, list_res_img = [], []
     for ind, trsf in enumerate(pairwise_trsf):
         if ind < len(pairwise_trsf) - 1:
-            print "Composition of rigid transformations to get trsf_{}/{}".format(ind, n_imgs-1)
+            print "Composition of rigid transformations to get trsf_{}/{}".format(
+                ind, n_imgs - 1)
             # matrix multiplication
             comp_trsf = compose_trsf(pairwise_trsf[ind:],
                                      template_img=list_images[-1])
@@ -165,7 +160,9 @@ def sequence_registration_rigid(list_images):
         print "Done.\n"
     # --- displacements compensation (whole sequence)
     for ind, trsf in enumerate(list_compo_trsf):
-        print "Applying t{}/{} composed transformation to t{}...".format(ind, n_imgs, ind)
+        print "Applying t{}/{} composed transformation to t{}...".format(ind,
+                                                                         n_imgs,
+                                                                         ind)
         tmp_img = apply_trsf(list_images[ind], trsf,
                              template_img=list_images[-1])
         list_res_img.append(tmp_img)
@@ -222,7 +219,8 @@ def sequence_registration_affine(list_images):
     list_compo_trsf, list_res_img = [], []
     for ind, trsf in enumerate(pairwise_trsf):
         if ind < len(pairwise_trsf) - 1:
-            print "Composition of affine transformations to get trsf_{}/{}".format(ind, n_imgs-1)
+            print "Composition of affine transformations to get trsf_{}/{}".format(
+                ind, n_imgs - 1)
             # matrix multiplication
             tmp_trsf = compose_trsf(pairwise_trsf[ind:],
                                     template_img=list_images[-1])
@@ -234,7 +232,9 @@ def sequence_registration_affine(list_images):
             list_compo_trsf.append(pairwise_trsf[-1])
     # --- displacements compensation (whole sequence)
     for ind, trsf in enumerate(list_compo_trsf):
-        print "Applying t{}/{} composed transformation to t{}...".format(ind, n_imgs, ind)
+        print "Applying t{}/{} composed transformation to t{}...".format(ind,
+                                                                         n_imgs,
+                                                                         ind)
         tmp_img = apply_trsf(list_images[ind], trsf,
                              template_img=list_images[-1])
         list_res_img.append(tmp_img)
@@ -281,7 +281,8 @@ def sequence_registration_deformable(list_images):
                                         param_str_2='-trsf-type vectorfield')
         print "Done.\n"
         print "Composition of rigid and deformable registrations..."
-        res_trsf = compose_trsf([trsf_rig, trsf_vf], template_img=list_images[-1])
+        res_trsf = compose_trsf([trsf_rig, trsf_vf],
+                                template_img=list_images[-1])
         pairwise_trsf.append(res_trsf)
         trsf_rig.free()
         print "Done.\n"
@@ -290,7 +291,8 @@ def sequence_registration_deformable(list_images):
     list_compo_trsf, list_res_img = [], []
     for ind, trsf in enumerate(pairwise_trsf):
         if ind < len(pairwise_trsf) - 1:
-            print "Composition of deformable transformations to get trsf_{}/{}".format(ind, n_imgs-1)
+            print "Composition of deformable transformations to get trsf_{}/{}".format(
+                ind, n_imgs - 1)
             # matrix multiplication
             tmp_trsf = compose_trsf(pairwise_trsf[ind:],
                                     template_img=list_images[-1])
@@ -302,7 +304,9 @@ def sequence_registration_deformable(list_images):
 
     # - Apply list of transformation to list of images, except 't_ref' (whole sequence registration on last time-point)
     for ind, trsf in enumerate(list_compo_trsf):
-        print "Applying t{}/{} composed transformation to t{}...".format(ind, n_imgs, ind)
+        print "Applying t{}/{} composed transformation to t{}...".format(ind,
+                                                                         n_imgs,
+                                                                         ind)
         tmp_img = apply_trsf(list_images[ind], trsf,
                              template_img=list_images[-1])
         list_res_img.append(tmp_img)

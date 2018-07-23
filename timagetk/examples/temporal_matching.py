@@ -7,8 +7,8 @@ try:
     from timagetk.plugins import labels_post_processing
     from timagetk.algorithms import GeometricalFeatures
     from timagetk.algorithms import TemporalMatching
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 try:
     import cPickle as pickle
 except:

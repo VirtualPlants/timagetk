@@ -18,8 +18,8 @@ try:
     from timagetk.algorithms import GeometricalFeatures
     from timagetk.algorithms.sets_metrics import sets_metrics
     from timagetk.algorithms.compute_res_sets import compute_res_sets
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 __all__ = ['TemporalMatching']
 av_number = 2
 

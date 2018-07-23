@@ -17,8 +17,8 @@ try:
     from timagetk.wrapping.clib import libblockmatching, c_stdout
     from timagetk.wrapping.bal_common import bal_mystr_c_ptr, bal_mystr_c_struct
     from timagetk.wrapping.balMatrix import BAL_MATRIX
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['bal_matrix_c_ptr',
            'bal_matrix_c_struct',
@@ -91,32 +91,32 @@ def np_array_to_bal_matrix_fields(np_array):
 
     Example
     -------
-    kwds = np_array_to_bal_matrix_fields(np_array)
+    kwargs = np_array_to_bal_matrix_fields(np_array)
     """
     l, c = np_array.shape
     kwargs = dict(c=c, l=l)
     return kwargs
 
 
-def init_c_bal_matrix(c_bal_matrix, **kwds):
+def init_c_bal_matrix(c_bal_matrix, **kwargs):
     """
     Initialization of a c_bal_matrix.
 
     Parameters
     ----------
     c_bal_matrix : c_bal_matrix
-    kwds: type dict
+    kwargs: type dict
         - l: number of lines
         - c: number of columns
 
     Example
     -------
-    init_c_bal_matrix(c_bal_matrix, kwds)
+    init_c_bal_matrix(c_bal_matrix, kwargs)
     """
-    c_bal_matrix.l, c_bal_matrix.c = kwds.get('l'), kwds.get('c')
+    c_bal_matrix.l, c_bal_matrix.c = kwargs.get('l'), kwargs.get('c')
 
 
-def allocate_c_bal_matrix(c_bal_matrix, np_array, **kwds):
+def allocate_c_bal_matrix(c_bal_matrix, np_array, **kwargs):
     """
     Memory allocation of a c_bal_matrix.
 
@@ -139,16 +139,16 @@ def allocate_c_bal_matrix(c_bal_matrix, np_array, **kwds):
             c_bal_matrix.m[j + i * c] = np_array[i, j]
 
 
-def new_c_bal_matrix(**kwds):
+def new_c_bal_matrix(**kwargs):
     """
-    Create an instance of BAL_MATRIX and fill it with kwds.
+    Create an instance of BAL_MATRIX and fill it with kwargs.
     """
     c_bal_matrix = BAL_MATRIX()
-    init_c_bal_matrix(c_bal_matrix, **kwds)
+    init_c_bal_matrix(c_bal_matrix, **kwargs)
     return c_bal_matrix
 
 
-def bal_matrix_to_np_array(c_or_bal_matrix, **kwds):
+def bal_matrix_to_np_array(c_or_bal_matrix, **kwargs):
     """
     From BAL_MATRIX to numpy array.
 
@@ -167,18 +167,18 @@ def bal_matrix_to_np_array(c_or_bal_matrix, **kwds):
     return np_array
 
 
-def np_array_to_bal_matrix(np_array, **kwds):
+def np_array_to_bal_matrix(np_array, **kwargs):
     """
     From numpy array to c_bal_matrix
 
     """
-    np_array_kwds = np_array_to_bal_matrix_fields(np_array)
+    np_array_kwargs = np_array_to_bal_matrix_fields(np_array)
 
-    _kwds = {}
-    _kwds.update(kwds)
-    _kwds.update(np_array_kwds)
+    _kwargs = {}
+    _kwargs.update(kwargs)
+    _kwargs.update(np_array_kwargs)
 
-    c_bal_matrix = new_c_bal_matrix(**_kwds)
+    c_bal_matrix = new_c_bal_matrix(**_kwargs)
     allocate_c_bal_matrix(c_bal_matrix, np_array)
 
     return c_bal_matrix
@@ -186,16 +186,16 @@ def np_array_to_bal_matrix(np_array, **kwds):
 
 class BalMatrix(object):
 
-    def __init__(self, np_array=None, c_bal_matrix=None, **kwds):
+    def __init__(self, np_array=None, c_bal_matrix=None, **kwargs):
 
         if np_array is not None:
             self._np_array = np_array
-            self._c_bal_matrix = np_array_to_bal_matrix(self._np_array, **kwds)
+            self._c_bal_matrix = np_array_to_bal_matrix(self._np_array, **kwargs)
         elif c_bal_matrix is not None:
             self._c_bal_matrix = c_bal_matrix
             self._np_array = self.to_np_array()
         else:
-            self._c_bal_matrix = new_c_bal_matrix(**kwds)
+            self._c_bal_matrix = new_c_bal_matrix(**kwargs)
             self._np_array = self.to_np_array()
 
     @property
@@ -206,8 +206,8 @@ class BalMatrix(object):
     def c_struct(self):
         return self._c_bal_matrix
 
-    def to_np_array(self, **kwds):
-        return bal_matrix_to_np_array(self._c_bal_matrix, **kwds)
+    def to_np_array(self, **kwargs):
+        return bal_matrix_to_np_array(self._c_bal_matrix, **kwargs)
 
     def free(self):
         if self._c_bal_matrix:

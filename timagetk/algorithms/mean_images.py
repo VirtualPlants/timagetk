@@ -20,8 +20,8 @@ try:
     from timagetk.wrapping.vtImage import _VT_IMAGE
     from timagetk.wrapping.vt_image import vt_image, new_vt_image
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['MEANIMAGES_DEFAULT', 'mean_images']
 MEANIMAGES_DEFAULT = '-mean'

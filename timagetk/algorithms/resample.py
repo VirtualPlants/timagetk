@@ -18,8 +18,8 @@ import numpy as np
 try:
     from timagetk.components import SpatialImage
     from timagetk.algorithms import apply_trsf
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['resample_isotropic', 'subsample']
 

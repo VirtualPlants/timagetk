@@ -17,8 +17,8 @@ try:
     from timagetk.wrapping.clib import libvtexec, add_doc, return_value
     from timagetk.wrapping.vt_image import vt_image, new_vt_image
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['REGIONALEXT_DEFAULT', 'regionalext']
 REGIONALEXT_DEFAULT = '-minima -connectivity 26 -h 3' #--- of course, stupid !

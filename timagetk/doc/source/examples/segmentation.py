@@ -6,8 +6,8 @@ try:
     from timagetk.plugins import h_transform
     from timagetk.plugins import region_labeling, segmentation
     from timagetk.plugins import labels_post_processing
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 out_path = './results/' # to save results
 # we consider an input image

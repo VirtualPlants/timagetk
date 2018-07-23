@@ -4,8 +4,8 @@ try:
     from timagetk.components import SpatialImage
     from timagetk.components import imread, imsave
     from timagetk.util import data_path
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 out_path = './results/' # to save results
 if not os.path.isdir(out_path):

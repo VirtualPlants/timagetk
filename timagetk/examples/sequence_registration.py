@@ -4,8 +4,8 @@ try:
     from timagetk.util import data_path
     from timagetk.components import imread, imsave
     from timagetk.plugins import sequence_registration
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 out_path = './results/' # to save results
 if not os.path.isdir(out_path):

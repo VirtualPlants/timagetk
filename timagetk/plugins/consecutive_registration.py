@@ -8,6 +8,7 @@
 #           Guillaume Baty <guillaume.baty@inria.fr>
 #           Sophie Ribes <sophie.ribes@inria.fr>
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
 # ------------------------------------------------------------------------------
@@ -17,27 +18,29 @@ This module contains a generic implementation of several consecutive registratio
 """
 
 try:
+    from timagetk.util import _method_check
     from timagetk.algorithms import blockmatching
     from timagetk.algorithms import compose_trsf, apply_trsf
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['consecutive_registration']
 
 POSS_METHODS = ['consecutive_rigid_registration',
                 'consecutive_affine_registration',
                 'consecutive_deformable_registration']
-DEFAULT_METHOD = POSS_METHODS[0]
+DEFAULT_METHOD = 0  # index of the default method in POSS_METHODS
 
 
-def consecutive_registration(list_images, method=None, **kwds):
+def consecutive_registration(list_images, method=None, **kwargs):
     """
-    Consecutive registration plugin. Available methods are :
+    Consecutive registration plugin
+    Available methods are:
 
-    * consecutive_rigid_registration
-    * consecutive_affine_registration
-    * consecutive_deformable_registration
+      * consecutive_rigid_registration
+      * consecutive_affine_registration
+      * consecutive_deformable_registration
 
     Parameters
     ----------
@@ -59,10 +62,8 @@ def consecutive_registration(list_images, method=None, **kwds):
     >>> times = [0, 1, 2]
     >>> list_images = [imread(data_path('time_' + str(time) + '.inr'))
                         for time in times]
-    >>> list_compo_trsf, list_res_img = consecutive_registration(list_images,
-                                                              method='consecutive_rigid_registration')
-    >>> list_compo_trsf, list_res_img = consecutive_registration(list_images,
-                                                              method='consecutive_affine_registration')
+    >>> list_compo_trsf, list_res_img = consecutive_registration(list_images, method='consecutive_rigid_registration')
+    >>> list_compo_trsf, list_res_img = consecutive_registration(list_images, method='consecutive_affine_registration')
     """
     # - Check list_images type:
     try:
@@ -85,17 +86,11 @@ def consecutive_registration(list_images, method=None, **kwds):
         raise ValueError(
             "Parameter 'list_images' should have a minimum length of 3!")
 
-    if method is None:
-        method = DEFAULT_METHOD
-    try:
-        assert method in POSS_METHODS
-    except AssertionError:
-        raise NotImplementedError(
-            "Unknown method '{}', available methods are: {}".format(method,
-                                                                    POSS_METHODS))
+    # - Set method if None and check it is a valid method:
+    method = _method_check(method, POSS_METHODS, DEFAULT_METHOD)
 
     try:
-        assert kwds.get('try_plugin', False)
+        assert kwargs.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         if method == 'consecutive_rigid_registration':
@@ -115,7 +110,7 @@ def consecutive_registration(list_images, method=None, **kwds):
         func = plugin_function('openalea.image', method)
         if func:
             print "WARNING: using 'plugin' functionality from 'openalea.core'!"
-            return func(list_images, **kwds)
+            return func(list_images, **kwargs)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
 

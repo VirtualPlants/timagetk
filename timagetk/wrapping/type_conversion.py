@@ -15,8 +15,8 @@ import numpy as np
 from ctypes import c_ubyte, c_byte, c_short, c_ushort, c_uint, c_int, c_ulong, c_long, c_float, c_double
 try:
     from timagetk.wrapping.vt_typedefs import ImageType
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['np_type_to_vt_type',
            'vt_type_to_np_type',

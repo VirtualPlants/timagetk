@@ -8,6 +8,7 @@
 #           Guillaume Baty <guillaume.baty@inria.fr>
 #           Sophie Ribes <sophie.ribes@inria.fr>
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
 # ------------------------------------------------------------------------------
@@ -17,26 +18,52 @@ This module contains a generic implementation of several registration algorithms
 """
 
 try:
+    from timagetk.util import _input_img_check
+    from timagetk.util import _method_check
+    from timagetk.util import _general_kwargs
+    from timagetk.util import _parallel_kwargs
     from timagetk.algorithms import blockmatching
     from timagetk.components import SpatialImage
     from timagetk.algorithms.blockmatching import BLOCKMATCHING_DEFAULT
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['registration']
 
 POSS_METHODS = ['rigid_registration', 'affine_registration',
                 'deformable_registration']
-DEFAULT_METHOD = POSS_METHODS[0]
+DEFAULT_METHOD = 0  # index of the default method in POSS_METHODS
 
 
-def registration(floating_img, reference_img, method=None, **kwds):
+def _registration_kwargs(**kwargs):
     """
-    Registration plugin. Available methods are :
+    Set parameters default values and make sure they are of the right type.
+    """
+    str_param = ""
+    # - By default 'pyramid_lowest_level' is equal to 1:
+    py_ll = kwargs.get('pyramid_lowest_level', 1)
+    str_param += ' -pyramid-lowest-level %d' % (py_ll)
+    # - By default 'pyramid_highest_level' is equal to 3:
+    py_hl = kwargs.get('pyramid_highest_level', 3)
+    str_param += ' -pyramid-highest-level %d' % (py_hl)
+    # TODO: make shorter version of param names available ? ie. py_ll & py_hl ?
 
-    * rigid_registration
-    * affine_registration
-    * deformable_registration
+    # - Parse general kwargs:
+    str_param += _general_kwargs(**kwargs)
+    # - Parse parallelism kwargs:
+    str_param += _parallel_kwargs(**kwargs)
+
+    return str_param
+
+
+def registration(floating_img, reference_img, method=None, **kwargs):
+    """
+    Registration plugin
+    Available methods are:
+
+      * rigid_registration
+      * affine_registration
+      * deformable_registration
 
     Parameters
     ----------
@@ -47,142 +74,89 @@ def registration(floating_img, reference_img, method=None, **kwds):
     method : str, optional
         used method, eg. 'rigid_registration' (default)
 
-    **kwds
+    **kwargs
     ------
     pyramid_lowest_level : int, optional
         lowest level at which to compute deformation, default is 1 (min is 0)
     pyramid_highest_level : int, optional
         highest level at which to compute deformation, default is 3 (max is 3)
-    param : bool, optional
-        print parameters, default is False
-    parallel : bool, optional
-        set usage of parallel mode, default is True
-    parallel-type : str, in ['none'|'openmp'|'omp'|'pthread'|'thread']
-        type of parrallelism to use, default is thread
-    time : bool, optional
-        print elapsed time, default is True
     try_plugin : bool, optional
-        manually control the use of openalea 'plugin' functionality, use
-        it by default (True)
-
+        manually control the use of openalea.core 'plugin' functionality, avoid
+        it by default (ie. try_plugin=False)
 
     Returns
     ----------
-    :return: ``BalTransformation`` instance -- trsf_out, *BalTransformation* transformation
-
-    :return: ``SpatialImage`` instance -- res_image, *SpatialImage* image and metadata
+    trsf_out : BalTransformation
+        computed transformation
+    res_image : SpatialImage
+        deformed image and metadata
 
     Example
     ----------
-    >>> from timagetk.util import data, data_path
+    >>> from timagetk.util import data_path
+    >>> from timagetk.components import imread
     >>> from timagetk.plugins import registration
     >>> image_path = data_path('time_0_cut.inr')
-    >>> floating_image = data(image_path)
+    >>> floating_image = imread(image_path)
     >>> image_path = data_path('time_1_cut.inr')
-    >>> reference_image = data(image_path)
+    >>> reference_image = imread(image_path)
     >>> trsf_rig, res_rig = registration(floating_image, reference_image, method='rigid_registration')
     >>> trsf_aff, res_aff = registration(floating_image, reference_image, method='affine_registration')
     >>> trsf_def, res_def = registration(floating_image, reference_image, method='deformable_registration')
     """
     # - Assert we have two SpatialImage:
-    try:
-        assert isinstance(floating_img, SpatialImage)
-    except:
-        raise TypeError('Floating image must be a SpatialImage instance.')
-    try:
-        assert isinstance(reference_img, SpatialImage)
-    except:
-        raise TypeError('Reference image must be a SpatialImage instance.')
+    _input_img_check(floating_img)
+    _input_img_check(reference_img)
+    # - Set method if None and check it is a valid method:
+    method = _method_check(method, POSS_METHODS, DEFAULT_METHOD)
 
-    if method is None:
-        method = DEFAULT_METHOD
-    try:
-        assert method in POSS_METHODS
-    except AssertionError:
-        raise NotImplementedError(
-            "Unknown method '{}', available methods are: {}".format(method,
-                                                                    POSS_METHODS))
     # - If provided 'init_trsf' will be used to initialize blockmatching
     # registration and the returned trsf will contain this trsf
-    init_trsf = kwds.pop('init_trsf', None)
+    init_trsf = kwargs.pop('init_trsf', None)
     # - If provided 'left_trsf' will be used to initialize blockmatching
     # registration but returned trsf will NOT contain this trsf
-    left_trsf = kwds.pop('left_trsf', None)
+    left_trsf = kwargs.pop('left_trsf', None)
 
     if init_trsf:
         try:
             assert left_trsf is None
         except:
-            raise ValueError(
-                "You cannot define both 'init_trsf' and 'left_trsf', please choose!")
+            msg = "You cannot define both 'init_trsf' and 'left_trsf'!"
+            raise ValueError(msg)
 
     # - Try to use the `plugin_function` or use the defined API:
     try:
-        assert kwds.get('try_plugin', False)
+        assert kwargs.get('try_plugin', False)
         from openalea.core.service.plugin import plugin_function
     except AssertionError or ImportError:
         if method == 'rigid_registration':
             trsf_out, res_image = rigid_registration(floating_img,
                                                      reference_img, init_trsf,
-                                                     left_trsf, **kwds)
+                                                     left_trsf, **kwargs)
             return trsf_out, res_image
         if method == 'affine_registration':
             trsf_out, res_image = affine_registration(floating_img,
                                                       reference_img, init_trsf,
-                                                      left_trsf, **kwds)
+                                                      left_trsf, **kwargs)
             return trsf_out, res_image
         if method == 'deformable_registration':
             trsf_out, res_image = deformable_registration(floating_img,
                                                           reference_img,
                                                           init_trsf, left_trsf,
-                                                          **kwds)
+                                                          **kwargs)
             return trsf_out, res_image
     else:
         func = plugin_function('openalea.image', method)
         if func is not None:
             print "WARNING: using 'plugin' functionality from 'openalea.core'!"
             return func(floating_img, reference_img, init_trsf, left_trsf,
-                        **kwds)
+                        **kwargs)
         else:
             raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
-def get_param_str_2(**kwds):
-    """
-    Set parameters default values and make sure they are of the right type.
-    """
-    str_param = ""
-    # - By default 'pyramid_lowest_level' is equal to 1:
-    str_param += ' -pyramid-lowest-level %d' % (
-        kwds.get('pyramid_lowest_level', 1))
-    # - By default 'pyramid_highest_level' is equal to 3:
-    str_param += ' -pyramid-highest-level %d' % (
-        kwds.get('pyramid_highest_level', 3))
-    # TODO: make shorter version of param names available ? ie. py_ll & py_hl ?
-
-    # - Providing 'param' will result in printing blockmatching parameters
-    if kwds.get('param', False):
-        str_param += ' -param'
-    # - Providing 'command_line' will result in
-    if kwds.get('command_line', False):
-        str_param += ' -command-line'
-    # - Providing 'verbose' will result in increased verbosity of the blockmatching code
-    if kwds.get('verbose', False):
-        str_param += ' -verbose'
-    # - Providing 'parallel' will result in using parallelization capabilities
-    if kwds.get('parallel', True):
-        str_param += ' -parallel'
-        str_param += ' -parallel-type ' + \
-                     kwds.get('parallel_type', 'thread')
-    # - Providing 'time' will result in printing CPU & User elapsed time
-    if kwds.get('time', True):
-        str_param += ' -time'
-
-    return str_param
-
-
 def rigid_registration(floating_img, reference_img, init_trsf=None,
-                       left_trsf=None, **kwds):
+                       left_trsf=None, **kwargs):
     """
     Performs RIGID registration of `floating_img` on `reference_img` by calling
     `blockmatching` with adequate parameters.
@@ -200,20 +174,12 @@ def rigid_registration(floating_img, reference_img, init_trsf=None,
         if provided (default None) the trsf will be used to initialize
         blockmatching registration but returned trsf will NOT contain this trsf
 
-    **kwds
+    **kwargs
     ------
     pyramid_lowest_level : int, optional
         lowest level at which to compute deformation, default is 1 (min is 0)
     pyramid_highest_level : int, optional
         highest level at which to compute deformation, default is 3 (max is 3)
-    param : bool, optional
-        print parameters, default is False
-    parallel : bool, optional
-        set usage of parallel mode, default is True
-    parallel-type : str, in ['none'|'openmp'|'omp'|'pthread'|'thread']
-        type of parrallelism to use, default is thread
-    time : bool, optional
-        print elapsed time, default is True
     try_plugin : bool, optional
         manually control the use of openalea 'plugin' functionality, use
         it by default (True)
@@ -225,7 +191,7 @@ def rigid_registration(floating_img, reference_img, init_trsf=None,
     res_rig : SpatialImage
         interpolated *SpatialImage* after registration
     """
-    param_str_2 = get_param_str_2(**kwds)
+    param_str_2 = _registration_kwargs(**kwargs)
 
     # - Make sure the provided initialisation trsf matrix is linear:
     if init_trsf:
@@ -247,7 +213,7 @@ def rigid_registration(floating_img, reference_img, init_trsf=None,
 
 
 def affine_registration(floating_img, reference_img, init_trsf=None,
-                        left_trsf=None, **kwds):
+                        left_trsf=None, **kwargs):
     """
     Performs AFFINE registration of `floating_img` on `reference_img` by calling
     `blockmatching` with adequate parameters.
@@ -273,20 +239,12 @@ def affine_registration(floating_img, reference_img, init_trsf=None,
         if provided (default None) the trsf matrix will be used to initialize
         blockmatching registration but returned trsf will NOT contain this trsf
 
-    **kwds
+    **kwargs
     ------
     pyramid_lowest_level : int, optional
         lowest level at which to compute deformation, default is 1 (min is 0)
     pyramid_highest_level : int, optional
         highest level at which to compute deformation, default is 3 (max is 3)
-    param : bool, optional
-        print parameters, default is False
-    parallel : bool, optional
-        set usage of parallel mode, default is True
-    parallel-type : str, optional in ['none'|'openmp'|'omp'|'pthread'|'thread']
-        type of parrallelism to use, default is thread
-    time : bool, optional
-        print elapsed time, default is True
     try_plugin : bool, optional
         manually control the use of openalea 'plugin' functionality, use
         it by default (True)
@@ -298,7 +256,7 @@ def affine_registration(floating_img, reference_img, init_trsf=None,
     res_aff : SpatialImage
         interpolated *SpatialImage* after registration
     """
-    param_str_2 = get_param_str_2(**kwds)
+    param_str_2 = _registration_kwargs(**kwargs)
 
     # - If no initialisation trsf-matrix were provided, initialise affine deformation estimation with rigid trsf:
     if not init_trsf or not left_trsf:
@@ -332,7 +290,7 @@ def affine_registration(floating_img, reference_img, init_trsf=None,
 
 
 def deformable_registration(floating_img, reference_img, init_trsf=None,
-                            left_trsf=None, **kwds):
+                            left_trsf=None, **kwargs):
     """
     Performs NON-LINEAR registration of `floating_img` on `reference_img` by calling
     `blockmatching` with adequate parameters.
@@ -358,20 +316,12 @@ def deformable_registration(floating_img, reference_img, init_trsf=None,
         if provided (default None) the trsf matrix will be used to initialize
         blockmatching registration but returned trsf will NOT contain this trsf
 
-    **kwds
+    **kwargs
     ------
     pyramid_lowest_level : int, optional
         lowest level at which to compute deformation, default is 1 (min is 0)
     pyramid_highest_level : int, optional
         highest level at which to compute deformation, default is 3 (max is 3)
-    param : bool, optional
-        print parameters, default is False
-    parallel : bool, optional
-        set usage of parallel mode, default is True
-    parallel-type : str, optional in ['none'|'openmp'|'omp'|'pthread'|'thread']
-        type of parrallelism to use, default is thread
-    time : bool, optional
-        print elapsed time, default is True
     try_plugin : bool, optional
         manually control the use of openalea 'plugin' functionality, use
         it by default (True)
@@ -383,7 +333,7 @@ def deformable_registration(floating_img, reference_img, init_trsf=None,
     res_def : SpatialImage
         interpolated *SpatialImage* after registration
     """
-    param_str_2 = get_param_str_2(**kwds)
+    param_str_2 = _registration_kwargs(**kwargs)
 
     # - If no initialisation trsf-matrix were provided, initialise non-linear deformation estimation with rigid trsf:
     if not init_trsf or not left_trsf:
