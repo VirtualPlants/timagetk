@@ -497,9 +497,15 @@ class SpatialImage(np.ndarray):
         """
         return self.extent
 
-    def get_metadata(self):
+    def get_metadata(self, name=None):
         """
         Get ``SpatialImage`` metadata
+
+        Parameters
+        ----------
+        name : None|str|list(str), optional
+            if None (default), we return all metadata, else try to return
+            selected name of list of names
 
         Returns
         ----------
@@ -562,7 +568,12 @@ class SpatialImage(np.ndarray):
                 self.voxelsize, self.extent, self.origin = vox, ext, orig
 
         self.metadata = met_dict
-        return self.metadata
+        if isinstance(name, str):
+            return met_dict[name]
+        elif isinstance(name, list):
+            return {n: met_dict[n] for n in name}
+        else:
+            return self.metadata
 
     def get_min(self):
         """

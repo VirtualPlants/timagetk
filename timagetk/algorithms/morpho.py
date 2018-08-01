@@ -139,10 +139,12 @@ def morpho(image, struct_elt=None, param_str_1=MORPHO_DEFAULT, param_str_2=None,
     #     print "Initializing default structuring element..."
     #     struct_elt = default_structuring_element()
 
+    # TODO: make a function raising this warning and use it when needed ('morpho', 'cell_filter', ...)
     # Raise a 'SyntaxWarning' when using both 'sphere' and 'connectivity' params
     all_params = param_str_1 + param_str_2
-    if all_params.find('sphere') != -1 and all_params.find(
-            'connectivity') != -1:
+    has_sphere = all_params.find('sphere') != -1
+    has_connectivity = all_params.find('connectivity') != -1
+    if has_sphere and has_connectivity:
         msg = "Function `morpho`, overriding 'sphere' parameter by given 'connectivity'!"
         warnings.formatwarning = clean_warning
         warnings.warn(msg, SyntaxWarning)
@@ -191,9 +193,10 @@ def cell_filter(image, struct_elt=None, param_str_1=CELL_FILTER_DEFAULT,
 
     # Raise a 'SyntaxWarning' when using both 'sphere' and 'connectivity' params
     all_params = param_str_1 + param_str_2
-    if all_params.find('sphere') != -1 and all_params.find(
-            'connectivity') != -1:
-        msg = "Function `morpho`, overriding 'sphere' parameter by given 'connectivity'!\n"
+    has_sphere = all_params.find('sphere') != -1
+    has_connectivity = all_params.find('connectivity') != -1
+    if has_sphere and has_connectivity:
+        msg = "Function `cell_filter`, overriding 'sphere' parameter by given 'connectivity'!\n"
         warnings.formatwarning = clean_warning
         warnings.warn(msg, SyntaxWarning)
 
