@@ -193,18 +193,26 @@ def rigid_registration(floating_img, reference_img, init_trsf=None,
     """
     param_str_2 = _registration_kwargs(**kwargs)
 
+    msg = None
     # - Make sure the provided initialisation trsf matrix is linear:
-    if init_trsf:
-        try:
-            assert init_trsf.is_linear()
-        except:
-            raise TypeError("Provided 'init_trsf' is not a linear deformation!")
     if left_trsf:
         try:
             assert left_trsf.is_linear()
         except:
             raise TypeError("Provided 'left_trsf' is not a linear deformation!")
+        else:
+            msg = "Using 'left' initialisation matrix for vectorfield blockmatching..."
+    if init_trsf:
+        try:
+            assert init_trsf.is_linear()
+        except:
+            raise TypeError("Provided 'init_trsf' is not a linear deformation!")
+        else:
+            msg = "Using initialisation matrix for vectorfield blockmatching..."
 
+    print "\nComputing RIGID blockmatching registration..."
+    if msg:
+        print msg
     trsf_rig, res_rig = blockmatching(floating_img, reference_img,
                                       init_result_transformation=init_trsf,
                                       left_transformation=left_trsf,
@@ -259,28 +267,34 @@ def affine_registration(floating_img, reference_img, init_trsf=None,
     param_str_2 = _registration_kwargs(**kwargs)
 
     # - If no initialisation trsf-matrix were provided, initialise affine deformation estimation with rigid trsf:
-    if not init_trsf or not left_trsf:
-        trsf_rig, res_rig = rigid_registration(floating_img, reference_img,
-                                               param_str_2=param_str_2)
-        init_trsf = trsf_rig
+    if init_trsf is None and left_trsf is None:
+        init_trsf, res_rig = rigid_registration(floating_img, reference_img,
+                                                **kwargs)
+        del res_rig
     else:
+        msg = None
         # - Make sure the provided initialisation trsf matrix is linear:
-        if init_trsf:
+        if left_trsf:
             try:
                 assert init_trsf.is_linear()
             except:
                 raise TypeError(
                     "Provided 'init_trsf' is not a linear deformation!")
-        if left_trsf:
+            else:
+                msg = "Using 'left' initialisation matrix for vectorfield blockmatching..."
+        if init_trsf:
             try:
                 assert left_trsf.is_linear()
             except:
                 raise TypeError(
                     "Provided 'left_trsf' is not a linear deformation!")
+            else:
+                msg = "Using initialisation matrix for vectorfield blockmatching..."
 
+    print "\nComputing AFFINE blockmatching registration..."
+    if msg:
+        print msg
     param_str_2 += ' -trsf-type affine'
-    # using 'left_transformation' returns an affine trsf matrix without the 'rigid deformation part!
-    # ~ trsf_aff, res_aff = blockmatching(floating_img, reference_img, left_transformation=trsf_rig, param_str_2=param_str_2)
     trsf_aff, res_aff = blockmatching(floating_img, reference_img,
                                       init_result_transformation=init_trsf,
                                       left_transformation=left_trsf,
@@ -335,12 +349,35 @@ def deformable_registration(floating_img, reference_img, init_trsf=None,
     """
     param_str_2 = _registration_kwargs(**kwargs)
 
-    # - If no initialisation trsf-matrix were provided, initialise non-linear deformation estimation with rigid trsf:
-    if not init_trsf or not left_trsf:
-        trsf_rig, res_rig = rigid_registration(floating_img, reference_img,
-                                               param_str_2=param_str_2)
-        init_trsf = trsf_rig
+    # - If no initialisation trsf-matrix are provided, initialise non-linear deformation estimation with rigid trsf:
+    if init_trsf is None and left_trsf is None:
+        init_trsf, res_rig = rigid_registration(floating_img, reference_img,
+                                                **kwargs)
+        del res_rig
+    else:
+        msg = None
+        # - Make sure the provided initialisation trsf matrix is linear:
+        if left_trsf:
+            try:
+                assert init_trsf.is_linear()
+            except:
+                raise TypeError(
+                    "Provided 'init_trsf' is not a linear deformation!")
+            else:
+                msg = "Using 'left' initialisation matrix for vectorfield blockmatching..."
+        if init_trsf:
+            try:
+                assert left_trsf.is_linear()
+            except:
+                raise TypeError(
+                    "Provided 'left_trsf' is not a linear deformation!")
+            else:
+                msg = "Using initialisation matrix for vectorfield blockmatching..."
 
+
+    print "\nComputing VECTORFIELD blockmatching registration..."
+    if msg:
+        print msg
     param_str_2 += ' -trsf-type vectorfield'
     trsf_def, res_def = blockmatching(floating_img, reference_img,
                                       init_result_transformation=init_trsf,
