@@ -377,12 +377,12 @@ class SpatialImage(np.ndarray):
         is_iso = np.alltrue([vxs_i == vxs[0] for vxs_i in vxs[1:]])
         return is_iso
 
-    def resolution(self):
+    def get_resolution(self):
         """
         Ensure backward compatibility with older openalea.image package.
         """
         print DeprecationWarning(
-            "Attribute 'resolution' is deprecated and 'voxelsize' or 'get_voxelsize()' should be used instead!")
+            "Attribute 'resolution' is deprecated, use 'voxelsize' or 'get_voxelsize()' instead!")
         return self.voxelsize
 
     def equal(self, sp_img):
