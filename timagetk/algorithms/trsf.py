@@ -17,6 +17,7 @@ import numpy as np
 import cPickle as pickle
 
 from ctypes import POINTER
+
 try:
     from ctypes import pointer
     from timagetk.wrapping.clib import libblockmatching, add_doc
@@ -182,7 +183,8 @@ def apply_trsf(image, trsf=None, template_img=None,
 
     c_img_res = BAL_IMAGE()
     init_c_bal_image(c_img_res, **kwargs)
-    allocate_c_bal_image(c_img_res, np.ndarray(kwargs['shape'], kwargs['np_type']))
+    allocate_c_bal_image(c_img_res,
+                         np.ndarray(kwargs['shape'], kwargs['np_type']))
     bal_img_res = BalImage(c_bal_image=c_img_res)
     bal_image = BalImage(spatial_image=image)
     libblockmatching.API_applyTrsf(bal_image.c_ptr, bal_img_res.c_ptr,
@@ -399,6 +401,7 @@ def mean_trsfs(list_trsf):
     for ind, trsf in enumerate(list_trsf):
         trsf.free()
     return trsf_out
+
 
 add_doc(inv_trsf, libblockmatching.API_Help_invTrsf)
 add_doc(apply_trsf, libblockmatching.API_Help_applyTrsf)
