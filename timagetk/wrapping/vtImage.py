@@ -15,8 +15,8 @@
 from ctypes import Structure, c_char, c_uint, c_void_p, c_char_p
 try:
     from timagetk.wrapping.vt_typedefs import vt_4vsize, vt_fpt, vt_ipt, CpuType
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['_VT_IMAGE']
 

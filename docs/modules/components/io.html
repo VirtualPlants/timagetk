@@ -133,14 +133,14 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="kn">from</span> <span class="nn">timagetk.components.inr_image</span> <span class="k">import</span> <span class="n">read_inr_image</span>
                 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .inr fonctionalities&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .inr functionalities&#39;</span><span class="p">)</span>
                 <span class="n">sp_img</span> <span class="o">=</span> <span class="n">read_inr_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">sp_img</span>
             <span class="k">elif</span> <span class="p">(</span><span class="n">extension</span><span class="o">==</span><span class="s1">&#39;.tiff&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s1">&#39;.tif&#39;</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="kn">from</span> <span class="nn">timagetk.components.tiff_image</span> <span class="k">import</span> <span class="n">read_tiff_image</span>
                 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .tiff fonctionalities&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .tiff functionalities&#39;</span><span class="p">)</span>
                 <span class="n">sp_img</span> <span class="o">=</span> <span class="n">read_tiff_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">)</span>
                 <span class="k">return</span> <span class="n">sp_img</span>
         <span class="k">else</span><span class="p">:</span>
@@ -181,13 +181,13 @@
                 <span class="k">try</span><span class="p">:</span>
                     <span class="kn">from</span> <span class="nn">timagetk.components.inr_image</span> <span class="k">import</span> <span class="n">write_inr_image</span>
                 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .inr fonctionalities&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .inr functionalities&#39;</span><span class="p">)</span>
                 <span class="n">write_inr_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">)</span>
             <span class="k">elif</span> <span class="p">(</span><span class="n">extension</span><span class="o">==</span><span class="s1">&#39;.tiff&#39;</span> <span class="ow">or</span> <span class="n">extension</span><span class="o">==</span><span class="s1">&#39;.tif&#39;</span><span class="p">):</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="kn">from</span> <span class="nn">timagetk.components.tiff_image</span> <span class="k">import</span> <span class="n">write_tiff_image</span>
                 <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .tiff fonctionalities&#39;</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span><span class="s1">&#39;Unable to import .tiff functionalities&#39;</span><span class="p">)</span>
                 <span class="n">write_tiff_image</span><span class="p">(</span><span class="n">img_file</span><span class="p">,</span> <span class="n">sp_img</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;sp_img is not a SpatialImage&#39;</span><span class="p">)</span>

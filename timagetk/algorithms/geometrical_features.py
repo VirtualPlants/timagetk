@@ -20,8 +20,8 @@ import numpy as np
 import time
 try:
     from timagetk.components import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 __all__ = ['GeometricalFeatures']
 
 #--- from numpy

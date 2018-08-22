@@ -4,8 +4,8 @@ try:
     from timagetk.util import data_path
     from timagetk.components import imread
     from timagetk.algorithms import GeometricalFeatures
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 try:
     import cPickle as pickle
 except:

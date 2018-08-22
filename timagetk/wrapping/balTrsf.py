@@ -15,8 +15,8 @@ from ctypes import Structure, c_int, c_float
 try:
     from timagetk.wrapping.balMatrix import BAL_MATRIX
     from timagetk.wrapping.balImage import BAL_IMAGE
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 
 __all__ = ['BAL_TRSF']

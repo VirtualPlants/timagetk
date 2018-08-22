@@ -16,8 +16,8 @@ from ctypes import Structure, c_int
 try:
     from timagetk.wrapping.vt_typedefs import DimType
     from timagetk.wrapping.vt_neighborhood import Neighborhood
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 VT_BINAIRE = 1
 VT_GREY = 2

@@ -8,106 +8,126 @@
 #           Guillaume Baty <guillaume.baty@inria.fr>
 #           Sophie Ribes <sophie.ribes@inria.fr>
 #           Gregoire Malandain <gregoire.malandain@inria.fr>
+#           Jonathan Legrand <jonathan.legrand@ens-lyon.fr>
 #
 #       See accompanying file LICENSE.txt
-#------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------
 
 """
 This module contain implementation of region labeling algorithms
 """
 
 import numpy as np
+
 try:
+    from timagetk.util import _input_img_check
+    from timagetk.util import _method_check
+    from timagetk.util import _general_kwargs
+    from timagetk.util import _parallel_kwargs
     from timagetk.algorithms import connexe
     from timagetk.components.spatial_image import SpatialImage
-
-except ImportError:
-    raise ImportError('Import Error')
-
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['region_labeling']
 
+POSS_METHODS = ['connected_components']
+DEFAULT_METHOD = 0  # index of the default method in POSS_METHODS
 
-def region_labeling(input_image, method=None, **kwds):
+
+def region_labeling(input_image, method=None, **kwargs):
     """
-    Region labeling plugin. Available methods are :
-
-    * connected_components
+    Region labeling plugin.
+    Available methods are:
+      * connected_components
 
     Parameters
     ----------
-    :param *SpatialImage* input_image: input *SpatialImage*
+    input_image : SpatialImage
+         input image to transform
+    method: str, optional
+        used method, by default 'erosion'
 
-    :param str method: used method (example: 'connected_components')
+    **kwargs
+    ------
+    low_threshold : int, optional
+        low threshold
+    high_threshold : int, optional
+        high threshold
 
     Returns
     ----------
-    :return: ``SpatialImage`` instance -- image and metadata
+    SpatialImage
+         transformed image with its metadata
 
     Example
     ----------
-    >>> from timagetk.util import data, data_path
+    >>> from timagetk.util import data_path
+    >>> from timagetk.components import imread
     >>> from timagetk.plugins import h_transform, region_labeling
     >>> image_path = data_path('time_0_cut.inr')
-    >>> input_image = data(image_path)
+    >>> input_image = imread(image_path)
     >>> reg_min_image = h_transform(input_image, h=3, method='h_transform_min')
-    >>> reg_lab_image = region_labeling(reg_min_image, low_threshold=1,
-                                        high_threshold=3, method='connected_components')
+    >>> reg_lab_image = region_labeling(reg_min_image, low_threshold=1, high_threshold=3, method='connected_components')
     """
-    poss_methods = ['connected_components']
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        if method is None:
-            return connected_components(input_image)
-        elif method is not None:
-            if method in poss_methods:
-                try:
-                    from openalea.core.service.plugin import plugin_function
-                    func = plugin_function('openalea.image', method)
-                    if func is not None:
-                        return func(input_image, **kwds)
-                except:
-                    if method=='connected_components':
-                        low_threshold_val = kwds.get('low_threshold', None)
-                        high_threshold_val = kwds.get('high_threshold', None)
-                        return connected_components(input_image, low_threshold=low_threshold_val,
-                                                    high_threshold=high_threshold_val)
-            else:
-                print('Available methods :'), poss_methods
-                raise NotImplementedError(method)
+    # - Assert the 'input_image' is a SpatialImage instance:
+    _input_img_check(input_image)
+    # - Set method if None and check it is a valid method:
+    method = _method_check(method, POSS_METHODS, DEFAULT_METHOD)
+
+    try:
+        assert kwargs.get('try_plugin', False)
+        from openalea.core.service.plugin import plugin_function
+    except AssertionError or ImportError:
+        if method == 'connected_components':
+            low_threshold_val = kwargs.pop('low_threshold', None)
+            high_threshold_val = kwargs.pop('high_threshold', None)
+            return connected_components(input_image,
+                                        low_threshold=low_threshold_val,
+                                        high_threshold=high_threshold_val,
+                                        **kwargs)
     else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+        func = plugin_function('openalea.image', method)
+        if func is not None:
+            print "WARNING: using 'plugin' functionality from 'openalea.core'!"
+            return func(input_image, **kwargs)
+        else:
+            raise NotImplementedError("Returned 'plugin_function' is None!")
 
 
-def connected_components(input_image, low_threshold=None, high_threshold=None, **kwds):
+def connected_components(input_image, low_threshold=None, high_threshold=None,
+                         **kwargs):
     """
-    Connected components
+    Connected components detection and labelling.
 
     Parameters
     ----------
-    :param SpatialImage input_image: input *SpatialImage*
-
-    :param int low_threshold: low threshold
-
-    :param int high_threshold: high threshold
+    input_image : SpatialImage
+        input image to transform
+    low_threshold : int, optional
+        low threshold
+    high_threshold : int, optional
+        high threshold
 
     Returns
     ----------
-    :return: *SpatialImage* instance -- image and associated informations
+    SpatialImage: image and metadata
     """
-    conds = isinstance(input_image, SpatialImage)
-    if conds:
-        if low_threshold is None:
-            low_threshold = 1
-        else:
-            low_threshold = abs(int(low_threshold))
-        if high_threshold is None:
-            high_threshold = 3
-        else:
-            high_threshold = abs(int(high_threshold))
-        params = '-low-threshold %d -high-threshold %d -label-output' % (low_threshold, high_threshold)
-        return connexe(input_image, param_str_2=params, dtype=np.uint16)
+    if low_threshold is None:
+        low_threshold = 1
     else:
-        raise TypeError('Input image must be a SpatialImage')
-        return
+        low_threshold = abs(int(low_threshold))
+    if high_threshold is None:
+        high_threshold = 3
+    else:
+        high_threshold = abs(int(high_threshold))
+
+    params = '-low-threshold %d -high-threshold %d -label-output' % (
+        low_threshold, high_threshold)
+
+    # - Parse general kwargs:
+    params += _general_kwargs(**kwargs)
+    # - Parse parallelism kwargs:
+    params += _parallel_kwargs(**kwargs)
+
+    return connexe(input_image, param_str_2=params, dtype=np.uint16)

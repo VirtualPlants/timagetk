@@ -13,8 +13,8 @@ import numpy as np
 try:
     from timagetk.components import SpatialImage
     from timagetk.algorithms import GeometricalFeatures
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['imgtosets']
 

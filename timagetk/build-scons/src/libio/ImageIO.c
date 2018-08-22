@@ -830,6 +830,7 @@ _image *_readImageHeader( const char *name ) {
 
 _image *_readImageHeaderAndGetError( const char *name_to_be_read, int *error )
 {
+  char *proc = "_readImageHeaderAndGetError";
   _image *im;
   char magic[5];
   char *name = NULL;
@@ -846,7 +847,13 @@ _image *_readImageHeaderAndGetError( const char *name_to_be_read, int *error )
     name = NULL;
   }
   else {
-    name = strdup( name_to_be_read );
+    name = malloc( strlen(name_to_be_read) + 1 );
+    if ( name == (char*)NULL ) {
+      fprintf( stderr, "%s: allocation error\n", proc );
+      return NULL;
+    }
+    strncpy( name, name_to_be_read,  strlen(name_to_be_read) );
+    name[ strlen(name_to_be_read) ] = '\0';
   }
 
 

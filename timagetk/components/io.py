@@ -1,28 +1,37 @@
 # -*- coding: utf-8 -*-
 # -*- python -*-
 #
-#       Copyright 2016 INRIA
+#       Copyright 2016-2018 INRIA
 #
 #       File author(s):
 #           Sophie Ribes <sophie.ribes@inria.fr>
 #           Jerome Chopard <jerome.chopard@inria.fr>
+#           G. Malandain
 #
 #       See accompanying file LICENSE.txt
 # -----------------------------------------------------------------------------
 
 """
 This module allows a management of inputs and outputs (2D/3D images and metadata)
-through the functions ``imread`` and ``imsave``. Supported formats are : ['.tif', '.tiff', '.inr', '.inr.gz', '.inr.zip'].
+through the functions ``imread`` and ``imsave``.
+Supported formats are : ['.tif', '.tiff', '.mha', '.mha.gz', '.inr', '.inr.gz', '.inr.zip'].
 """
 
 from __future__ import division
+
 import os
+
+import numpy as np
+import scipy.ndimage as nd
+
 try:
     from timagetk.components import SpatialImage
 except ImportError:
     raise ImportError('Unable to import SpatialImage')
 
-__all__ = ["imread", "imsave"]
+__all__ = ["imread", "imsave", "apply_mask"]
+
+POSS_EXT = ['.inr', '.inr.gz', '.inr.zip', '.mha', '.mha.gz', '.tiff', '.tif']
 
 
 def imread(img_file):
@@ -32,7 +41,7 @@ def imread(img_file):
 
     Parameters
     ----------
-    :param str image_path: path to the image
+    :param str img_file: path to the image
 
     Returns
     ----------
@@ -47,34 +56,75 @@ def imread(img_file):
     >>> isinstance(sp_image, SpatialImage)
     True
     """
-    conds = os.path.exists(img_file)
-    poss_ext = ['.inr', '.inr.gz', '.inr.zip', '.tiff', '.tif']
+    # Check file exists:
+    try:
+        os.path.exists(img_file)
+    except:
+        raise IOError("This file does not exists: {}".format(img_file))
 
-    if conds:
-        (filepath, filename) = os.path.split(img_file)
-        (shortname, extension) = os.path.splitext(filename)
-        if extension in poss_ext:
-            if (extension=='.inr' or extension=='.inr.gz' or extension=='.inr.zip'):
-                try:
-                    from timagetk.components.inr_image import read_inr_image
-                except ImportError:
-                    raise ImportError('Unable to import .inr fonctionalities')
-                sp_img = read_inr_image(img_file)
-                return sp_img
-            elif (extension=='.tiff' or extension=='.tif'):
-                try:
-                    from timagetk.components.tiff_image import read_tiff_image
-                except ImportError:
-                    raise ImportError('Unable to import .tiff fonctionalities')
-                sp_img = read_tiff_image(img_file)
-                return sp_img
-        else:
-            print('Unknown extension')
-            print('Extensions can be either :'), poss_ext
-            return
+    # Get file path, name, root_name and extension:
+    (filepath, filename) = os.path.split(img_file)
+    (shortname, ext) = os.path.splitext(filename)
+    # Check for possible compression of the file:
+    if (ext == '.gz') or (ext == '.zip'):
+        zip_ext = ext
+        (shortname, ext) = os.path.splitext(shortname)
+        ext += zip_ext
+    try:
+        assert ext in POSS_EXT
+    except AssertionError:
+        raise NotImplementedError(
+            "Unknown file ext '{}', should be in {}.".format(ext, POSS_EXT))
+
+    if (ext == '.inr' or ext == '.inr.gz' or ext == '.inr.zip'):
+        try:
+            from timagetk.components.inr_image import read_inr_image
+        except ImportError:
+            raise ImportError('Unable to import .inr functionalities')
+        sp_img = read_inr_image(img_file)
+    elif (ext == '.tiff' or ext == '.tif'):
+        try:
+            from timagetk.components.tiff_image import read_tiff_image
+        except ImportError:
+            raise ImportError('Unable to import .tiff functionalities')
+        sp_img = read_tiff_image(img_file)
+    elif (ext == '.mha' or ext == '.mha.gz'):
+        try:
+            from timagetk.components.mha_image import read_mha_image
+        except ImportError:
+            raise ImportError('Unable to import .mha functionalities')
+        sp_img = read_mha_image(img_file)
     else:
-        print('This file does not exist : '), img_file
-        return
+        pass
+
+    try:
+        md_filename = sp_img.metadata['filename']
+    except KeyError:
+        sp_img.metadata['filepath'] = filepath
+        sp_img.metadata['filename'] = filename
+    else:
+        (md_filepath, md_filename) = os.path.split(md_filename)
+        # -- Check the given filepath and the one found in metadata (if any)
+        if md_filepath == '':
+            md_filepath = filepath
+        elif md_filepath != filepath:
+            print "WARNING: file path from 'filename' metadata differ from given path to reader.",
+            print "Updated!"
+            md_filepath = filepath
+        else:
+            pass
+        sp_img.metadata['filepath'] = md_filepath
+        # -- Check the given filename and the one found in metadata (if any)
+        if md_filename == '':
+            md_filename = filename
+        elif md_filename != filename:
+            print "WARNING: file name from 'filename' metadata differ from given name to reader.",
+            print "Updated!"
+        else:
+            pass
+        sp_img.metadata['filename'] = md_filename
+
+    return sp_img
 
 
 def imsave(img_file, sp_img):
@@ -84,8 +134,8 @@ def imsave(img_file, sp_img):
 
     Parameters
     ----------
-    :param str save_path: save path
-    :param SpatialImage sp_image: *SpatialImage* instance
+    :param str img_file: save path
+    :param SpatialImage sp_img: *SpatialImage* instance
 
     Example
     ---------
@@ -96,24 +146,96 @@ def imsave(img_file, sp_img):
     >>> save_path = data_path('test_output.tif')
     >>> imsave(save_path, sp_image)
     """
-    conds = isinstance(sp_img, SpatialImage) and sp_img.get_dim() in [2,3]
-    poss_ext = ['.inr', '.inr.gz', '.inr.zip', '.tiff', '.tif']
-    if conds:
-        (filepath, filename) = os.path.split(img_file)
-        (shortname, extension) = os.path.splitext(filename)
-        if extension in poss_ext:
-            if (extension=='.inr' or extension=='.inr.gz' or extension=='.inr.zip'):
-                try:
-                    from timagetk.components.inr_image import write_inr_image
-                except ImportError:
-                    raise ImportError('Unable to import .inr fonctionalities')
-                write_inr_image(img_file, sp_img)
-            elif (extension=='.tiff' or extension=='.tif'):
-                try:
-                    from timagetk.components.tiff_image import write_tiff_image
-                except ImportError:
-                    raise ImportError('Unable to import .tiff fonctionalities')
-                write_tiff_image(img_file, sp_img)
+    # - Assert sp_img is a SpatialImage instance:
+    try:
+        assert isinstance(sp_img, SpatialImage)
+    except AssertionError:
+        raise TypeError("Parameter 'sp_img' is not a SpatialImage!")
+    # - Assert SpatialImage is 2D or 3D:
+    try:
+        assert sp_img.get_dim() in [2, 3]
+    except AssertionError:
+        raise ValueError("Parameter 'sp_img' should have a dimensionality of 2 or 3, not '{}'.".format(sp_img.get_dim()))
+    # - Get file extension and check its validity:
+    (filepath, filename) = os.path.split(img_file)
+    (shortname, ext) = os.path.splitext(filename)
+    # Check for possible compression of the file:
+    if (ext == '.gz') or (ext == '.zip'):
+        zip_ext = ext
+        (shortname, ext) = os.path.splitext(shortname)
+        ext += zip_ext
+    try:
+        assert ext in POSS_EXT
+    except AssertionError:
+        raise NotImplementedError(
+            "Unknown file ext '{}', should be in {}.".format(
+                ext, POSS_EXT))
+
+    if (ext == '.inr' or ext == '.inr.gz' or ext == '.inr.zip'):
+        try:
+            from timagetk.components.inr_image import write_inr_image
+        except ImportError:
+            raise ImportError('Unable to import .inr functionalities')
+        write_inr_image(img_file, sp_img)
+    elif (ext == '.tiff' or ext == '.tif'):
+        try:
+            from timagetk.components.tiff_image import write_tiff_image
+        except ImportError:
+            raise ImportError('Unable to import .tiff functionalities')
+        write_tiff_image(img_file, sp_img)
+    elif ext == '.mha' or ext == '.mha.gz':
+        try:
+            from timagetk.components.mha_image import write_mha_image
+        except ImportError:
+            raise ImportError('Unable to import .mha functionalities')
+        write_mha_image(img_file, sp_img)
     else:
-        print('sp_img is not a SpatialImage')
-    return
+        pass
+
+    return 
+
+
+def apply_mask(img, mask_filename, masking_value=0, crop_mask=False):
+    """
+    Load and apply a z-projection mask (2D) to a SpatialImage (2D/3D).
+    In case of an intensity image, allows to remove unwanted signal intensities.
+    If the SpatialImage is 3D, it is applied in z-direction.
+    The mask should contain a distinct "masking value".
+
+    Parameters
+    ----------
+    img : SpatialImage
+        SpatialImage to modify with the mask
+    mask_filename : str
+        string giving the location of the mask file
+    masking_value : int, optional
+        value (default 0) defining the masked region
+    crop_mask : bool, optional
+        if True (default False), the returned SpatialImage is cropped around the
+        non-masked region
+
+    Returns
+    -------
+    masked_image : SpatialImage
+        the masked SpatialImage.
+    """
+    try:
+        from pillow import Image
+    except ImportError:
+        from PIL import Image
+
+    xsh, ysh, zsh = img.get_shape()
+    # Read the mask file:
+    mask_im = Image.open(mask_filename)
+    # Detect non-masked values positions
+    mask_im = np.array(mask_im) != masking_value
+    # Transform mask to 3D by repeating the 2D-mask along the z-axis:
+    mask_im = np.repeat(mask_im[:, :, np.newaxis], zsh, axis=2)
+    # Remove masked values from `img`:
+    masked_im = img * mask_im
+    # Crop the mask if required:
+    if crop_mask:
+        bbox = nd.find_objects(mask_im)
+        masked_im = masked_im[bbox]
+
+    return masked_im

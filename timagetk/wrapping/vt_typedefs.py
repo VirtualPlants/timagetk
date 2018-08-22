@@ -56,7 +56,7 @@ class typeBoolean:
 
 
 class vt_ipt(Structure):
-    """ vt_ipt structure: point with 3 intergers (x, y, z) """
+    """ vt_ipt structure: point with 3 integers (x, y, z) """
     _fields_ = [("x", c_int), ("y", c_int), ("z", c_int)]
 
 

@@ -19,8 +19,8 @@ try:
     from timagetk.wrapping.balImage import BAL_IMAGE
     from timagetk.wrapping.bal_common import bal_mystr_c_ptr, bal_mystr_c_struct
     from timagetk.components.spatial_image import SpatialImage
-except ImportError:
-    raise ImportError('Import Error')
+except ImportError as e:
+    raise ImportError('Import Error: {}'.format(e))
 
 __all__ = ['bal_image_c_ptr',
            'bal_image_c_struct',
@@ -111,7 +111,7 @@ def spatial_image_to_bal_image_fields(spatial_image):
 
     Example
     -------
-    bal_image_kwds = spatial_image_to_bal_image_fields(spatial_image)
+    bal_image_kwargs = spatial_image_to_bal_image_fields(spatial_image)
     """
     # Get data information from spatial image
     if spatial_image.ndim == 2:
@@ -127,24 +127,24 @@ def spatial_image_to_bal_image_fields(spatial_image):
     shape = _xdim, _ydim, _zdim, _vdim
     resolution = _vx, _vy, _vz
 
-    bal_image_kwds = dict(
+    bal_image_kwargs = dict(
         shape=shape,
         resolution=resolution,
         vx=_vx, vy=_vy, vz=_vz,
         xdim=_xdim, ydim=_ydim, zdim=_zdim, vdim=_vdim,
         np_type=spatial_image.dtype)
 
-    return bal_image_kwds
+    return bal_image_kwargs
 
 
-def init_c_bal_image(c_bal_image, **kwds):
+def init_c_bal_image(c_bal_image, **kwargs):
     """
     Initialization of a c_bal_image.
 
     Parameters
     ----------
     c_bal_image : BAL_IMAGE
-    kwds:
+    kwargs:
         - vy, vy, vz: voxelsize
         - np_type OR vt_type: data type (np_type: np.dtype, np_type: vt_type)
         - xdim, ydim, zdim, vdim: image dim
@@ -153,32 +153,32 @@ def init_c_bal_image(c_bal_image, **kwds):
 
     Example
     -------
-    init_c_bal_image(c_bal_image, **kwds)
+    init_c_bal_image(c_bal_image, **kwargs)
     """
-    xdim, ydim, zdim, vdim = kwds.get('xdim', 1), kwds.get(
-        'ydim', 1), kwds.get('zdim', 1), kwds.get('vdim', 1)
+    xdim, ydim, zdim, vdim = kwargs.get('xdim', 1), kwargs.get(
+        'ydim', 1), kwargs.get('zdim', 1), kwargs.get('vdim', 1)
 
     valid_shape = [xdim, ydim, zdim, vdim]
 
-    shape = kwds.get('shape', valid_shape)
+    shape = kwargs.get('shape', valid_shape)
     if len(shape) > 4:
         raise NotImplementedError
     valid_shape[:len(shape)] = shape
 
     xdim, ydim, zdim, vdim = valid_shape
 
-    vx = kwds.get('vx', 1)
-    vy = kwds.get('vy', 1)
-    vz = kwds.get('vz', 1)
-    vx, vy, vz = kwds.get('voxelsize', (vx, vy, vz))
+    vx = kwargs.get('vx', 1)
+    vy = kwargs.get('vy', 1)
+    vz = kwargs.get('vz', 1)
+    vx, vy, vz = kwargs.get('voxelsize', (vx, vy, vz))
 
-    vt_type_kwds = dict(vt_type=kwds.get('vt_type'),
-                        np_type=kwds.get('np_type'))
-    vtype = vt_type(**vt_type_kwds)
+    vt_type_kwargs = dict(vt_type=kwargs.get('vt_type'),
+                        np_type=kwargs.get('np_type'))
+    vtype = vt_type(**vt_type_kwargs)
     if vtype is None:
         vtype = DEFAULT_VT_TYPE
 
-    name = kwds.get('name', DEFAULT_NAME)
+    name = kwargs.get('name', DEFAULT_NAME)
 
     libblockmatching.BAL_InitImage(
         pointer(c_bal_image), name, xdim, ydim, zdim, vdim, vtype)
@@ -186,7 +186,7 @@ def init_c_bal_image(c_bal_image, **kwds):
     c_bal_image.vx, c_bal_image.vy, c_bal_image.vz = vx, vy, vz
 
 
-def allocate_c_bal_image(c_bal_image, spatial_image, **kwds):
+def allocate_c_bal_image(c_bal_image, spatial_image, **kwargs):
     """
     Memory allocation of a c_bal_image.
 
@@ -208,31 +208,31 @@ def allocate_c_bal_image(c_bal_image, spatial_image, **kwds):
     # DO NOT FORGET TO FREE IT LATER
 
 
-def new_c_bal_image(**kwds):
+def new_c_bal_image(**kwargs):
     """
     Initialization of a c_bal_image.
 
     Parameters
     ----------
-    **kwds : contains all fields necessary to c_bal_image, type dict
+    **kwargs : contains all fields necessary to c_bal_image, type dict
 
     Example
     -------
-    c_bal_image = new_c_bal_image(**kwds)
+    c_bal_image = new_c_bal_image(**kwargs)
     """
     c_bal_image = BAL_IMAGE()
-    init_c_bal_image(c_bal_image, **kwds)
+    init_c_bal_image(c_bal_image, **kwargs)
     return c_bal_image
 
 
-def spatial_image_to_bal_image(spatial_image, **kwds):
+def spatial_image_to_bal_image(spatial_image, **kwargs):
     """
     Create an instance of a BalImage from a spatial_image.
 
     Parameters
     ----------
     spatial_image : spatial_image, see timagetk.components.spatial_image
-    kwds : contains all fields necessary to c_bal_image not found in spatial_image
+    kwargs : contains all fields necessary to c_bal_image not found in spatial_image
 
     Returns
     ----------
@@ -240,28 +240,28 @@ def spatial_image_to_bal_image(spatial_image, **kwds):
 
     Example
     -------
-    c_bal_image = spatial_image_to_bal_image(spatial_image, **kwds)
+    c_bal_image = spatial_image_to_bal_image(spatial_image, **kwargs)
     """
-    spatial_image_kwds = spatial_image_to_bal_image_fields(spatial_image)
+    spatial_image_kwargs = spatial_image_to_bal_image_fields(spatial_image)
 
-    _kwds = {}
-    _kwds.update(kwds)
-    _kwds.update(spatial_image_kwds)
+    _kwargs = {}
+    _kwargs.update(kwargs)
+    _kwargs.update(spatial_image_kwargs)
 
-    c_bal_image = new_c_bal_image(**_kwds)
+    c_bal_image = new_c_bal_image(**_kwargs)
     allocate_c_bal_image(c_bal_image, spatial_image)
 
     return c_bal_image
 
 
-def bal_image_to_spatial_image(c_or_bal_image, **kwds):
+def bal_image_to_spatial_image(c_or_bal_image, **kwargs):
     """
     Create a spatial_image from a BalImage.
 
     Parameters
     ----------
     c_or_bal_image : c_or_bal_image
-    kwds : contains all fields necessary to spatial_image not found in c_bal_image
+    kwargs : contains all fields necessary to spatial_image not found in c_bal_image
 
     Returns
     ----------
@@ -269,7 +269,7 @@ def bal_image_to_spatial_image(c_or_bal_image, **kwds):
 
     Example
     -------
-    spatial_image = bal_image_to_spatial_image(c_or_bal_image, **kwds)
+    spatial_image = bal_image_to_spatial_image(c_or_bal_image, **kwargs)
     """
     b = bal_image_c_struct(c_or_bal_image)
 
@@ -294,22 +294,22 @@ def bal_image_to_spatial_image(c_or_bal_image, **kwds):
         #--- SR 21/03
         #arr = np.array(_np_array.reshape(x, y, z, v, order="F"))
         arr = np.array(_np_array.reshape(x, y, z, v, order="F"), dtype=_nptype)
-    # return SpatialImage(arr, voxelsize=resolution, dtype=arr.dtype)
-    return SpatialImage(arr, voxelsize=resolution, dtype=arr.dtype)
+
+    return SpatialImage(arr, voxelsize=resolution, origin=[0]*arr.ndim, dtype=arr.dtype)
 
 
 class BalImage(object):
 
-    def __init__(self, spatial_image=None, c_bal_image=None, **kwds):
+    def __init__(self, spatial_image=None, c_bal_image=None, **kwargs):
 
         if spatial_image is not None:
             self._spatial_image = spatial_image
-            self._c_bal_image = spatial_image_to_bal_image(self._spatial_image, **kwds)
+            self._c_bal_image = spatial_image_to_bal_image(self._spatial_image, **kwargs)
         elif c_bal_image is not None:
             self._c_bal_image = c_bal_image
             self._spatial_image = self.to_spatial_image()
         else:
-            self._c_bal_image = new_c_bal_image(**kwds)
+            self._c_bal_image = new_c_bal_image(**kwargs)
             self._spatial_image = self.to_spatial_image()
 
     @property
@@ -320,8 +320,8 @@ class BalImage(object):
     def c_struct(self):
         return self._c_bal_image
 
-    def to_spatial_image(self, **kwds):
-        return bal_image_to_spatial_image(self._c_bal_image, **kwds)
+    def to_spatial_image(self, **kwargs):
+        return bal_image_to_spatial_image(self._c_bal_image, **kwargs)
 
     def free(self):
         if self._c_bal_image:
