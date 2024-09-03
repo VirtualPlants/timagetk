@@ -1,3 +1,6 @@
+**DEPRECATION NOTICE:** The new repository for this library can be found `here <https://gitlab.inria.fr/mosaic/timagetk>`_.
+
+
 **Tissue Image Toolkit** (*timagetk*) is a Python library dedicated
 to image processing of multicellular architectures such as plants or animals,
 and is intended for biologists, modelers and computer scientists.
